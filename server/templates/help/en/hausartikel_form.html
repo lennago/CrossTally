@@ -1,0 +1,97 @@
+<h3>Source and number</h3>
+<p>
+    The source is the system that carries the article. What a number looks like is up to
+    the system. For WinTICKET it stands exactly as the file writes it: usually six digits,
+    sometimes fewer, sometimes with a suffix such as “101014-1”.
+    <strong>Own</strong> means: the article exists only here, for instance at a site
+    without a merchandise management system. It has no number, and no system's file
+    knows it. Its target stock is maintained by hand. Preselected is what the site
+    already carries.
+</p>
+<h3>Article group</h3>
+<p>
+    The category of the merchandise management system. It stays site-specific: the same product may well sit in a
+    different group at another site, depending on whether it is bought centrally or locally.
+</p>
+<h3>Unit at the site</h3>
+<p>
+    This is how the site carries the article, how the target stock arrives
+    and how the result goes back. Almost always it is the unit of the product. Leaving it
+    empty means exactly that. If the site counts in a different dimension than the product
+    (pieces instead of kilograms, litres instead of pieces), the <strong>conversion to the
+    product</strong> belongs with it: how many units of the product one unit of this site
+    is. The field states the direction itself (“1 pcs = how many g?”). If the product is
+    carried in g and the site counts a pack of 1 kg as a piece, 1000 goes there, not 0.001.
+    Between g and kg or litres and millilitres the units convert by themselves.
+</p>
+<p>
+    A closed result keeps the unit the site counted in at the time. If an inventory that is
+    not closed yet carries a target, an open target stock line or a difference by hand for
+    the article, the unit stays until that inventory is closed. Those numbers are in the
+    current unit.
+</p>
+<h3>Product</h3>
+<p>
+    The identity of this article across all sites: the product. The packs hang on it and apply to all sites,
+    and its unit is the one of the report. If another site already
+    carries the same product, select it here. Otherwise describe a new one below. It is
+    created in the unit of this site.
+</p>
+<p>
+    If the article changes its product, its closed results convert into the new one
+    through the article. If one of these conversions would be too large to store, the
+    article keeps its product, and the message names the result.
+</p>
+<h3>Inventory type</h3>
+<p>
+    Which tab of the counting app the article stands in: an inventory counts it if it
+    counts its type.
+    {% if object %}
+    If the product has further articles, the form asks with a new type whether it applies
+    to this article only or to all articles of the product, at the other sites too.
+    {% else %}
+    Without a choice it goes into the type the other articles of the product are already
+    counted in. A new product goes into the first type of the list.
+    {% endif %}
+</p>
+{% if object %}
+<h3>Settings of the product</h3>
+<p>
+    When editing, the details of the product stand here too: its name, its family, whether
+    it is weighed, the usual containers and the conversions. They
+    belong to the product and not to the site. <strong>A change applies at every
+    site</strong> that carries the product. The note above the fields names these sites.
+</p>
+<p>
+    Only what was changed is saved. Whoever selects another product above changes neither
+    of the two: the settings disappear, because they belonged to the previous one. The unit
+    of the product and its existing packs are changed on the product's page, because packs
+    and recipes are converted in the process.
+</p>
+{% endif %}
+<h3>Packs</h3>
+<p>
+    Counting is quantity × amount per pack: a crate of 20 bottles gets the 20, the single
+    bottle gets the 1. Changing and reordering existing packs happens on the
+    {% if object %}
+    <a href="{{ object.ware.get_absolute_url }}">product</a>.
+    {% else %}
+    product.
+    {% endif %}
+</p>
+<p>
+    If the product already has a pack typed here, but inactive (same name or same quantity),
+    the row is marked and asks: <strong>Activate again</strong> or <strong>Leave
+    inactive</strong>. Nothing is saved before that.
+</p>
+{% if not object %}
+<h3>Locations</h3>
+<p>
+    The expectation drives the count list and the completeness check. The packs below it are
+    the usual counting units at this location. A ticked location needs one of them,
+    otherwise the article would get no line there. A pack that stays inactive does not
+    count. Only goods that can be weighed may go
+    without, they are then weighed there. A default quantity for them can be set later on
+    the location.
+</p>
+{% endif %}

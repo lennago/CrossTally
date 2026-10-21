@@ -1,0 +1,25 @@
+<h3>The account</h3>
+<p>
+    Username, name, e-mail address, sites, when the account was created and when the person
+    last signed in, on the website or in the counting app.{% if mail_moeglich %} Whatever changes here, the person learns by
+    e-mail.{% endif %}
+</p>
+<h3>The buttons</h3>
+<p>
+    <strong>Edit</strong> opens the form for username, name, role, sites and active, for
+    administrators the e-mail address too.
+    <strong>Delete</strong> removes the account. No count data hangs on the account. Only the
+    assignments to sites and inventories and the passkeys disappear. Whoever leaves the
+    business is deleted, not set to inactive.{% if mail_moeglich %} <strong>Send invitation again</strong> stands at an
+    account still waiting for its password: a new link, say when the old one has
+    expired.{% endif %}
+</p>
+<h3>Password and address</h3>
+<p>
+    The password is changed by every person themselves, through the account menu at the top
+    right, in the counting app or through the links on the block page of the website. The
+    e-mail address likewise, or an administrator changes it.{% if mail_moeglich %} A new
+    address applies only once the person has confirmed the link from the mail.{% endif %}
+    Whoever forgets their password gets a new one set by an administrator in the
+    administration.
+</p>

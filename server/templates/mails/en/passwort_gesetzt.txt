@@ -1,0 +1,14 @@
+Your password at {{ anwendung }} was changed
+
+Hello {{ vorname }},
+
+A new password was set for your account at {{ anwendung }} in the administration. This signed you out on all devices.
+
+{% if selbst %}
+Wasn't that you? Then set a new password via “Forgot your password?” on the sign-in page and let an administrator know.
+{% elif wer %}
+Set by {{ wer }}.
+If you did not expect this, talk to {{ wer }}.
+{% else %}
+If you did not expect this, talk to your manager.
+{% endif %}

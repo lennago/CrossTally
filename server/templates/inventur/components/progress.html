@@ -1,0 +1,25 @@
+{% load i18n %}
+{# How many count positions are already filled.                                 #}
+{#                                                                              #}
+{# Expects 'inventur' with the annotations from 'views.mit_fortschritt'.        #}
+{# After closing there are no positions any more. Then it says here how         #}
+{# many articles were frozen.                                                   #}
+{% if inventur.status == "ABGESCHLOSSEN" %}
+<span class="text-body-secondary small text-nowrap">
+    {% blocktranslate with anzahl_ergebnisse=inventur.anzahl_ergebnisse %}{{ anzahl_ergebnisse }} Artikel eingefroren{% endblocktranslate %}
+</span>
+{% elif inventur.anzahl_positionen %}
+<div class="d-flex align-items-center gap-2">
+    {# The browser's own element instead of Bootstrap's bar: that would      #}
+    {# need its width as a 'style' attribute, and the policy blocks that.    #}
+    <progress class="fortschritt flex-grow-1{% if inventur.anzahl_gezaehlt == inventur.anzahl_positionen %} {% translate "fertig" %}{% endif %}"
+        aria-label="{% translate 'Zählfortschritt' %}" value="{{ inventur.anzahl_gezaehlt }}"
+        max="{{ inventur.anzahl_positionen }}"></progress>
+    <span class="text-body-secondary small text-nowrap">
+    {% blocktranslate with anzahl_gezaehlt=inventur.anzahl_gezaehlt anzahl_positionen=inventur.anzahl_positionen %}{{ anzahl_gezaehlt }} von {{ anzahl_positionen }}{% endblocktranslate %}
+</span>
+</div>
+{% else %}
+{# No expectation in the house, no position: that would otherwise only show up when counting. #}
+<span class="text-warning-emphasis small text-nowrap">{% translate "keine Zählpositionen" %}</span>
+{% endif %}

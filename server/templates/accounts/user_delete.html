@@ -1,0 +1,19 @@
+{% extends "components/delete_page.html" %}
+{% load i18n %}
+
+{% block art %}{% translate "Benutzer löschen" %}{% endblock art %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'user_list' %}">{% translate "Benutzer" %}</a></li>
+{% endblock pfad %}
+
+{% block frage %}
+{% blocktranslate with name=object benutzername=object.username %}Soll <strong>{{ name }}</strong> (<span class="font-monospace">{{ benutzername }}</span>) wirklich gelöscht werden?{% endblocktranslate %}
+{% endblock frage %}
+
+{% block folgen %}
+<p class="text-body-secondary small mb-0">
+    {% translate "Mit dem Konto gehen seine Passkeys, die Zuordnungen zu Häusern und Inventuren und die fehlgeschlagenen Anmeldungen unter seinem Benutzernamen. Die Zähldaten bleiben, denn sie tragen keinen Namen." %}{% if mail_moeglich and object.is_active and object.email %} {% translate "Die Person bekommt darüber eine Mail." %}{% endif %}
+    {% translate "Das Löschen kann nicht rückgängig gemacht werden." %}
+</p>
+{% endblock folgen %}

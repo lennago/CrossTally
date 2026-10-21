@@ -1,0 +1,7 @@
+Neuer Passkey für dein Konto bei {{ anwendung }}
+
+Hallo {{ vorname }},
+
+für dein Konto bei {{ anwendung }} gibt es einen neuen Passkey: „{{ passkey }}“.
+
+Warst du das nicht? Dann entferne ihn unter „Passkeys“ im Kontomenü, ändere dein Passwort und gib einem Administrator Bescheid.

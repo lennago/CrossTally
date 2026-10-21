@@ -1,0 +1,14 @@
+Anmeldung mit Passwort bei {{ anwendung }} abgeschaltet
+
+Hallo {{ vorname }},
+
+für dein Konto bei {{ anwendung }} wurde in der Verwaltung die Anmeldung mit Passwort abgeschaltet. Damit bist du auf allen Geräten abgemeldet.
+
+{% if selbst %}
+Warst du das nicht? Dann gib einem Administrator Bescheid.
+{% elif wer %}
+Abgeschaltet von {{ wer }}.
+Wenn du das nicht erwartet hast, sprich mit {{ wer }}.
+{% else %}
+Wenn du das nicht erwartet hast, sprich mit deiner Führungskraft.
+{% endif %}

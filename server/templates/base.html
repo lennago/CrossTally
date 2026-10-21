@@ -1,0 +1,245 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+{# The language is on the account and applies to this request. Hard-wired it  #}
+{# lied to the screen reader as soon as someone had switched to English.      #}
+{% get_current_language as SPRACHE %}
+<html lang="{{ SPRACHE }}" data-bs-theme="light">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8f9fa" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#2b3035" media="(prefers-color-scheme: dark)">
+    <title>{% block title %}{{ app_name }}{% endblock title %}</title>
+
+    {# Right at the front: before the first paint, otherwise it flashes bright. #}
+    {% include "components/theme_script.html" %}
+
+    {# Without an own logo the bundled placeholder, as SVG and thus sharp at    #}
+    {# every size. With an own logo the derived PNGs under '/icons/', see       #}
+    {# 'organisation/icons.py'.                                                 #}
+    {% if eigenes_logo %}
+    <link rel="icon" href="{% url 'icon' name='favicon-32' %}?stand={{ logo_stand }}" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="{% url 'icon' name='apple-touch-icon' %}?stand={{ logo_stand }}">
+    {% else %}
+    <link rel="icon" href="{% static 'logo.svg' %}" type="image/svg+xml">
+    <link rel="icon" href="{% static 'favicon-32.png' %}" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="{% static 'apple-touch-icon.png' %}">
+    {% endif %}
+    {# Third-party libraries lie under 'static/vendor/' and come from here, not #}
+    {# from a CDN, fetched and checked against their hash by 'bin/vendor.sh'.   #}
+    <link href="{% static 'vendor/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+    {# Searchable select lists. The script for them is at the end of the page. #}
+    <link href="{% static 'vendor/tom-select/tom-select.bootstrap5.min.css' %}" rel="stylesheet">
+    <link href="{% static 'site.css' %}" rel="stylesheet">
+    {% block extra_head %}{% endblock extra_head %}
+</head>
+
+{# The colours of the difference hang on the account. The class here switches #}
+{# them off, the rules for it are in 'site.css'. The administration does not  #}
+{# get them: there the difference stands as a raw number without colour.      #}
+<body class="d-flex flex-column min-vh-100{% if user.is_authenticated %} farben-{{ user.differenzfarben }}{% endif %}">
+    {# The first stop with the tab key: past the bar and the breadcrumbs.      #}
+    <a class="visually-hidden-focusable position-absolute top-0 start-0 m-2 btn btn-primary" href="#inhalt">{% translate "Zum Inhalt springen" %}</a>
+
+    {% include "components/demo_band.html" %}
+
+    {% if user.is_staff %}
+    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom sticky-top navbar-fest">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center gap-2"
+                href="{% url 'inventur_list' %}">
+                <img src="{% if eigenes_logo %}{% url 'icon' name='logo' %}?stand={{ logo_stand }}{% else %}{% static 'logo.svg' %}{% endif %}"
+                    alt="" width="28" height="28">
+                {{ app_name }}
+                {# Stays put when scrolling, the band at the top does not. #}
+                {% include "components/demo_marke.html" %}
+            </a>
+            {# Outside the collapsible menu: on the phone the button stays visible, on   #}
+            {# the desktop it moves all the way to the right. It only exists where there #}
+            {# is a text ('django_project/help.py').                                     #}
+            {% if hilfe_vorlage %}
+            <button class="btn btn-sm btn-secondary order-lg-last ms-auto ms-lg-2 me-2 me-lg-0"
+                type="button" data-bs-toggle="offcanvas" data-bs-target="#hilfe" aria-controls="hilfe">
+                {% translate "Hilfe" %}
+            </button>
+            {% endif %}
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#hauptnavigation"
+                aria-controls="hauptnavigation" aria-expanded="false" aria-label="{% translate 'Navigation umschalten' %}">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="hauptnavigation">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'inventur_list' %}">{% translate "Inventuren" %}</a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">{% translate "Stammdaten" %}</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item"
+                                    href="{% url 'ware_list' %}">{% translate "Waren" %}</a></li>
+                            <li><a class="dropdown-item"
+                                    href="{% url 'rezepturartikel_list' %}">{% translate "Rezepturartikel" %}</a></li>
+                            <li><a class="dropdown-item"
+                                    href="{% url 'warenfamilie_list' %}">{% translate "Warenfamilien" %}</a></li>
+                            <li><a class="dropdown-item"
+                                    href="{% url 'warengruppe_list' %}">{% translate "Warengruppen" %}</a></li>
+                            <li><a class="dropdown-item"
+                                    href="{% url 'behaelter_list' %}">{% translate "Behälter" %}</a></li>
+                            <li><a class="dropdown-item"
+                                    href="{% url 'inventurart_list' %}">{% translate "Inventurarten" %}</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            {# House articles have no list of their own, because each belongs #}
+                            {# to one house and is maintained there.                          #}
+                            <li><a class="dropdown-item" href="{% url 'haus_list' %}">{% translate "Häuser und Orte" %}</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'auswertung' %}">{% translate "Auswertungen" %}</a>
+                    </li>
+
+                    {# Managers count too. Then they need the way into the app    #}
+                    {# without knowing the address by heart. A new tab keeps the  #}
+                    {# website open, the app is a separate workplace.             #}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'pwa' %}" target="_blank">{% translate "Zähl-App" %}</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'user_list' %}">{% translate "Benutzer" %}</a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        {# The name stands close to the tag: a line break before or after it #}
+                        {# becomes a space and pushes the triangle away from the name.       #}
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">{{ user.username }}</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            {# The real admin interface lies under a random address    #}
+                            {# (ADMIN_URL). Without this link someone would have to    #}
+                            {# remember or write it down.                              #}
+                            {% if user.is_superuser %}
+                            <li><a class="dropdown-item" href="{% url 'admin:index' %}">{% translate "Verwaltung" %}</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            {% endif %}
+                            {% include "components/theme_menu.html" %}
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            {% include "components/language_menu.html" %}
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            {% include "components/colors_menu.html" %}
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'passkey_list' %}">{% translate "Passkeys" %}</a></li>
+                            <li><a class="dropdown-item" href="{% url 'password_change' %}">{% translate "Passwort ändern" %}</a></li>
+                            <li><a class="dropdown-item" href="{% url 'email_aendern' %}">{% translate "E-Mail-Adresse ändern" %}</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <form method="post" action="{% url 'logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item">{% translate "Abmelden" %}</button>
+                                </form>
+                            </li>
+                            {# On a support request the first question: which version is running? #}
+                            {# The mail behind the link brings it along, with the page.           #}
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            {% if rueckmeldung_link %}
+                            <li><a class="dropdown-item" href="{{ rueckmeldung_link }}">{% translate "Problem oder Wunsch melden" %}</a></li>
+                            {% endif %}
+                            <li><span class="dropdown-item-text small text-body-secondary">
+    {% blocktranslate %}Version {{ app_version }}{% endblocktranslate %}
+</span></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% else %}
+    {# Without bar the language choice stays reachable nonetheless: whoever  #}
+    {# wants to sign in in English should not need an account first.         #}
+    {% include "components/language_switch.html" %}
+    {% endif %}
+
+    <main class="flex-grow-1" id="inhalt">
+        {# Own container so that actions from within a list can deliver their         #}
+        {# message later without reloading the page.                                  #}
+        {# With 'aria-live', because messages also come in without reloading          #}
+        {# ('instant_actions.js'), and a screen reader would otherwise learn nothing. #}
+        <div data-meldungen role="status" aria-live="polite">
+            {% if messages %}
+            <div class="meldungen">
+                {% for message in messages %}
+                {# Success messages go by themselves, warnings and errors       #}
+                {# stay, because one wants to read those to the end.            #}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm"
+                    role="alert"
+                    {% if message.level_tag == 'success' or message.level_tag == 'info' %}data-vergaenglich{% endif %}>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{% translate 'Schließen' %}"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        {# What a form outside every list takes over after sending in the      #}
+        {# background ('instant_actions.js').                                  #}
+        <div data-seite>
+        {% block content %}
+        {% endblock content %}
+        </div>
+    </main>
+
+    {% include "components/footer.html" %}
+
+    {% if hilfe_vorlage %}
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="hilfe" aria-labelledby="hilfe-titel">
+        <div class="offcanvas-header border-bottom">
+            <h2 class="offcanvas-title h5" id="hilfe-titel">{% translate "Hilfe zu dieser Seite" %}</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{% translate 'Schließen' %}"></button>
+        </div>
+        <div class="offcanvas-body hilfe">
+            {% include hilfe_vorlage %}
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
+    {# Before 'extra_scripts': the page scripts report changes the select     #}
+    {# script reacts to.                                                      #}
+    {% include "components/script.html" with name="confirm" %}
+    {% include "components/script.html" with name="messages" %}
+    {# What every script that asks in the background needs: the request      #}
+    {# marked as a script's and the CSRF token as the browser holds it now   #}
+    {# ('shared.js'). Before all of them.                                    #}
+    {% include "components/script.html" with name="shared" %}
+    {# On every page: every form with 'data-sofort' sends in the background. #}
+    {% include "components/script.html" with name="instant_actions" %}
+    {% include "components/select_script.html" %}
+    {% include "components/script.html" with name="expand" %}
+    {# After 'expand': the scroll position is only right once the groups are open. #}
+    {% include "components/script.html" with name="view_state" %}
+    {% block extra_scripts %}{% endblock extra_scripts %}
+</body>
+
+</html>

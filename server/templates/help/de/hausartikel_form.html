@@ -1,0 +1,100 @@
+<h3>Quelle und Nummer</h3>
+<p>
+    Die Quelle ist das System, das den Artikel führt. Wie eine Nummer aussieht, sagt
+    das System. Bei WinTICKET steht sie genau so da, wie die Datei sie schreibt: meist
+    sechs Ziffern, manchmal weniger, manchmal mit Zusatz wie „101014-1“.
+    <strong>Eigen</strong> heißt: es gibt den Artikel nur hier, etwa in einem Haus ohne
+    Warenwirtschaft. Er hat keine Nummer, und die Datei eines Systems kennt ihn nicht.
+    Sein Soll wird von Hand gepflegt. Vorgewählt ist, was das Haus schon führt.
+</p>
+<h3>Warengruppe</h3>
+<p>
+    Die Kategorie der Warenwirtschaft. Sie bleibt hausbezogen: dieselbe Ware
+    steht in einem anderen Haus durchaus in einer anderen Gruppe, je
+    nachdem ob sie zentral oder lokal bezogen wird.
+</p>
+<h3>Einheit im Haus</h3>
+<p>
+    So führt das Haus den Artikel, und so kommt der Sollbestand
+    und geht das Ergebnis zurück. Fast immer ist es die Einheit der Ware. Leer
+    lassen heißt genau das. Zählt das Haus in einer anderen Dimension als die
+    Ware (Stück statt Kilogramm, Liter statt Stück), gehört die
+    <strong>Umrechnung zur Ware</strong> dazu: wie viele Einheiten der Ware
+    eine Einheit dieses Hauses ist. Das Feld sagt die Richtung selbst
+    („1 Stk. = wie viele g?“). Wird die Ware in g geführt und zählt das Haus
+    ein Gebinde von 1 kg als Stück, steht dort 1000, nicht 0,001. Zwischen g
+    und kg oder Liter und Milliliter rechnen die Einheiten selbst.
+</p>
+<p>
+    Ein abgeschlossenes Ergebnis behält die Einheit, in der das Haus damals gezählt hat.
+    Trägt eine Inventur, die noch nicht abgeschlossen ist, für den Artikel ein Soll, eine
+    offene Sollzeile oder eine Differenz von Hand, bleibt die Einheit bis zu ihrem
+    Abschluss. Diese Zahlen stehen in der bisherigen.
+</p>
+<h3>Ware</h3>
+<p>
+    Die hausübergreifende Identität dieses Artikels. Die Gebinde hängen an ihr und
+    gelten für alle Häuser, ihre Einheit ist die der Auswertung. Führt ein anderes Haus dieselbe Ware schon, hier auswählen,
+    sonst unten eine neue beschreiben. Die entsteht in der Einheit dieses
+    Hauses.
+</p>
+<p>
+    Wechselt der Artikel die Ware, rechnen seine abgeschlossenen Ergebnisse über ihn in
+    die neue um. Wäre eine dieser Umrechnungen zu groß zum Speichern, bleibt der Artikel
+    bei seiner Ware, und die Meldung nennt das Ergebnis.
+</p>
+<h3>Inventurart</h3>
+<p>
+    In welchem Reiter der Zähl-App der Artikel steht: eine Inventur zählt ihn, wenn sie
+    seine Art zählt.
+    {% if object %}
+    Hat die Ware weitere Artikel, fragt das Formular bei einer neuen Art, ob sie nur für
+    diesen Artikel gilt oder für alle Artikel der Ware, auch in den anderen Häusern.
+    {% else %}
+    Ohne Wahl kommt er in die Art, in der die übrigen Artikel der Ware schon gezählt
+    werden. Eine neue Ware kommt in die erste Art der Liste.
+    {% endif %}
+</p>
+{% if object %}
+<h3>Einstellungen der Ware</h3>
+<p>
+    Beim Bearbeiten stehen hier auch die Angaben der Ware: ihr Name, ihre
+    Familie, ob sie abgewogen wird, die üblichen Behälter und die Umrechnungen. Sie gehören der Ware und nicht dem Haus.
+    <strong>Eine Änderung gilt in jedem Haus</strong>, das die Ware führt. Der
+    Hinweis über den Feldern nennt diese Häuser.
+</p>
+<p>
+    Gespeichert wird nur, was geändert wurde. Wer oben eine andere Ware wählt,
+    ändert keine von beiden: die Einstellungen verschwinden, denn sie gehörten
+    zur bisherigen. Die Einheit der Ware und ihre vorhandenen Gebinde ändern
+    sich auf der Seite der Ware, denn dabei werden Gebinde und Rezepturen
+    umgerechnet.
+</p>
+{% endif %}
+<h3>Gebinde</h3>
+<p>
+    Gezählt wird Anzahl × Menge je Gebinde: ein Kasten mit 20 Flaschen
+    bekommt die 20, die einzelne Flasche die 1. Bestehende Gebinde ändern
+    und umsortieren läuft über die
+    {% if object %}
+    <a href="{{ object.ware.get_absolute_url }}">Ware</a>.
+    {% else %}
+    Ware.
+    {% endif %}
+</p>
+<p>
+    Hat die Ware ein hier eingetragenes Gebinde schon, aber inaktiv (gleicher Name oder
+    gleiche Menge), ist die Zeile markiert und fragt: <strong>Wieder aktivieren</strong> oder
+    <strong>Inaktiv lassen</strong>. Gespeichert wird erst danach.
+</p>
+{% if not object %}
+<h3>Orte</h3>
+<p>
+    Die Erwartung steuert Zählliste und Vollständigkeitsprüfung. Die Gebinde
+    darunter sind die üblichen Zähleinheiten an diesem Ort. Ein angehakter Ort
+    braucht eines davon, sonst bekäme der Artikel dort keine Zeile. Ein Gebinde, das
+    inaktiv bleibt, zählt dabei nicht. Nur bei
+    abwiegbarer Ware darf es fehlen, sie wird dort dann gewogen. Eine
+    Standardmenge dazu lässt sich später beim Ort hinterlegen.
+</p>
+{% endif %}

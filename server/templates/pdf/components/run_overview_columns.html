@@ -1,0 +1,11 @@
+{# The widths of the overview, the same for its head and for every family, so #}
+{# that the separate tables line up. Wide enough for a bold sum like           #}
+{# "-12,77 kg" in a band, which did not fit in 18mm.                           #}
+<colgroup>
+    <col>
+    {% for inventur in lauf.inventuren %}
+    <col style="width: 21mm;">
+    {% endfor %}
+    <col style="width: 25mm;">
+    <col style="width: 11mm;">
+</colgroup>

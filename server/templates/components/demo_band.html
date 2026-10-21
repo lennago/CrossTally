@@ -1,0 +1,20 @@
+{% load i18n %}
+{# A band above everything as long as the stock comes from 'manage.py demo'.  #}
+{# It stands before the navigation bar so it also appears on the pages        #}
+{# without one, say the login. It sticks to the top and stays put when        #}
+{# scrolling. Whoever is signed in additionally sees the badge in the bar.    #}
+{# A landmark of its own: outside header, nav and main a screen reader that  #}
+{# jumps by landmarks would skip the notice.                                  #}
+{#                                                                            #}
+{# Own classes instead of Bootstrap: the same template serves the             #}
+{# administration, and there is no Bootstrap there. The rules therefore stand #}
+{# twice, in 'site.css' and in 'admin_site.css', as with the navigation bar.  #}
+{% if ist_demo %}
+<div class="demo-band" role="region" aria-label="{% translate 'Demo' %}">
+    <strong>{% translate "Demo" %}</strong> {% translate "· Dieser Bestand ist erfunden. Häuser, Artikel und Mengen gibt es so nirgends." %}
+</div>
+{# Stands here and not at the end of the page, because it belongs to the band #}
+{# and would otherwise be forgotten in one of the two templates. It measures  #}
+{# only what stands directly above and needs nothing else from the page.      #}
+{% include "components/script.html" with name="demo_band" %}
+{% endif %}

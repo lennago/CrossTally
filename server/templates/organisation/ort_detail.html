@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ ort }}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    {% include "components/breadcrumbs.html" with aktuell=ort.name %}
+
+    <div class="kopfleiste bg-body py-2 d-flex flex-wrap gap-2 justify-content-between align-items-start mb-3">
+        <div>
+            <h1 class="h3 mb-1">{{ ort.name }}</h1>
+            <div class="text-body-secondary small">
+                {{ ort.haus.name }} · {% blocktranslate with anzahl=ort.erwartungen.all|length %}{{ anzahl }} erwartete Artikel{% endblocktranslate %}
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'ort_edit' ort.pk %}" class="btn btn-outline-secondary btn-sm">
+                {% translate "Ort bearbeiten" %}
+            </a>
+            <a href="{% url 'zaehlliste' ort.pk %}" class="btn btn-success btn-sm">
+                {% translate "Zählliste bearbeiten" %}
+            </a>
+            <a href="{% url 'ort_aufteilen' ort.pk %}" class="btn btn-outline-secondary btn-sm">
+                {% translate "Aufteilen" %}
+            </a>
+            <a href="{% url 'ort_zusammenfuehren' ort.pk %}" class="btn btn-outline-secondary btn-sm">
+                {% translate "Zusammenführen" %}
+            </a>
+            <a href="{% url 'ort_kopieren' ort.pk %}" class="btn btn-outline-secondary btn-sm">
+                {% translate "Kopieren" %}
+            </a>
+            <a href="{% url 'ort_delete' ort.pk %}" class="btn btn-outline-danger btn-sm">{% translate "Löschen" %}</a>
+        </div>
+    </div>
+
+    <h2 class="h5 mb-2">{% translate "Erwartete Artikel" %}</h2>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th scope="col" class="text-center breite-5">{% translate "Pos." %}</th>
+                    <th scope="col">{% translate "Artikel" %}</th>
+                    <th scope="col">{% translate "Gebinde" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for erwartung in ort.erwartungen.all %}
+                {% with artikel=erwartung.artikel.konkret %}
+                <tr>
+                    <td class="text-center text-body-secondary font-monospace">
+                        {{ erwartung.sortierung }}
+                    </td>
+
+                    <td>
+                        <a href="{{ artikel.get_absolute_url }}?von={{ herkunft|urlencode }}"
+                            class="link-body-emphasis link-offset-2 text-decoration-none">
+                            {% if artikel.artikelnummer %}
+                            <span class="font-monospace text-body-secondary">
+                                {{ artikel.artikelnummer }}
+                            </span>
+                            {% endif %}
+                            {% include "katalog/components/artikel_name.html" %}
+                        </a>
+                        {% if not erwartung.artikel.ist_hausartikel %}
+                        <span class="badge rounded-pill bg-body-secondary text-body border ms-1">{% translate "Rezepturartikel" %}</span>
+                        {% elif not artikel.aktiv %}
+                        <span class="badge bg-body-secondary text-body border ms-1">{% translate "inaktiv" %}</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% for vorgabe in erwartung.gebinde_vorgaben.all %}
+                        <span class="badge rounded-pill bg-body-secondary text-body border text-body me-1">
+                            {{ vorgabe.gebinde.anzeigename }}
+                            {% if vorgabe.standard_menge is not None %}
+                            <span class="text-body-secondary">
+                                · {{ vorgabe.standard_menge|floatformat:"-3" }}
+                            </span>
+                            {% endif %}
+                            {# No row in new inventories, as in the counting list. #}
+                            {% if not vorgabe.gebinde.aktiv %}
+                            <span class="text-body-secondary">· {% translate "inaktiv" %}</span>
+                            {% endif %}
+                        </span>
+                        {% empty %}
+                        {% if not erwartung.artikel.ist_hausartikel or not artikel.ware.abwiegbar or not erwartung.wiegen_erwartet %}
+                        <span class="text-body-secondary small">{% translate "keine" %}</span>
+                        {% endif %}
+                        {% endfor %}
+                        {# The scale stands next to the packs: both say how #}
+                        {# counting happens here.                           #}
+                        {% if erwartung.artikel.ist_hausartikel and artikel.ware.abwiegbar and erwartung.wiegen_erwartet %}
+                        <span class="badge rounded-pill bg-body-secondary text-body border me-1">{% translate "Wiegen" %}</span>
+                        {% endif %}
+                    </td>
+
+                </tr>
+                {% endwith %}
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center text-body-secondary py-5">
+                        {% translate "An diesem Ort wird noch kein Artikel erwartet. Im Reiter" %}
+                        <a href="{% url 'zaehlliste' ort.pk %}?reiter=auswahl">{% translate "Artikel auswählen" %}</a> {% translate "zusammenstellen." %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+</div>
+{% endblock content %}

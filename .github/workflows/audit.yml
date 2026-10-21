@@ -1,0 +1,331 @@
+# Checks everything third-party that gets shipped for known vulnerabilities,
+# and the licenses of all dependencies. Third-party means the Python packages,
+# the packages in the counting app, the libraries under 'server/static/vendor/'
+# and the images from 'compose.yaml'.
+#
+# A workflow of its own, because the cause differs from lint and tests. Here
+# it is not our own code that is wrong, but a third-party version that has
+# become vulnerable in the meantime. And it does so without anyone pushing
+# anything. Hence these triggers:
+#
+#   - weekly, because new advisories arrive independently of our own code,
+#   - on a pull request that touches a lock file or an audit script,
+#   - on a push through 'image.yml' ('workflow_call'). There the image does
+#     **not** wait for the result. A vulnerability without an available fix
+#     would otherwise keep every fix of our own away from the server too. The
+#     run still goes red, and it should.
+#   - by hand ('workflow_dispatch').
+#
+# Only for main. Each job checks that the run belongs to it: the schedule on
+# main, the push through 'image.yml', a pull request into main. GitHub cannot
+# tie a schedule to a branch. It always starts on the default branch, even if
+# that is not main (in an archive of an old branch, say). The run starts there
+# on Monday, but every job is skipped. The same goes for a manual run on
+# another branch. GitHub switches the schedule off when nothing happens in the
+# repo for sixty days.
+name: Audit
+
+on:
+  schedule:
+    # Early Monday, before the working week. The minute is odd because at the
+    # full hour everyone starts their schedules and GitHub then delays runs.
+    - cron: "17 5 * * 1"
+  pull_request:
+    branches: [main]
+    paths:
+      - "server/uv.lock"
+      - "app/package-lock.json"
+      - "server/bin/vendor.sh"
+      - "server/bin/vendor_audit.sh"
+      - "app/bin/audit.mjs"
+      - ".github/workflows/audit.yml"
+  workflow_call:
+  workflow_dispatch:
+
+# A fixed name of its own, see 'server_ci.yml'.
+concurrency:
+  group: audit-${{ github.ref }}
+  # Not on 'main': there a cancelled run would take the release with it ('image.yml').
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+env:
+  UV_VERSION: "0.12.15"
+  NODE_VERSION: "26"
+
+jobs:
+  server:
+    name: Server dependencies
+    # Only for main, see the top.
+    if: github.ref == 'refs/heads/main' || github.base_ref == 'main'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./server
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: ${{ env.UV_VERSION }}
+
+      # Checked is what gets shipped: the lock without the development tools,
+      # with the group for PostgreSQL that the image installs. 'pip-audit'
+      # reads it as a requirements list. There is nothing left to resolve,
+      # every version is fixed.
+      - name: Export locked dependencies
+        run: >-
+          uv export --frozen --no-dev --group postgres --no-hashes
+          --output-file /tmp/requirements.txt
+
+      - name: Audit dependencies
+        run: uvx pip-audit --requirement /tmp/requirements.txt --no-deps --disable-pip
+
+      # Bootstrap, Tom Select & Co. are in no lock file. Why the script finds
+      # them anyway is explained in its header.
+      - name: Audit vendored libraries
+        run: bin/vendor_audit.sh luecken
+
+  app:
+    name: App dependencies
+    if: github.ref == 'refs/heads/main' || github.base_ref == 'main'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./app
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      # Only what ends up in the shipped app. The tools for building and
+      # testing are not up for debate here. They run on the developer's machine
+      # and in the CI, not on the server in the cinema. But what ends up in the
+      # app is not told by 'package.json', only by the build. 'npm audit
+      # --omit=dev' would also report Babel or Rollup, which the PWA plugin
+      # under 'dependencies' only runs while building. That is why it builds
+      # (see 'bin/audit.mjs').
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Audit shipped packages
+        run: node bin/audit.mjs
+
+  # The licenses of the dependencies. The project is under MIT and should stay
+  # that way: a new dependency under GPL or AGPL would undermine that. It shows
+  # up here before it is merged. Checked against a list of allowed licenses,
+  # not a list of forbidden ones. A license nobody knows should stop the run
+  # instead of slipping through. If a package offers several licenses to
+  # choose from, one allowed one is enough.
+  #
+  # FOSSA and GitHub's 'dependency-review-action' can do this too. FOSSA needs
+  # an account and receives the whole dependency graph. The action checks only
+  # what a pull request changes, and GitHub does not read 'uv.lock'.
+  licenses:
+    name: Dependency licenses
+    if: github.ref == 'refs/heads/main' || github.base_ref == 'main'
+    runs-on: ubuntu-latest
+
+    env:
+      # For everything from npm, i.e. the counting app and 'static/vendor/'.
+      # 'CC-BY-4.0' is 'caniuse-lite', the browser data for Vite. That is not
+      # code, and it is not in the app. 'MPL-2.0' is 'lightningcss', Vite's CSS
+      # minifier since Vite 8. It only runs at build time and does not end up
+      # in the app (it is missing from 'third-party-licenses.txt'). The MPL
+      # anyway only requires disclosing changes to its own files, and nothing
+      # is changed. On the server it already applies to 'pyphen'.
+      ALLOWED_NPM: >-
+        MIT MIT-0 ISC Apache-2.0 BSD-2-Clause BSD-3-Clause
+        BlueOak-1.0.0 CC0-1.0 CC-BY-4.0 MPL-2.0
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: ${{ env.UV_VERSION }}
+
+      # The license is only in the metadata of an installed package, not in
+      # the lock. So it installs what the image installs: without the
+      # development tools, with the group for PostgreSQL. Its C implementation
+      # of psycopg is built while installing and needs the headers of libpq.
+      # '--no-sync' on the call, otherwise 'uv run' would fetch the tools
+      # after all.
+      #
+      # 'LGPL' is for 'psycopg' and its C implementation 'psycopg-c'. Whoever
+      # only uses it and does not change it may include it under any license.
+      # 'Mozilla Public License' is for 'pyphen' (GPL, LGPL or MPL to choose
+      # from, WeasyPrint hyphenates with it). '--partial-match' lets 'MIT' also
+      # match 'MIT License'. The packages write their license sometimes as an
+      # SPDX identifier, sometimes as a classifier. PSF is the license of the
+      # Python Software Foundation ('typing_extensions'): today only a tool of
+      # development pulls it in, but any runtime dependency may do so tomorrow.
+      - name: Check server licenses
+        working-directory: ./server
+        run: |
+          sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev
+          uv sync --locked --no-dev --group postgres
+          uv run --no-sync --with pip-licenses pip-licenses --from=mixed --partial-match \
+            --allow-only="MIT;BSD;Apache;ISC;LGPL;Mozilla Public License;PSF"
+
+      # Here the lock is enough, npm writes each package's license into it.
+      # Checked is also what only serves the build: what ends up in the app
+      # only the build knows, and Vite's helper is in it although Vite is a tool.
+      - name: Check app licenses
+        working-directory: ./app
+        run: |
+          disallowed=$(jq -r --arg allowed "$ALLOWED_NPM" '
+            ($allowed | split(" ")) as $list
+            | .packages | to_entries[] | select(.key != "")
+            | (.value.license // "") as $license
+            | select($license | gsub("[()]"; "") | split(" OR ") | any(.[]; IN($list[])) | not)
+            | "\(.key | sub(".*node_modules/"; "")): \(if $license == "" then "not specified" else $license end)"
+          ' package-lock.json)
+          if [ -n "$disallowed" ]; then
+            echo "Licenses not allowed:"
+            echo "$disallowed"
+            exit 1
+          fi
+
+      - name: Check vendored licenses
+        working-directory: ./server
+        run: bin/vendor_audit.sh lizenzen "$ALLOWED_NPM"
+
+  # Which images run in operation is in 'compose.yaml'. Our own is only one of
+  # them. The list is read there, not maintained here. Which tag of our own
+  # runs, the '.env' of the server decides ('VERSION'), and the CI does not
+  # know it: ':main' until the first release, a release afterwards. So both
+  # ':main' and ':latest' are scanned. Until 10/2026 only ':latest' was, the
+  # default of '${VERSION:-latest}'. Before the first release that tag does
+  # not exist, and the scan failed on it every week. ':main' was scanned only
+  # once, when 'image.yml' built it.
+  compose-images:
+    name: Compose images
+    if: >-
+      github.ref == 'refs/heads/main'
+      && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+
+    # Asking the registry for a tag of our own image needs the same right as
+    # the scan, should the package not be public.
+    permissions:
+      contents: read
+      packages: read
+
+    outputs:
+      list: ${{ steps.read.outputs.list }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Our own image is scanned only in the repo that publishes it. In a copy
+      # under another name it belongs to someone else. The login does not
+      # reach it there, and a finding could not be answered with a release.
+      # The colon ends the name, otherwise 'crosstally' would also match
+      # 'crosstally-fork'. A third-party image from 'ghcr.io' would be
+      # skipped as well and then needs a rule of its own.
+      #
+      # A tag of our own the registry does not have (':latest' before the
+      # first release) is skipped with a notice. Any other answer than "there"
+      # or "not there" stops the run, so a failing registry does not pass as
+      # a scan without findings.
+      - name: Read images
+        id: read
+        env:
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          repository="${GITHUB_REPOSITORY,,}"
+          own="ghcr.io/$repository:"
+          manifests="application/vnd.oci.image.index.v1+json"
+          manifests+=",application/vnd.oci.image.manifest.v1+json"
+          manifests+=",application/vnd.docker.distribution.manifest.list.v2+json"
+          manifests+=",application/vnd.docker.distribution.manifest.v2+json"
+          kept=()
+          while IFS= read -r image; do
+            if [[ "$image" == "$own"* ]]; then
+              token=$(curl -fsS -u "$GITHUB_ACTOR:$REGISTRY_TOKEN" \
+                "https://ghcr.io/token?service=ghcr.io&scope=repository:$repository:pull" |
+                jq -er .token)
+              for tag in main latest; do
+                status=$(curl -sS -o /dev/null -w '%{http_code}' --head \
+                  -H "Authorization: Bearer $token" -H "Accept: $manifests" \
+                  "https://ghcr.io/v2/$repository/manifests/$tag")
+                case "$status" in
+                  200) kept+=("$own$tag") ;;
+                  404) echo "::notice::Not in the registry yet, not scanned: $own$tag" ;;
+                  *) echo "::error::The registry answered $status for $own$tag"; exit 1 ;;
+                esac
+              done
+            elif [[ "$image" == ghcr.io/* ]]; then
+              echo "Skipped, published by another repository: $image"
+            else
+              kept+=("$image")
+            fi
+          done < <(sed -nE 's/^\s+image:\s*(\S+)\s*$/\1/p' compose.yaml |
+            sed -E 's/\$\{[A-Z_]+:-([^}]*)\}/\1/g')
+          list=$(printf '%s\n' "${kept[@]}" | jq -R -s -c 'split("\n") | map(select(. != ""))')
+          echo "list=$list" >> "$GITHUB_OUTPUT"
+
+  # Between two releases our own image ages too, and so does ':main' between
+  # two pushes. Debian fixes vulnerabilities, the published image still
+  # contains them. If this job reports something, it is time for a new
+  # release. That builds without cache and picks up the updates. Database and
+  # proxy run under a tag ('postgres:18-alpine') that points to a new image
+  # after every vendor update. The scan fetches that newest image. A finding
+  # there is one that 'docker compose pull' does not remove, because the
+  # vendor has not rebuilt yet. It is waited out or accepted in
+  # '.trivyignore.yaml', with a reason and an expiry date. The jobs run only
+  # on schedule and by hand. On a push, 'image.yml' checks the image it has
+  # just built.
+  image:
+    name: Image ${{ matrix.image }}
+    needs: compose-images
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: read
+
+    strategy:
+      # A finding in the proxy must not abort the scan of the database.
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.compose-images.outputs.list) }}
+
+    steps:
+      # Only for '.trivyignore.yaml'. The images come from the registry.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Scan for known vulnerabilities
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          # The login applies to every registry. But the token belongs to
+          # GitHub only and must not go to Docker Hub.
+          TRIVY_USERNAME: ${{ startsWith(matrix.image, 'ghcr.io/') && github.actor || '' }}
+          TRIVY_PASSWORD: ${{ startsWith(matrix.image, 'ghcr.io/') && secrets.GITHUB_TOKEN || '' }}
+        with:
+          image-ref: ${{ matrix.image }}
+          severity: CRITICAL,HIGH
+          # What nobody has fixed yet cannot be fixed here either.
+          ignore-unfixed: true
+          exit-code: "1"
+          # 'gosu' sits in the image of the database and only drops the rights
+          # from root to 'postgres' at start. Trivy reports every
+          # vulnerability of the Go version it was built with. Its maintainer
+          # does not rebuild for those in packages that 'gosu' never calls
+          # (see its SECURITY.md).
+          skip-files: usr/local/bin/gosu
+          trivyignores: .trivyignore.yaml

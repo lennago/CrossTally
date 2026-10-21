@@ -1,0 +1,21 @@
+{% load i18n %}
+{# One block of the product list grouped by family: the families below it        #}
+{# first, then its own products. Includes itself for every family below.         #}
+<details class="border rounded mb-2" data-gruppe="{{ gruppe.kennung }}">
+    <summary class="px-3 py-2 bg-body-tertiary d-flex justify-content-between gap-3">
+        <strong>{{ gruppe.name }}</strong>
+        <span class="small text-body-secondary">
+    {% blocktranslate with eintraege=gruppe.anzahl %}{{ eintraege }} Waren{% endblocktranslate %}
+</span>
+    </summary>
+    {% if gruppe.unterbloecke %}
+    <div class="ps-3 pt-2">
+        {% for unter in gruppe.unterbloecke %}
+        {% include "katalog/components/ware_group.html" with gruppe=unter %}
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% if gruppe.eintraege %}
+    {% include "katalog/components/ware_table.html" with zeilen=gruppe.eintraege gegliedert=True %}
+    {% endif %}
+</details>

@@ -1,0 +1,20 @@
+Passkey removed from your account at {{ anwendung }}
+
+Hello {{ vorname }},
+
+The passkey “{{ passkey }}” is removed from your account at {{ anwendung }}. Nobody signs in with it any more.
+
+{% if selbst %}
+On your other devices you are signed out, on the website at once, in the counting app within an hour at the latest. Where you removed it, you stay signed in.
+
+Wasn't that you? Then change your password and let an administrator know.
+{% elif wer %}
+You are signed out on every device, on the website at once, in the counting app within an hour at the latest.
+
+Removed by {{ wer }}.
+If you did not expect this, talk to {{ wer }}.
+{% else %}
+You are signed out on every device, on the website at once, in the counting app within an hour at the latest.
+
+If you did not expect this, talk to your manager.
+{% endif %}

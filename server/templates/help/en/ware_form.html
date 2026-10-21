@@ -1,0 +1,73 @@
+<h3>What hangs on the product</h3>
+<p>
+    Base unit and packs apply to all sites. Number, name and article group per site, on the
+    other hand, sit on the article.
+</p>
+<h3>Inventory type</h3>
+<p>
+    The type belongs to the product's articles. Here it can be set for all of them at once,
+    at every site. Without a choice each stays as it is. If the articles are in different
+    types, nothing is preselected. A new product has no articles yet and therefore no field
+    for it: its first article gets its type in its own form.
+</p>
+<h3>Changing the unit</h3>
+<p>
+    The base unit can be changed later as well. What is held in it is converted in the
+    process: the quantities of the packs and the quantities in recipes. Shares in percent
+    stay as they are. A box of 40 pieces of 125 g each becomes one of 5 kg. The product's
+    conversions follow along. Target stocks
+    and the results of earlier inventories stay as they are: they are in the site's unit,
+    and every site gets its conversion to the product anew. Counted packs stay too: two
+    boxes are still two boxes.
+</p>
+<p>
+    From g to kg or from litres to millilitres the application converts by itself. When
+    switching between pieces, weight and volume it needs the <strong>conversion</strong>:
+    how many of the new unit make one of the previous? If a piece weighs 125 g and the
+    product will be carried in kg, 0.125 belongs there. If the product already carries the
+    conversion, say “125 g per pcs”, the field can stay empty. The application then
+    converts with it. Packs submitted along with it still count in the previous unit. If a
+    pack would become too small or too large in the process, or if two would land on the
+    same quantity, everything stays as it was. The same goes for a quantity in a recipe, a
+    conversion of the product or the conversion of a site that would grow too large. The
+    page names what does not fit. The loose single unit exists only in pieces: in kg or
+    litres it becomes an ordinary pack “Einzeln” with its quantity, and back in pieces the
+    single unit again.
+</p>
+<h3>Conversions</h3>
+<p>
+    What one unit of the product is in the other dimensions. The direction is always the
+    same: <strong>mass and volume per piece</strong> (“g per pcs”, “ml per pcs”, for a product
+    in kg “kg per pcs”), <strong>mass per volume</strong> (“g per l”, that is the density:
+    water 1,000, syrup about 1,300) and <strong>everything per portion</strong> (“pcs per
+    portion”, “g per portion”). Within its own dimension the unit converts by itself, there
+    is no field for that. An entry the form shows the other way round (“kg per pcs”) comes
+    back with six significant digits. Whatever goes beyond that is lost on the next save.
+</p>
+<p>
+    The entries are needed in two places. The scale delivers grams and needs the weight of a
+    piece or a litre as soon as the product is not carried in g or kg. And a product family
+    totals in its lead unit: a bottle in a family that counts in litres needs “ml per pcs”, a
+    bag of nuts in a family that counts in portions needs “g per portion”. What no family
+    and no scale needs stays empty. When the unit changes, the application converts the
+    conversions along.
+</p>
+<h3>Weighing</h3>
+<p>
+    <strong>Is weighed</strong> means: the product goes loose onto the scale, and when
+    counting an entry of its own appears for it beside the packs: gross weight in grams, and
+    the tare of the chosen container is deducted. That works in every unit. If the product
+    is not carried in g or kg, the scale needs the “g per …” from above. The containers here
+    are the usual ones. “No
+    container” (scale tared) is always offered when counting anyway and needs no tick.
+</p>
+<h3>Packs</h3>
+<p>
+    Counting is quantity × amount: a crate of 20 bottles gets the amount 20, the single
+    bottle the amount 1. Each amount may occur only once per product: “crate” and “case” of
+    20 each could not be told apart while counting.
+</p>
+<p>
+    A pack a running inventory already counts on can only be deleted once that inventory
+    is closed. Until then it can be set inactive on the product's page.
+</p>

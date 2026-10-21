@@ -1,0 +1,17 @@
+Your access to {{ anwendung }}
+
+Hello {{ vorname }},
+
+{% if wer %}
+{{ wer }} has created an account for you at {{ anwendung }}. Your username: {{ benutzername }}
+{% else %}
+There is now an account for you at {{ anwendung }}. Your username: {{ benutzername }}
+{% endif %}
+
+Through this link you set your password. That activates the account:
+{{ link }}
+
+The link lasts {{ tage }} days. After that a manager can send you a new invitation.
+
+Counting happens in the counting app: {{ app }}
+Managers also sign in on the website: {{ website }}

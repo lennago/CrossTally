@@ -1,0 +1,16 @@
+New e-mail address for your account at {{ anwendung }}
+
+Hello {{ vorname }},
+
+{% if selbst %}
+You entered this address for your account at {{ anwendung }}.
+{% elif wer %}
+{{ wer }} entered this address for your account at {{ anwendung }}.
+{% else %}
+This address was entered for your account at {{ anwendung }}.
+{% endif %}
+
+Through this link you confirm it. Only then does it apply:
+{{ link }}
+
+The link lasts {{ tage }} days. If you did not enter anything and expect nothing, there is nothing to do. The address is then not taken over.

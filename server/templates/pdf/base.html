@@ -1,0 +1,305 @@
+{% load i18n css_strings %}
+{% get_current_language as SPRACHE %}
+<!DOCTYPE html>
+<html lang="{{ SPRACHE }}">
+
+<head>
+    <meta charset="utf-8">
+    <title>{% block titel %}{% translate "Inventur" %}{% endblock titel %}</title>
+    <style>
+        /* The page frame: portrait, with the page number bottom right. A sheet
+           someone works through otherwise gets mixed up. */
+        @page {
+            size: A4 portrait;
+            margin: 16mm 14mm 18mm 14mm;
+
+            @bottom-right {
+                content: "{% translate 'Seite' %} " counter(page) " {% translate 'von' %} " counter(pages);
+                font: 8pt system-ui, sans-serif;
+                color: #666;
+            }
+
+            /* The names in the footer are escaped for CSS ('css_text'): an
+               entity in this string would be printed as it stands. */
+            @bottom-left {
+                content: "{% filter css_text %}{% block fusszeile %}{% endblock fusszeile %}{% endfilter %}";
+                font: 8pt system-ui, sans-serif;
+                color: #666;
+            }
+        }
+
+        body {
+            font: 9pt/1.35 system-ui, "DejaVu Sans", sans-serif;
+            color: #111;
+        }
+
+        h1 {
+            font-size: 14pt;
+            margin: 0 0 2mm;
+        }
+
+        .kopf {
+            margin-bottom: 6mm;
+            padding-bottom: 2mm;
+            border-bottom: 1px solid #999;
+        }
+
+        .kopf .zeile {
+            color: #444;
+            font-size: 9pt;
+        }
+
+        h2 {
+            font-size: 10.5pt;
+            margin: 5mm 0 1.5mm;
+            /* A family should not stand alone at the end of a page. */
+            break-after: avoid;
+        }
+
+        /* A family below another one: one step smaller. */
+        h3 {
+            font-size: 9.5pt;
+            margin: 3mm 0 1mm;
+            break-after: avoid;
+        }
+
+        /* A part of the sheet, such as the overview in front of the products. */
+        h2.abschnitt {
+            font-size: 12pt;
+            margin: 0 0 1mm;
+        }
+
+        .erklaerung {
+            margin: 0 0 4mm;
+        }
+
+        .neue-seite {
+            break-before: page;
+        }
+
+        /* A family at the top is a block of its own: its name as a band above,
+           its sum as a band below, and a line on the left that holds the two
+           together, across a page break too. A family below another one is
+           indented, with a thinner line of its own. Without that the sum of
+           "drinks" stood under its last subfamily like one more subtotal. */
+        .familie {
+            margin-bottom: 2mm;
+        }
+
+        .familie.oberste {
+            margin-bottom: 7mm;
+            padding-left: 2mm;
+            border-left: 1.5pt solid #555;
+        }
+
+        .familie .familie {
+            margin-left: 1mm;
+            padding-left: 2mm;
+            border-left: .6pt solid #c8c8c8;
+        }
+
+        .familie.oberste>h2 {
+            margin: 0 0 2mm;
+            padding: 1.2mm 2mm;
+            background: #e8e8e8;
+            font-size: 11pt;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            break-inside: auto;
+        }
+
+        /* On a page break WeasyPrint repeats the header row. Without that
+           nobody knows on page three any more which column is what. */
+        thead {
+            display: table-header-group;
+        }
+
+        th {
+            text-align: left;
+            font-size: 8pt;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: #555;
+            border-bottom: .6pt solid #999;
+            padding: 1mm 1.5mm;
+        }
+
+        td {
+            padding: .9mm 1.5mm;
+            border-bottom: .3pt solid #ddd;
+        }
+
+        tr {
+            break-inside: avoid;
+        }
+
+        .zahl {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        .nummer {
+            font-family: "DejaVu Sans Mono", monospace;
+            color: #555;
+            white-space: nowrap;
+        }
+
+        .summe td {
+            border-top: .6pt solid #999;
+            border-bottom: none;
+            font-weight: 600;
+        }
+
+        /* A long sum may put its unit below the number. Four houses with
+           "+3 Portionen" in bold were wider than a portrait page, and without
+           the break the table ran off it. Since 10/2026 the portion is short
+           on paper ("+3 Port."), but a large number still makes a sum long.
+           Only the long ones: where the page gets tight, a sum that may break
+           gives way first, and "+2,106 kg" broke in two while the column next
+           to it had room. The overview in front breaks them the same way: four
+           houses with "0 Stk. · 0 g = 0 kg" under "Without family" pushed its
+           row past the edge (until 10/2026). */
+        .summe .zahl.umbrechbar,
+        .uebersicht .zahl.umbrechbar {
+            white-space: normal;
+        }
+
+        /* A long house name in the head of a block breaks, as in the overview,
+           and a single long word is hyphenated. Four names of fourteen letters
+           pushed the column "Difference" off the page (until 10/2026). */
+        .familie th.zahl.leise {
+            white-space: normal;
+            hyphens: auto;
+        }
+
+        .summe.oberste td {
+            padding-top: 1.4mm;
+            padding-bottom: 1.4mm;
+            border-top: 1pt solid #555;
+            background: #e8e8e8;
+            font-size: 10pt;
+        }
+
+        /* The difference over all houses, in the last column: what the row is
+           about. The columns per house before it stay quiet. */
+        .gesamt {
+            font-weight: 600;
+        }
+
+        th.gesamt {
+            color: #111;
+        }
+
+        .gesamt .leise {
+            font-weight: normal;
+        }
+
+        /* The overview in front ('run_overview.html') is built like the blocks
+           behind it, only closer, because every family is one row there. A
+           family at the top is a band, held together with the ones below it
+           by the line on the left. Every family has a table of its own, with
+           the same widths ('run_overview_columns.html'), and that lines their
+           number columns up with the head. A sum wider than its column widens
+           only its own table instead of running into the next number. A long
+           house name in the head breaks, and a single long word is hyphenated
+           ('th.haus'), as in the blocks. "Page" stays whole: it fits once the
+           names give way. Without that, four names of one long word each made
+           the head wider than the tables below it, and "Difference" and "Page"
+           fell off the page (until 10/2026). */
+        .uebersicht th.zahl {
+            white-space: normal;
+        }
+
+        .uebersicht th.haus {
+            hyphens: auto;
+        }
+
+        .uebersicht .familie {
+            margin-bottom: 0;
+        }
+
+        .uebersicht .familie.oberste {
+            margin-bottom: 2.5mm;
+        }
+
+        .uebersicht .band td {
+            padding-top: 1.2mm;
+            padding-bottom: 1.2mm;
+            border-bottom: none;
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        /* The head as far in as the bands: the same line, only unseen. */
+        .uebersicht .spaltenkoepfe {
+            padding-left: 2mm;
+            border-left: 1.5pt solid transparent;
+        }
+
+        .uebersicht a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* The page on which the family's products stand. WeasyPrint looks it up
+           behind the link. */
+        .uebersicht .seite a::after {
+            content: target-counter(attr(href), page);
+        }
+
+        .leise {
+            color: #666;
+        }
+
+        /* A note from the check list: below the name, smaller and slanted,
+           so it does not pass for part of the designation. */
+        .notiz {
+            font-size: 8pt;
+            font-style: italic;
+            color: #444;
+        }
+
+        /* The colours of the difference as in the web interface ('static/site.css'),
+           only pale: on paper the number should stay readable and the sheet not
+           turn colourful. Red means something is missing. Yellow means there is
+           more than expected. Green means it matches.
+
+           They come after '.leise', because the columns per house carry both.
+           Both rules are equally specific, and then the later one applies. A
+           cell without difference thus stays grey. */
+        .differenz-fehlt {
+            color: #8d5c5e;
+        }
+
+        .differenz-mehr {
+            color: #83703f;
+        }
+
+        .differenz-passt {
+            color: #5c7a60;
+        }
+
+        /* How much colour someone wants to see is on their account. Printed is
+           for whoever presses the button. The same classes as in
+           'static/site.css'. */
+        .farben-abweichungen .differenz-passt {
+            color: inherit;
+        }
+
+        .farben-aus .differenz-passt,
+        .farben-aus .differenz-fehlt,
+        .farben-aus .differenz-mehr {
+            color: inherit;
+        }
+    </style>
+</head>
+
+<body class="farben-{{ farben|default:'alle' }}">
+    {% block inhalt %}{% endblock inhalt %}
+</body>
+
+</html>

@@ -1,0 +1,51 @@
+{% load i18n %}
+{# One family on the sheet over inventories: the families below it first, then  #}
+{# its own products and the sum of the whole subtree. Includes itself for every #}
+{# family below. A family at the top is a block of its own ('pdf/base.html').   #}
+<div class="familie{% if not block.tiefe %} oberste{% endif %}">
+{% if block.tiefe %}<h3>{{ block.name }}</h3>{% else %}<h2>{{ block.name }}</h2>{% endif %}
+{% for unter in block.unterbloecke %}
+{% include "pdf/components/evaluation_block.html" with block=unter %}
+{% endfor %}
+<table>
+    {% if block.zeilen %}
+    <thead>
+        <tr>
+            <th>{% translate "Ware" %}</th>
+            <th class="zahl" style="width: 16mm;">{% translate "Häuser" %}</th>
+            {% if bestaende_sinnvoll %}
+            <th class="zahl" style="width: 24mm;">{% translate "Ergebnis" %}</th>
+            <th class="zahl" style="width: 24mm;">{% translate "Soll" %}</th>
+            {% endif %}
+            <th class="zahl" style="width: 26mm;">{% translate "Differenz" %}</th>
+        </tr>
+    </thead>
+    {% endif %}
+    <tbody>
+        {% for zeile in block.zeilen %}
+        <tr>
+            <td>
+                {{ zeile.ware.name }}
+                {% if zeile.ohne_umrechnung_text %}<div class="leise">{{ zeile.ohne_umrechnung_text }}</div>{% endif %}
+            </td>
+            <td class="zahl leise">{{ zeile.haeuser }}</td>
+            {% if bestaende_sinnvoll %}
+            <td class="zahl">{{ zeile.ist_text }}</td>
+            <td class="zahl">{{ zeile.soll_text }}</td>
+            {% endif %}
+            <td class="zahl {{ zeile.differenz_klasse }}">
+                {{ zeile.differenz_text }}
+                {% if zeile.teilsumme_text %}<div class="leise">{{ zeile.teilsumme_text }}</div>{% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        {# The name spans the empty columns, as on the sheet of a run. #}
+        <tr class="summe{% if not block.tiefe %} oberste{% endif %}">
+            <td colspan="{% if bestaende_sinnvoll %}4{% else %}2{% endif %}">
+    {% blocktranslate with name=block.name %}Summe {{ name }}{% endblocktranslate %}
+</td>
+            <td class="zahl {{ block.differenz_klasse }}" style="width: 26mm;">{{ block.differenz_gesamt|default:"-" }}</td>
+        </tr>
+    </tbody>
+</table>
+</div>

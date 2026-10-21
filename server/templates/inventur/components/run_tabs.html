@@ -1,0 +1,22 @@
+{% load i18n %}
+{# The tabs of a run: "Total" and per house its detail page.                    #}
+{#                                                                              #}
+{# Real addresses instead of switchable panes, as in the counting list: every   #}
+{# house page brings its own buttons and forms, and "back" in the browser       #}
+{# leads to the previous tab. Expects 'lauf' ('views.Lauf') and 'aktiv', the    #}
+{# number of the shown inventory, empty for "Total".                            #}
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+        <a class="nav-link {% if not aktiv %}active{% endif %}" href="{{ lauf.get_absolute_url }}"
+            {% if not aktiv %}aria-current="page"{% endif %}>{% translate "Gesamt" %}</a>
+    </li>
+    {% for reiter in lauf.inventuren %}
+    <li class="nav-item">
+        <a class="nav-link {% if reiter.pk == aktiv %}active{% endif %}" href="{{ reiter.get_absolute_url }}"
+            {% if reiter.pk == aktiv %}aria-current="page"{% endif %}>
+            {{ reiter.haus.name }}
+            <span class="small text-body-secondary ms-1">{{ reiter.get_status_display }}</span>
+        </a>
+    </li>
+    {% endfor %}
+</ul>

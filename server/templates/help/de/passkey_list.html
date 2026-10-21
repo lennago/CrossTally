@@ -1,0 +1,86 @@
+<h3>Was ein Passkey ist</h3>
+<p>
+    Ein Passkey ersetzt das Passwort durch das Gerät: Beim Anmelden fragt das Gerät nach
+    Gesicht, Finger oder PIN, und der Browser bestätigt der Anwendung, dass du es bist.
+    Es gibt nichts zu tippen und nichts, das jemand erraten oder abfangen könnte. Das
+    Passwort bleibt daneben gültig, etwa für ein fremdes Gerät.
+</p>
+<h3>Anlegen</h3>
+<p>
+    Ein Passkey gehört zu dem Gerät, auf dem er entsteht. Bei Apple und Google wandert er
+    über das eigene Konto auf die anderen Geräte mit. Wer mit mehreren Geräten arbeitet,
+    legt je Gerät einen an und gibt ihm einen Namen, um sie auseinanderzuhalten. Beim
+    Anmelden braucht es dann keinen Benutzernamen: der Knopf <strong>Mit Passkey
+    anmelden</strong> genügt.
+</p>
+<p>
+    Vor dem Anlegen fragt die Seite nach deinem Passwort, erst danach fragt das Gerät nach
+    Gesicht, Finger oder PIN. So legt niemand einen Passkey an, der nur dein Gerät in der
+    Hand hat oder eine offene Sitzung findet. Ein falsches Passwort zählt wie ein
+    Fehlversuch beim Anmelden. Nach zu vielen ist das Konto von hier aus vorübergehend
+    gesperrt, auch für die Anmeldung.
+</p>
+<p>
+    Hat dein Konto kein Passwort, bestätigst du stattdessen mit einem deiner Passkeys. Nach
+    <strong>Mit Passkey bestätigen</strong> fragt das Gerät nach Gesicht, Finger oder PIN,
+    und angeboten werden nur die Passkeys deines Kontos. Die Bestätigung gilt zwei Minuten.
+    Bricht der Dialog beim Anlegen ab, versuchst du es in der Zeit einfach noch einmal. Ohne
+    Passwort und ohne Passkey gibt es nichts, womit du bestätigen könntest. Dann kann dir ein
+    Administrator ein Passwort setzen.
+</p>
+<h3>Wo er liegt</h3>
+<p>
+    Wo der Passkey gespeichert wird, entscheidet das Gerät: in Windows Hello, im
+    iCloud-Schlüsselbund, im Google Passwortmanager oder in einem anderen Passwortmanager.
+    Ein Passwortmanager im Browser fängt die Anfrage meist ab und bietet an, den Passkey bei
+    sich zu speichern. Wer ihn lieber im Gerät selbst hat, wählt in dessen Fenster die
+    andere Möglichkeit oder schaltet dort das Speichern von Passkeys ab. Lässt du das
+    Namensfeld leer, heißt der Passkey nach seinem Speicher, etwa „Windows Hello“ oder
+    „iCloud-Schlüsselbund“. So siehst du, wo er gelandet ist.
+</p>
+{% if mail_moeglich %}
+<p>
+    Jeder neue und jeder entfernte Passkey kommt als E-Mail. Wer ihn nicht selbst angelegt
+    hat, sieht es so.
+</p>
+{% endif %}
+<h3>Entfernen</h3>
+<p>
+    Ein Gerät, das verloren ging, verliert hier seinen Zugang: Entfernen nimmt den Passkey
+    aus der Anwendung und meldet dein Konto überall ab. Auf der Website gilt das sofort, in
+    der Zähl-App spätestens nach einer Stunde. Angemeldet bleibst du nur dort, wo du den
+    Passkey entfernst. Was in der Zähl-App noch nicht gesendet ist, bleibt liegen und geht
+    nach der nächsten Anmeldung raus. Auf dem Gerät bleibt der Passkey liegen und ist nur
+    nicht mehr bekannt. Dort lässt er sich in den Einstellungen des Geräts löschen.
+</p>
+<p>
+    Vor dem Entfernen fragt die Seite nach deinem Passwort, wie vor dem Anlegen. Sonst
+    könnte jemand, der eine offene Sitzung findet, deine Passkeys entfernen und dich
+    überall abmelden, während die gefundene Sitzung angemeldet bleibt. Ein falsches
+    Passwort zählt wie ein Fehlversuch beim Anmelden. Hat dein Konto kein Passwort,
+    bestätigst du zuerst oben auf der Seite mit einem deiner Passkeys. Die Bestätigung gilt
+    zwei Minuten, auch für mehrere Passkeys nacheinander.
+</p>
+<p>
+    Ohne Passwort ist dein letzter Passkey der einzige Weg in dein Konto, und einen neuen
+    bestätigst du mit einem vorhandenen. Die Seite fragt deshalb vor dem Entfernen des
+    letzten noch einmal nach. Ist er weg, meldest du dich erst wieder an, wenn ein
+    Administrator dir ein Passwort gesetzt hat. Leg deshalb zuerst den neuen an und entferne
+    dann den alten.
+</p>
+<h3>In der Zähl-App</h3>
+<p>
+    Die Zähl-App hat dieselben Passkeys im Kontomenü. Wer auf dem Handy zählt, legt
+    den Passkey dort an, denn die installierte App hat auf dem iPhone einen eigenen
+    Speicher, und ein Passkey aus dem Browser kommt in ihr nicht an. Auch die App fragt vor
+    dem Anlegen und vor dem Entfernen nach dem Passwort, und ein Konto ohne Passwort
+    bestätigt dort ebenso mit einem seiner Passkeys. Beim Anmelden in der App genügt dann
+    „Mit Passkey anmelden“.
+</p>
+<h3>Was dazugehört</h3>
+<p>
+    Passkeys sind an die Adresse der Anwendung gebunden. Zieht sie auf eine andere Domain
+    um, gelten die alten nicht mehr, und jedes Gerät legt einen neuen an. Ein
+    Administrator kann Passkeys in der Verwaltung entfernen, etwa wenn jemand sein Gerät
+    nicht mehr hat. Auch dann ist das Konto danach überall abgemeldet.
+</p>

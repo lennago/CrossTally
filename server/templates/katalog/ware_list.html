@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Waren" context "Liste aller Waren" %}{% endblock title %}
+
+{# The three-level house filter: a further field of the filter card ('zusatz'). #}
+{% partialdef haus_filter %}
+<div class="col-6 col-lg-2">
+    <span class="form-label small mb-1 d-block">{% translate "Geführt in" %}</span>
+    <div class="dropdown" data-sammelwahl>
+        <button class="form-select form-select-sm text-start text-truncate" type="button"
+            data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+            <span data-ersetzen="haeuser-text">{{ filterform.haeuser_text }}</span>
+        </button>
+        <div class="dropdown-menu p-2 shadow min-breite-16">
+            {% for feld, haus, zustand in filterform.haus_wahl %}
+            <div class="d-flex justify-content-between align-items-center gap-3 py-1">
+                <span>{{ haus.name }}</span>
+                <input type="hidden" name="{{ feld }}" value="{{ zustand }}">
+                <button type="button" class="btn btn-sm breite-5" data-hauszustand
+                    data-text-egal="{% translate 'egal' %}" data-text-muss="{% translate 'muss' %}" data-text-nicht="{% translate 'nicht' %}"
+                    aria-label="{% blocktranslate with name=haus.name %}{{ name }}: egal, muss oder nicht{% endblocktranslate %}"></button>
+            </div>
+            {% endfor %}
+            <p class="small text-body-secondary mt-2 mb-0">
+                {% translate "Ein Klick wechselt zwischen" %} <em>{% translate "egal" %}</em>, <em>{% translate "muss" %}</em> {% translate "und" %} <em>{% translate "nicht" %}</em>{% translate ". Ist nichts auf" %} <em>{% translate "muss" %}</em>{% translate ", genügt eines der übrigen Häuser." %}
+            </p>
+            <button type="submit" class="btn btn-primary btn-sm w-100 mt-2" data-uebernehmen>
+                {% translate "Übernehmen" %}
+            </button>
+        </div>
+    </div>
+</div>
+{% endpartialdef %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="kopfleiste bg-body d-flex flex-wrap gap-2 justify-content-between align-items-center mb-1 py-2">
+        <div class="d-flex align-items-center gap-3">
+            <h1 class="h3 mb-0">{% translate "Waren" context "Liste aller Waren" %}</h1>
+            <span class="text-body-secondary small" data-ersetzen="anzahl">{% if page_obj %}{% blocktranslate count anzahl=page_obj.paginator.count context "Zahl der Waren" %}{{ anzahl }} Ware{% plural %}{{ anzahl }} Waren{% endblocktranslate %}{% else %}{% blocktranslate count anzahl=ware|length context "Zahl der Waren" %}{{ anzahl }} Ware{% plural %}{{ anzahl }} Waren{% endblocktranslate %}{% endif %}</span>
+        </div>
+        <a href="{% url 'ware_add' %}" class="btn btn-success btn-sm">{% translate "Neue Ware" %}</a>
+    </div>
+
+    {% url 'ware_list' as zurueck %}
+    {% include "components/list_filter.html" with zuruecksetzen=zurueck breite=2 zusatz="katalog/ware_list.html#haus_filter" %}
+
+    <div data-liste>
+    {% include "components/pagination.html" with stelle="oben" %}
+
+    {% if gruppen is not None %}
+    {# By product family: one collapsible per family, inside by name, as in    #}
+    {# the review list. Products without family stand last. No paging here.    #}
+    {# A group that ran over two pages would no longer be one. They are        #}
+    {# closed by default. What was open the browser remembers.                 #}
+    {% include "components/expand_buttons.html" %}
+    {% for gruppe in gruppen %}
+    {% include "katalog/components/ware_group.html" %}
+    {% empty %}
+    <p class="text-center text-body-secondary py-5">
+        {% if filterform.ist_eingeschraenkt %}{% translate "Keine Ware passt zu diesen Filtern." %}{% else %}{% translate "Noch keine Waren angelegt." %}{% endif %}
+    </p>
+    {% endfor %}
+    {% else %}
+    {% include "katalog/components/ware_table.html" with zeilen=ware gegliedert=False %}
+    {% endif %}
+
+    {% include "components/pagination.html" with stelle="unten" %}
+    </div>
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% include "components/script.html" with name="multi_select" %}
+{% include "components/script.html" with name="live_filter" %}
+{% endblock extra_scripts %}

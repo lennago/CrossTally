@@ -1,0 +1,49 @@
+{% extends "pdf/base.html" %}
+{% load i18n %}
+
+{# The title comes from the form: the given one, or the default ('AuswertungForm.titel'). #}
+{% block titel %}{{ titel }}{% endblock titel %}
+{# The footer is a CSS "content" string ('pdf/base.html'): an entity would stand there as text. #}
+{% block fusszeile %}{% blocktranslate count anzahl=inventuren|length %}Auswertung · {{ anzahl }} Inventur{% plural %}Auswertung · {{ anzahl }} Inventuren{% endblocktranslate %}{% endblock fusszeile %}
+
+{% block inhalt %}
+<div class="kopf">
+    <h1>{{ titel }}</h1>
+    {# Period and houses instead of every inventory: over a year and four      #}
+    {# houses the enumeration would be longer than the first table.            #}
+    {% if inventuren %}
+    <div class="zeile">
+        {% if stichtag_von == stichtag_bis %}
+        {% blocktranslate with stichtag=stichtag_von|date:"SHORT_DATE_FORMAT" %}Stichtag {{ stichtag }}{% endblocktranslate %}
+        {% else %}
+        {% blocktranslate with von=stichtag_von|date:"SHORT_DATE_FORMAT" bis=stichtag_bis|date:"SHORT_DATE_FORMAT" %}Stichtage vom {{ von }} bis {{ bis }}{% endblocktranslate %}
+        {% endif %}
+    </div>
+    <div class="zeile">
+        {% blocktranslate count anzahl=hausnamen|length with namen=hausnamen|join:", " %}Haus: {{ namen }}{% plural %}Häuser: {{ namen }}{% endblocktranslate %}
+    </div>
+    {% endif %}
+    {% if familien_text %}
+    <div class="zeile">
+        {% blocktranslate with namen=familien_text %}Warenfamilien: {{ namen }}{% endblocktranslate %}
+    </div>
+    {% endif %}
+    {% if nur_mehrere_haeuser %}
+    <div class="zeile">
+        {% translate "Nur Waren, die in mehreren Häusern gezählt wurden" %}
+    </div>
+    {% endif %}
+    {% if not bestaende_sinnvoll %}
+    <div class="zeile">
+        {% translate "Mehrere Inventuren je Haus. Ergebnis und Soll bleiben deshalb außen vor." %}
+    </div>
+    {% endif %}
+</div>
+
+{# By family the blocks nest ('evaluation_block.html' includes itself). #}
+{% for block in bloecke %}
+{% include "pdf/components/evaluation_block.html" %}
+{% empty %}
+<p class="leise">{% translate "Für diese Auswahl gibt es keine eingefrorenen Ergebnisse." %}</p>
+{% endfor %}
+{% endblock inhalt %}

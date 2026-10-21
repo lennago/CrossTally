@@ -1,0 +1,22 @@
+<h3>Was hier steht</h3>
+<p>
+    Was {{ haus.name }} führt, mit der Nummer, der Bezeichnung und der
+    Warengruppe dieses Hauses. Führt ein anderes Haus dieselbe Ware, hängt sein Artikel an
+    derselben Ware, hat dort aber eine eigene Nummer.
+</p>
+{% include "help/de/shared/artikelstatus.html" %}
+<p>Der Status betrifft nur den Artikel in {{ haus.name }}.</p>
+{% include "help/de/shared/inventurart.html" %}
+<p>
+    Die Spalte „Abwiegen“ gehört der Ware und schaltet das Wiegen in jedem Haus. „Nein“ löst
+    dabei die Behälter der Ware.
+</p>
+<h3>Suchen und Gliedern</h3>
+<p>
+    Die Suche geht über Nummer, Bezeichnung, EAN, Ware, Warengruppe und Warenfamilie, bei der
+    Familie auch über die Familien darunter. Ein Tippfehler stört nicht: findet die Suche
+    nichts, zeigt sie, was ähnlich heißt. Nummern müssen stimmen. Unter „Ansicht“ lässt sich
+    die Liste nach Warengruppe oder Warenfamilie gliedern. Sonst sortiert ein Klick auf den
+    Spaltenkopf.
+</p>
+{% include "help/de/shared/search_order.html" %}

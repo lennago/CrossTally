@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img"
+     aria-label="Inventur">
+    <title>Inventur</title>
+    <!--
+        Placeholder logo: a tally, four strokes and the bar across. Pure
+        geometry, no font and no third-party template, so nobody else holds
+        rights to it. Meant to be replaced: whoever has a logo of their own
+        swaps this file and runs 'npm run icons'.
+
+        This version has rounded corners. It stands in the browser tab and on
+        the website. The home screen of a device uses 'logo-maskable.svg'.
+    -->
+    <rect width="512" height="512" rx="112" fill="#0d6efd" />
+    <g fill="none" stroke="#ffffff" stroke-width="34" stroke-linecap="round">
+        <path d="M168 184v144" />
+        <path d="M224 184v144" />
+        <path d="M280 184v144" />
+        <path d="M336 184v144" />
+        <path d="M134 330 378 192" />
+    </g>
+</svg>

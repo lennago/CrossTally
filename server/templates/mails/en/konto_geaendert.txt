@@ -1,0 +1,16 @@
+Your account at {{ anwendung }} was changed
+
+Hello {{ vorname }},
+
+Something has changed in your account at {{ anwendung }}.
+
+{{ aenderungen }}
+
+{% if selbst %}
+Wasn't that you? Then change your password and let an administrator know.
+{% elif wer %}
+Changed by {{ wer }}.
+If you did not expect this, talk to {{ wer }}.
+{% else %}
+If you did not expect this, talk to your manager.
+{% endif %}

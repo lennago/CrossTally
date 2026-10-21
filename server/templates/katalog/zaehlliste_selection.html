@@ -1,0 +1,137 @@
+{% load i18n %}
+{# Takes an article into the location's counting list or out of it: the same           #}
+{# button in both tables. 'erwartet' and 'waehlbar' are sets from the context:         #}
+{# that way no row costs a query of its own. The button says what it wants             #}
+{# ('aktion'): a click from a stale page then changes nothing.                         #}
+{% partialdef erwartung_knopf %}
+{% if artikel.pk in erwartet or artikel.pk in waehlbar %}
+<form method="post" action="{% url 'erwartung_umschalten' ort.pk %}" class="d-inline" data-sofort>
+    {% csrf_token %}
+    <input type="hidden" name="weiter" value="{{ request.get_full_path }}">
+    <input type="hidden" name="artikel" value="{{ artikel.pk }}">
+    {% if artikel.pk in erwartet %}
+    <button type="submit" name="aktion" value="entfernen" class="btn btn-sm btn-secondary"
+        title="{% translate 'Aus der Zählliste nehmen' %}" data-fokus="erwartung-{{ artikel.pk }}">
+        {% translate "&check; kommt vor" %}
+    </button>
+    {% else %}
+    <button type="submit" name="aktion" value="aufnehmen" class="btn btn-sm btn-outline-secondary"
+        title="{% translate 'In die Zählliste aufnehmen' %}" data-fokus="erwartung-{{ artikel.pk }}">
+        {% translate "hinzufügen" %}
+    </button>
+    {% endif %}
+</form>
+{% else %}
+<span class="text-body-secondary small"
+    title="{% translate 'Eingestellte Artikel lassen sich nicht neu aufnehmen' %}">{% translate "&mdash;" %}</span>
+{% endif %}
+{% endpartialdef %}
+
+{# Second tab of the counting list: all articles of the house, one button per row. #}
+{#                                                                                 #}
+{# The filters are the same as in the house article list. 'reiter' rides           #}
+{# along as a hidden field, otherwise one would fall back into the first           #}
+{# tab when applying.                                                              #}
+{% url 'zaehlliste' ort.pk as liste %}
+{% include "components/list_filter.html" with zuruecksetzen=liste|add:"?reiter=auswahl" reiter="auswahl" breite=2 %}
+
+<div data-liste>
+    {% include "components/pagination.html" with stelle="oben" %}
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    {% include "components/column_header.html" with kopf=spalten.nummer breite="7rem" %}
+                    {% include "components/column_header.html" with kopf=spalten.name %}
+                    {% include "components/column_header.html" with kopf=spalten.warengruppe %}
+                    {% include "components/column_header.html" with kopf=spalten.familie %}
+                    {% include "components/column_header.html" with kopf=spalten.einheit klasse="text-end" breite="7rem" %}
+                    <th class="breite-11" scope="col"><span class="visually-hidden">{% translate "Aktionen" %}</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for artikel in auswahl_hausartikel %}
+                <tr {% if not artikel.aktiv %}class="ausgegraut"{% endif %}>
+                    <td class="font-monospace text-body-secondary">{{ artikel.artikelnummer|default:"–" }}</td>
+
+                    <td>
+                        <a href="{{ artikel.get_absolute_url }}"
+                            class="link-body-emphasis link-offset-2 text-decoration-none">
+                            {% include "katalog/components/artikel_name.html" %}
+                        </a>
+                        {# The status itself: a discontinued article is not "inactive". #}
+                        {% if not artikel.aktiv %}
+                        <span class="badge bg-body-secondary text-body border ms-1">{{ artikel.get_status_display|lower }}</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="text-body-secondary small">{{ artikel.warengruppe.anzeigename }}</td>
+
+                    <td class="text-body-secondary small">
+                        {{ artikel.ware.warenfamilie.anzeigename|default:"–" }}
+                    </td>
+
+                    <td class="text-end text-body-secondary small">
+                        {{ artikel.ware.basiseinheit.kurz }}
+                    </td>
+
+                    <td class="text-end">
+                        {% partial erwartung_knopf %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-body-secondary py-5">
+                        {% if filterform.ist_eingeschraenkt %}
+                        {% translate "Kein Artikel passt zu diesen Filtern." %}
+                        {% else %}
+                        {% blocktranslate with name=ort.haus.name %}{{ name }} führt noch keine Hausartikel.{% endblocktranslate %}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% include "components/pagination.html" with stelle="unten" %}
+
+    {# Recipe articles carry neither product group nor status. The filters          #}
+    {# above do not apply to them, that is why they stand on their own. The         #}
+    {# search, by contrast, applies here too.                                       #}
+    {% if auswahl_rezepturartikel %}
+    <h2 class="h6 mt-4 mb-2">{% translate "Rezepturartikel" %}</h2>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <tbody>
+                {% for artikel in auswahl_rezepturartikel %}
+                <tr>
+                    <td>
+                        <a href="{{ artikel.get_absolute_url }}"
+                            class="link-body-emphasis link-offset-2 text-decoration-none">
+                            {{ artikel.name }}
+                        </a>
+                        <span class="badge rounded-pill bg-body-secondary text-body border ms-1">
+                            {% translate "vorbereitet" %}
+                        </span>
+                    </td>
+                    <td class="text-end text-body-secondary small breite-7">
+                        {{ artikel.basiseinheit.kurz }}
+                    </td>
+                    <td class="text-end breite-11">
+                        {% partial erwartung_knopf %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% elif rezepturartikel_gesucht %}
+    {# Without this sentence it would look as if there were no recipe articles here at all. #}
+    <p class="text-body-secondary small mt-4 mb-0">
+        {% translate "Kein Rezepturartikel passt zur Suche." %}
+    </p>
+    {% endif %}
+</div>
+

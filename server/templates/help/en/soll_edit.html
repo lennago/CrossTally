@@ -1,0 +1,25 @@
+<h3>What the page is for</h3>
+<p>
+    Not every merchandise management system exports a stock, and not every file knows
+    every article. Here the target per article can be entered, in the unit in which
+    {{ inventur.haus.name }} carries it. It counts like a target from the file: the
+    review list shows the difference against it, and it is frozen with the closing.
+</p>
+<h3>Two blocks</h3>
+<p>
+    At the top the articles <strong>without a target</strong>: that is the work. Below
+    them those <strong>with a target</strong>, whether from the file or by hand. Their
+    fields are locked. <em>Edit</em> releases exactly that row, then the value can be
+    changed or cleared. Empty means: the target is removed. Whatever was not released is
+    left untouched by “Save”, even if the browser had shown something else. Without
+    JavaScript a row with a target stays locked. A target may also be negative, the way
+    a merchandise management system shows a stock when more was booked than delivered.
+</p>
+<h3>File and hand</h3>
+<p>
+    An upload counts in full: it also replaces what was entered by hand, and the message
+    afterwards says how many values that were. The other way round, a value by hand turns
+    a value from the file into one by hand, because someone has just confirmed or replaced
+    it. Maintaining only happens during preparation. If the count is already running:
+    “Back to preparation”, the counted quantities are kept.
+</p>

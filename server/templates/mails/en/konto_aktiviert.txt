@@ -1,0 +1,14 @@
+Your account at {{ anwendung }} is active again
+
+Hello {{ vorname }},
+
+Your account at {{ anwendung }} is active again. You can sign in again.
+
+{{ aenderungen }}
+
+{% if wer %}
+Reactivated by {{ wer }}.
+If you did not expect this, talk to {{ wer }}.
+{% else %}
+If you did not expect this, talk to your manager.
+{% endif %}

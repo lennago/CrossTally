@@ -1,0 +1,20 @@
+{% extends "components/delete_page.html" %}
+{% load i18n %}
+
+{% block art %}{% translate "Behälter löschen" %}{% endblock art %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'behaelter_list' %}">{% translate "Behälter" %}</a></li>
+{% endblock pfad %}
+
+{% block folgen %}
+{% if object.wird_benutzt %}
+<p class="mb-0">
+    {% translate "Der Behälter ist noch zugeordnet. Das Löschen wird abgelehnt. Erst die Zuordnungen lösen, dann löschen, sonst verlören bereits erfasste Wiegungen ihren Bezug." %}
+</p>
+{% else %}
+<p class="text-body-secondary small mb-0">
+    {% translate "Er ist nirgends zugeordnet und kann gefahrlos entfernt werden." %}
+</p>
+{% endif %}
+{% endblock folgen %}

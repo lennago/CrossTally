@@ -1,0 +1,240 @@
+# Builds the image, advances the versions and publishes them.
+#
+# On a push, style and tests of both sides run first. The two CI workflows are
+# called here ('workflow_call') instead of being repeated. An image built from
+# red code helps nobody.
+#
+# The versions are managed by release-please. On main it reads the commits
+# (Conventional Commits: 'feat' bumps the middle digit, 'fix' the last, a '!'
+# announces a breaking change) and keeps a pull request "chore: release x.y.z"
+# up to date from them, with 'CHANGELOG.md' and 'version.txt'. Only merging
+# **that** one publishes. Then the tag 'vx.y.z' and the release on GitHub are
+# created, and the same run builds the image for it.
+#
+# In the same run and not in a separate workflow on 'push: tags'. A tag set by
+# a workflow with the GITHUB_TOKEN does not trigger another run, otherwise
+# workflows could start each other endlessly.
+#
+# There is only main. What is there is the working state. Published is only
+# what carries a release. The release PR is the threshold that a separate 'dev'
+# branch used to be. The image tags:
+#   every push          -> :main   and :main-<short hash>
+#   push with release   -> plus :x.y.z, :x.y and :latest
+#
+# ':latest' is therefore the last **published** version, not the last push to
+# main.
+#
+# On a pull request the image is only built as a trial, and on every one.
+# Otherwise a broken Dockerfile would show up only after merging. There is no
+# path filter there, because the trial build is required in the ruleset, and a
+# required check that never starts would hold the pull request forever.
+#
+# Third-party actions are pinned to a commit, see 'server_ci.yml'.
+name: Image
+
+on:
+  push:
+    branches: [main]
+    # Documentation alone changes nothing about the image. 'CHANGELOG.md' falls
+    # under this too. The release PR, however, also changes 'version.txt', and
+    # so it runs.
+    paths-ignore:
+      - "**.md"
+      - "*.mermaid"
+  pull_request:
+    branches: [main]
+
+# On main, runs wait instead of being cancelled. A cancellation between tag and
+# image would leave a release without an image.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+# The starting point for all jobs. Whoever needs more says so locally.
+permissions:
+  contents: read
+
+jobs:
+  server:
+    name: Server checks
+    if: github.event_name == 'push'
+    uses: ./.github/workflows/server_ci.yml
+
+  app:
+    name: App checks
+    if: github.event_name == 'push'
+    uses: ./.github/workflows/app_ci.yml
+
+  # Runs alongside but holds nothing up. Why is explained in 'audit.yml'.
+  audit:
+    name: Audit
+    if: github.event_name == 'push'
+    # A building block gets at most what the caller has. And GitHub checks that
+    # for **every** one of its jobs, even the one that does not run here (the
+    # scan of the published image requires 'packages: read').
+    permissions:
+      contents: read
+      packages: read
+    uses: ./.github/workflows/audit.yml
+
+  # Only from green code, otherwise there would be a release whose image never
+  # gets built.
+  release:
+    name: Release
+    if: github.event_name == 'push'
+    needs: [server, app]
+    runs-on: ubuntu-latest
+
+    # Writes the release PR, the tag and the release. For that, "Allow GitHub
+    # Actions to create and approve pull requests" has to be ticked in the repo
+    # under Settings > Actions > General.
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    outputs:
+      created: ${{ steps.release.outputs.release_created }}
+      tag: ${{ steps.release.outputs.tag_name }}
+
+    steps:
+      - name: Update release PR or publish release
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  image:
+    name: Build and push
+    if: github.event_name == 'push'
+    needs: [server, app, release]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # amd64 only: tested on the developer's machine, run on a server, and
+      # both are x86. Should it ever go onto a Raspberry Pi, ',linux/arm64' is
+      # added below and 'docker/setup-qemu-action' goes back in front of this.
+      # The run then takes many times longer, because arm64 is emulated.
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Log in to the registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 'version' in the output is the tag with the highest priority: on a
+      # release the version number, otherwise 'main' and hash. That is why the
+      # hash ranks above the fixed names. It is what the application shows
+      # about itself.
+      - name: Determine tags
+        id: tags
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ needs.release.outputs.tag }},enable=${{ needs.release.outputs.created == 'true' }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.release.outputs.tag }},enable=${{ needs.release.outputs.created == 'true' }}
+            type=raw,value=latest,enable=${{ needs.release.outputs.created == 'true' }}
+            type=sha,prefix=main-,format=short,priority=300
+            type=raw,value=main
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          labels: ${{ steps.tags.outputs.labels }}
+          build-args: |
+            APP_VERSION=${{ steps.tags.outputs.version }}
+          # Always today's base image, not the one from the last run. And a
+          # release is built entirely without cache. Only then do the security
+          # updates in the Dockerfile ('apt-get upgrade') really run again.
+          pull: true
+          no-cache: ${{ needs.release.outputs.created == 'true' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # After the upload, not before. The image is there by then, and the run goes
+  # red if it contains known vulnerabilities with a fix available. 'pip-audit'
+  # sees only the Python packages. The system libraries WeasyPrint needs are
+  # seen only by this look.
+  scan:
+    name: Scan image
+    needs: [image]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      # An image name is lower case, a repository name need not be
+      # ('CrossTally'). Trivy refuses such a name outright. The upload above
+      # does not need this, 'metadata-action' lowers the name itself.
+      - name: Image name
+        id: name
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Scan for known vulnerabilities
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          image-ref: ${{ steps.name.outputs.image }}@${{ needs.image.outputs.digest }}
+          severity: CRITICAL,HIGH
+          # What nobody has fixed yet cannot be fixed here either.
+          ignore-unfixed: true
+          exit-code: "1"
+
+  # Pull request: build, do not upload. The checks of both sides run there
+  # through their own triggers.
+  build-check:
+    name: Build without pushing
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Typos and broken placeholders show up here, not at 'up' on the server.
+      # The '.env' comes from the template, because 'compose.yaml' requires the
+      # file, and that way the template is checked along with it.
+      - name: Validate compose file
+        run: |
+          cp .env.example .env
+          docker compose config --quiet
+        env:
+          POSTGRES_PASSWORD: ci-only
+
+      - name: Validate Caddyfile
+        run: >-
+          docker run --rm
+          -v "$PWD/Caddyfile:/etc/caddy/Caddyfile:ro"
+          caddy:2-alpine
+          caddy validate --config /etc/caddy/Caddyfile
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Build
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64
+          push: false
+          cache-from: type=gha

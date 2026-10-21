@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load mengen %}
+
+{# What the expected stock file left open, and what it lacks. Every answer     #}
+{# is its own button (see 'SollbestandKlaerungView'). Only discarding also     #}
+{# works per block and for all open rows together. The buttons act without     #}
+{# reloading ('instant_actions.js'): the area 'data-liste' comes fresh from    #}
+{# the server, the page stays where it was.                                    #}
+
+{# The button in a block's header: drop the rows of this reason.               #}
+{% partialdef block_verwerfen %}
+<form method="post" class="mb-0" data-sofort>
+    {% csrf_token %}
+    <input type="hidden" name="grund" value="{{ grund }}">
+    <button class="btn btn-outline-secondary btn-sm" type="submit" name="aktion" value="alle_verwerfen"
+        data-rueckfrage="{% blocktranslate count anzahl=anzahl %}Diese Zeile verwerfen? Ihr Soll fällt unter den Tisch, die Stammdaten bleiben.{% plural %}Alle {{ anzahl }} Zeilen dieses Blocks verwerfen? Ihr Soll fällt unter den Tisch, die Stammdaten bleiben.{% endblocktranslate %}">
+        {% translate "Alle verwerfen" %}
+    </button>
+</form>
+{% endpartialdef %}
+
+{% block title %}{% blocktranslate %}Sollbestand klären: {{ inventur }}{% endblocktranslate %}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4 max-breite-80">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'inventur_list' %}">{% translate "Inventuren" %}</a></li>
+            <li class="breadcrumb-item">
+                <a href="{{ inventur.get_absolute_url }}">{{ inventur }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{% translate "Sollbestand" %}</li>
+        </ol>
+    </nav>
+
+    <div class="kopfleiste bg-body py-2 mb-1">
+        <h1 class="h3 mb-0">{% translate "Sollbestand klären" %}</h1>
+    </div>
+    <p class="text-body-secondary mb-3">
+    <span data-ersetzen="anzahl_soll">{% blocktranslate with name=inventur.haus.name %}{{ anzahl_soll }} Artikel haben ihr Soll. Die Datei der Warenwirtschaft sagt aber auch, was es in {{ name }} noch gibt, und was nicht mehr. Was hier steht, passt nicht zusammen. Jede Zeile hat ihren eigenen Knopf.{% endblocktranslate %}</span>
+<strong>{% translate "Ohne Antwort bleibt alles, wie es ist." %}</strong>
+    </p>
+
+    <div data-liste>
+    {% if klaerung.inaktive %}
+    <div class="card mb-4">
+        <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center gap-2">
+            <span>{% translate "Inaktiv, aber mit Sollbestand: wieder aktivieren?" %}</span>
+            {% with grund="INAKTIV" anzahl=klaerung.inaktive|length %}{% partial block_verwerfen %}{% endwith %}
+        </div>
+        <div class="card-body py-2 small text-body-secondary">
+            {% translate "Die Warenwirtschaft führt einen Bestand, hier ist der Artikel gerade nicht im Sortiment." %}
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <tbody>
+                    {% for zeile in klaerung.inaktive %}
+                    <tr>
+                        <td class="font-monospace text-body-secondary breite-7">
+                            {{ zeile.artikelnummer }}
+                        </td>
+                        <td>
+                            {% include "katalog/components/artikel_name.html" with artikel=zeile.hausartikel %}
+                            {% if zeile.name and zeile.name != zeile.hausartikel.name %}
+                            <div class="small text-body-secondary">
+    {% blocktranslate with name=zeile.name %}in der Datei: {{ name }}{% endblocktranslate %}
+</div>
+                            {% endif %}
+                        </td>
+                        <td class="small breite-10">
+                            {% blocktranslate with menge=zeile.menge_basiseinheit|menge_kurz %}Soll {{ menge }}{% endblocktranslate %}
+                            {{ zeile.hausartikel.basiseinheit.kurz }}
+                        </td>
+                        <td class="breite-20">
+                            <form method="post" class="d-inline" data-sofort>
+                                {% csrf_token %}
+                                <input type="hidden" name="zeile" value="{{ zeile.pk }}">
+                                <button class="btn btn-outline-success btn-sm" type="submit"
+                                    name="aktion" value="aktivieren">{% translate "Wieder aktivieren" %}</button>
+                                <button class="btn btn-outline-secondary btn-sm" type="submit"
+                                    name="aktion" value="verwerfen">{% translate "Verwerfen" %}</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if klaerung.eingestellte %}
+    <div class="card mb-4">
+        <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center gap-2">
+            <span>{% translate "Eingestellt, aber mit Sollbestand: zurück, oder neu belegt?" %}</span>
+            {% with grund="EINGESTELLT" anzahl=klaerung.eingestellte|length %}{% partial block_verwerfen %}{% endwith %}
+        </div>
+        <div class="card-body py-2 small text-body-secondary">
+            {% translate "Die Nummer gehört einem eingestellten Satz." %}
+            {% if klaerung.nachfolger %}
+            {% translate "Führt das Haus dieselbe Ware inzwischen aktiv unter einer anderen Nummer, lässt sich das Soll dort dazurechnen. Die alte Nummer zählt danach als die neue, auch beim nächsten Einlesen." %}
+            {% endif %}
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <tbody>
+                    {# The successor: the active article of the same product. This row's target #}
+                    {# can go onto it, and bringing the old row back would fail on the product. #}
+                    {% for zeile, nachfolger in klaerung.eingestellte_mit_nachfolger %}
+                    <tr>
+                        <td class="font-monospace text-body-secondary breite-7">
+                            {{ zeile.artikelnummer }}
+                        </td>
+                        <td>
+                            {% include "katalog/components/artikel_name.html" with artikel=zeile.hausartikel %}
+                            <div class="small text-body-secondary">
+                                {% blocktranslate with datum=zeile.hausartikel.gueltig_bis|date:"SHORT_DATE_FORMAT" %}eingestellt seit {{ datum }}{% endblocktranslate %}{% if zeile.name and zeile.name != zeile.hausartikel.name %}
+                                &middot; {% blocktranslate with name=zeile.name %}in der Datei: {{ name }}{% endblocktranslate %}{% endif %}
+                            </div>
+                            {% if nachfolger %}
+                            <div class="small">
+                                {% blocktranslate with nummer=nachfolger.artikelnummer|default:"–" name=nachfolger.name %}Dieselbe Ware führt das Haus jetzt aktiv unter {{ nummer }} „{{ name }}“.{% endblocktranslate %}
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td class="small breite-10">
+                            {% blocktranslate with menge=zeile.menge_basiseinheit|menge_kurz %}Soll {{ menge }}{% endblocktranslate %}
+                            {{ zeile.hausartikel.basiseinheit.kurz }}
+                        </td>
+                        <td class="breite-28">
+                            <form method="post" class="d-inline" data-sofort>
+                                {% csrf_token %}
+                                <input type="hidden" name="zeile" value="{{ zeile.pk }}">
+                                {% if nachfolger %}
+                                <button class="btn btn-outline-success btn-sm" type="submit"
+                                    name="aktion" value="dazurechnen">{% blocktranslate with nummer=nachfolger.artikelnummer|default:nachfolger.name %}Bei {{ nummer }} dazurechnen{% endblocktranslate %}</button>
+                                {% else %}
+                                <button class="btn btn-outline-success btn-sm" type="submit"
+                                    name="aktion" value="aktivieren">{% translate "Wieder aktivieren" %}</button>
+                                {% endif %}
+                                <a class="btn btn-outline-primary btn-sm"
+                                    href="{% url 'hausartikel_add' inventur.haus.pk %}?artikelnummer={{ zeile.artikelnummer|urlencode }}&amp;name={{ zeile.name|urlencode }}&amp;weiter={{ request.get_full_path|urlencode }}">
+                                    {% translate "Neu anlegen" %}
+                                </a>
+                                <button class="btn btn-outline-secondary btn-sm" type="submit"
+                                    name="aktion" value="verwerfen">{% translate "Verwerfen" %}</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if klaerung.unbekannte %}
+    <div class="card mb-4">
+        <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center gap-2">
+            <span>{% translate "Nummer unbekannt: anlegen?" %}</span>
+            <div class="d-flex flex-wrap gap-2">
+                {% with grund="UNBEKANNT" anzahl=klaerung.unbekannte|length %}{% partial block_verwerfen %}{% endwith %}
+            </div>
+        </div>
+        <div class="card-body py-2 small text-body-secondary">
+    {% blocktranslate with name=inventur.haus.name %}{{ name }} kennt diese Nummern nicht.{% endblocktranslate %}
+</div>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <tbody>
+                    {% for zeile in klaerung.unbekannte %}
+                    <tr>
+                        <td class="font-monospace text-body-secondary breite-7">
+                            {{ zeile.artikelnummer }}
+                        </td>
+                        <td>{% translate "ohne Bezeichnung in der Datei" as ohne_namen %}{{ zeile.name|default:ohne_namen }}</td>
+                        <td class="small breite-10">
+                            {% blocktranslate with menge=zeile.menge_basiseinheit|menge_kurz %}Soll {{ menge }}{% endblocktranslate %}
+                        </td>
+                        <td class="breite-20">
+                            <form method="post" class="d-inline" data-sofort>
+                                {% csrf_token %}
+                                <input type="hidden" name="zeile" value="{{ zeile.pk }}">
+                                <a class="btn btn-outline-primary btn-sm"
+                                    href="{% url 'hausartikel_add' inventur.haus.pk %}?artikelnummer={{ zeile.artikelnummer|urlencode }}&amp;name={{ zeile.name|urlencode }}&amp;weiter={{ request.get_full_path|urlencode }}">
+                                    {% translate "Neu anlegen" %}
+                                </a>
+                                <button class="btn btn-outline-secondary btn-sm" type="submit"
+                                    name="aktion" value="verwerfen">{% translate "Verwerfen" %}</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if klaerung.abweichende_namen %}
+    <div class="card mb-4">
+        <div class="card-header bg-body-tertiary">{% translate "Bezeichnung weicht ab: dieselbe Ware?" %}</div>
+        <div class="card-body py-2 small text-body-secondary">
+            {% translate "Die Nummer passt, die Bezeichnung in der Datei nicht. Das Soll steht trotzdem schon am Artikel." %}
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <tbody>
+                    {% for soll in klaerung.abweichende_namen %}
+                    <tr>
+                        <td class="font-monospace text-body-secondary breite-7">
+                            {{ soll.hausartikel.artikelnummer|default:"–" }}
+                        </td>
+                        <td>
+                            <a href="{{ soll.hausartikel.get_absolute_url }}" class="link-body-emphasis">
+                                {{ soll.hausartikel.name }}
+                            </a>
+                        </td>
+                        <td class="small text-body-secondary">
+    {% blocktranslate with name_in_datei=soll.name_in_datei %}in der Datei: {{ name_in_datei }}{% endblocktranslate %}
+</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if klaerung.ohne_soll %}
+    <div class="card mb-4">
+        <div class="card-header bg-body-tertiary">
+            {% translate "Aktiv, aber ohne Sollbestand: gibt es den Artikel noch?" %}
+        </div>
+        <div class="card-body py-2 small text-body-secondary">
+    {% blocktranslate with name=inventur.haus.name %}{{ name }} führt diese Artikel aktiv, und sie haben kein Soll: weder aus der Datei noch von Hand.{% endblocktranslate %}
+</div>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <tbody>
+                    {% for artikel in klaerung.ohne_soll %}
+                    <tr>
+                        <td class="font-monospace text-body-secondary breite-7">
+                            {{ artikel.artikelnummer|default:"–" }}
+                        </td>
+                        <td>{% include "katalog/components/artikel_name.html" with artikel=artikel %}</td>
+                        <td class="small text-body-secondary breite-14">
+                            {{ artikel.warengruppe.anzeigename }}
+                        </td>
+                        <td class="breite-20">
+                            <form method="post" class="d-inline" data-sofort>
+                                {% csrf_token %}
+                                <input type="hidden" name="artikel" value="{{ artikel.pk }}">
+                                <button class="btn btn-outline-secondary btn-sm" type="submit"
+                                    name="aktion" value="inaktiv">{% translate "Inaktiv setzen" %}</button>
+                                <button class="btn btn-outline-danger btn-sm" type="submit"
+                                    name="aktion" value="einstellen">{% translate "Einstellen" %}</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if klaerung.leer %}
+    <p class="text-body-secondary">{% translate "Hier ist nichts zu klären: das Soll passt zu den Stammdaten." %}</p>
+    {% endif %}
+
+    <div class="fussleiste d-flex align-items-center flex-wrap gap-2 bg-body border-top py-3">
+        <a href="{{ inventur.get_absolute_url }}" class="btn btn-outline-secondary">{% translate "Zurück zur Inventur" %}</a>
+        {% if klaerung.offene_zeilen %}
+        {# After creating or activating an article elsewhere: every open row is   #}
+        {# held against the master data again, whatever block it stands in.      #}
+        {# Until 10/2026 the button stood only in the block "Number unknown".     #}
+        <form method="post" class="mb-0" data-sofort>
+            {% csrf_token %}
+            <button class="btn btn-outline-primary" type="submit" name="aktion" value="erneut">
+                {% translate "Erneut zuordnen" %}
+            </button>
+        </form>
+        <form method="post" class="mb-0" data-sofort>
+            {% csrf_token %}
+            <button class="btn btn-outline-danger" type="submit" name="aktion" value="alle_verwerfen"
+                data-rueckfrage="{% blocktranslate count anzahl=klaerung.offene_zeilen %}Die eine offene Zeile verwerfen? Ihr Soll fällt unter den Tisch, die Stammdaten bleiben.{% plural %}Alle {{ anzahl }} offenen Zeilen verwerfen? Ihr Soll fällt unter den Tisch, die Stammdaten bleiben.{% endblocktranslate %}">
+                {% translate "Alle offenen Zeilen verwerfen" %}
+            </button>
+        </form>
+        {% endif %}
+        <span class="text-body-secondary small ms-2">
+            {% translate "Was offen bleibt, stört die Zählung nicht. Es fehlt dann nur das Soll dazu." %}
+        </span>
+    </div>
+    </div>
+
+</div>
+{% endblock content %}
+

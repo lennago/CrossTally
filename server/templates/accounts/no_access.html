@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Kein Zugriff" %}{% endblock title %}
+
+{% block content %}
+<div class="container py-5 max-breite-36">
+
+    <div class="card">
+        <div class="card-body p-4">
+
+            <h2 class="h4 mb-3">{% translate "Diese Seiten sind für Führungskräfte" %}</h2>
+
+            <p>
+    {% blocktranslate with first_name=user.first_name %}Hallo {{ first_name }}, dein Konto ist angemeldet, hat aber keine Berechtigung für die Weboberfläche.{% endblocktranslate %}
+</p>
+
+            <p class="mb-4">
+                {% translate "Zum Zählen benutzt du die Zähl-App. Der Knopf führt direkt dorthin. Wenn du hier etwas brauchst, melde dich bitte bei einer Führungskraft." %}
+            </p>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'pwa' %}" class="btn btn-success" target="_blank">{% translate "Zur Zähl-App" %}</a>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-secondary">{% translate "Abmelden" %}</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <p class="text-body-secondary small text-center mt-3 mb-0">
+    {% blocktranslate with username=user.username %}Angemeldet als {{ username }}{% endblocktranslate %}
+    · <a href="{% url 'password_change' %}" class="link-secondary">{% translate "Passwort ändern" %}</a>
+    · <a href="{% url 'email_aendern' %}" class="link-secondary">{% translate "E-Mail-Adresse ändern" %}</a>
+    · <a href="{% url 'passkey_list' %}" class="link-secondary">{% translate "Passkeys" %}</a>
+</p>
+
+</div>
+{% endblock content %}

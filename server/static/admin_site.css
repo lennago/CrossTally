@@ -1,0 +1,860 @@
+/* The Django admin in the site's clothing.
+ *
+ * Only colours, dimensions and the bar at the top. The inside stays the
+ * admin, with its lists, filters and the delete preview. Loading Bootstrap
+ * here would have been the shorter way and the wrong one: without its classes
+ * it only acts through Reboot, and that among other things pushes the module
+ * headings below their tables ('caption-side: bottom').
+ *
+ * The values are those of Bootstrap 5.3 so both halves hit the same tones.
+ * The admin hangs almost everything on CSS variables. The three blocks below
+ * follow its own structure (light, system dark, explicitly dark).
+ */
+
+html[data-theme="light"],
+:root {
+    --header-bg: #f8f9fa;
+    --header-link-color: #212529;
+    --header-color: #6c757d;
+    --header-branding-color: #212529;
+    --primary: #198754;
+    --primary-fg: #fff;
+    --secondary: #198754;
+    --accent: #146c43;
+
+    --body-fg: #212529;
+    --body-bg: #fff;
+    --body-quiet-color: #6c757d;
+    --body-medium-color: #495057;
+    --body-loud-color: #000;
+
+    --link-fg: #146c43;
+    --link-hover-color: #0f5132;
+    --link-selected-fg: #0f5132;
+
+    --hairline-color: #dee2e6;
+    --border-color: #dee2e6;
+
+    --breadcrumbs-bg: #f8f9fa;
+    --breadcrumbs-fg: #6c757d;
+    --breadcrumbs-link-fg: #212529;
+
+    --darkened-bg: #f8f9fa;
+    --selected-bg: #e9ecef;
+    --selected-row: #fff3cd;
+
+    --message-success-bg: #d1e7dd;
+    --message-warning-bg: #fff3cd;
+    --message-error-bg: #f8d7da;
+    --message-info-bg: #cff4fc;
+
+    --leiste-fg: rgba(0, 0, 0, .65);
+    --leiste-fg-hover: rgba(0, 0, 0, .8);
+    --leiste-aktiv: #000;
+    --leiste-bg: #f8f9fa;
+    --leiste-menue-bg: #fff;
+    --leiste-menue-rand: rgba(0, 0, 0, .175);
+    --leiste-menue-hover-bg: #f8f9fa;
+    --leiste-leise: rgba(33, 37, 41, .75);
+    --leiste-knopf-rand: rgba(0, 0, 0, .15);
+    --leiste-knopf-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2833, 37, 41, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+
+    /* The demo banner, Bootstrap's "warning subtle". */
+    --demo-bg: #fff3cd;
+    --demo-fg: #664d03;
+    --demo-rand: #ffe69c;
+}
+
+/* Follows the system as long as nobody has explicitly chosen light. */
+@media (prefers-color-scheme: dark) {
+    :root {
+    --header-bg: #2b3035;
+    --header-link-color: #dee2e6;
+    --header-color: #adb5bd;
+    --header-branding-color: #dee2e6;
+        --body-fg: #dee2e6;
+        --body-bg: #212529;
+        --body-quiet-color: #adb5bd;
+        --body-medium-color: #ced4da;
+        --body-loud-color: #fff;
+
+        --link-fg: #75b798;
+        --link-hover-color: #a3cfbb;
+        --link-selected-fg: #a3cfbb;
+
+        --hairline-color: #495057;
+        --border-color: #495057;
+
+        --breadcrumbs-bg: #2b3035;
+        --breadcrumbs-fg: #adb5bd;
+        --breadcrumbs-link-fg: #dee2e6;
+
+        --darkened-bg: #2b3035;
+        --selected-bg: #343a40;
+        --selected-row: #3a3320;
+
+        --message-success-bg: #0a3622;
+        --message-warning-bg: #664d03;
+        --message-error-bg: #2c0b0e;
+        --message-info-bg: #032830;
+
+        --leiste-fg: rgba(255, 255, 255, .65);
+        --leiste-fg-hover: rgba(255, 255, 255, .8);
+        --leiste-aktiv: #fff;
+        --leiste-bg: #2b3035;
+        --leiste-menue-bg: #212529;
+        --leiste-menue-rand: rgba(255, 255, 255, .15);
+        --leiste-menue-hover-bg: #2b3035;
+        --leiste-leise: rgba(222, 226, 230, .75);
+        --leiste-knopf-rand: rgba(255, 255, 255, .15);
+        --leiste-knopf-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+
+        --demo-bg: #332701;
+        --demo-fg: #ffda6a;
+        --demo-rand: #997404;
+    }
+}
+
+html[data-theme="dark"] {
+    --header-bg: #2b3035;
+    --header-link-color: #dee2e6;
+    --header-color: #adb5bd;
+    --header-branding-color: #dee2e6;
+    --body-fg: #dee2e6;
+    --body-bg: #212529;
+    --body-quiet-color: #adb5bd;
+    --body-medium-color: #ced4da;
+    --body-loud-color: #fff;
+
+    --link-fg: #75b798;
+    --link-hover-color: #a3cfbb;
+    --link-selected-fg: #a3cfbb;
+
+    --hairline-color: #495057;
+    --border-color: #495057;
+
+    --breadcrumbs-bg: #2b3035;
+    --breadcrumbs-fg: #adb5bd;
+    --breadcrumbs-link-fg: #dee2e6;
+
+    --darkened-bg: #2b3035;
+    --selected-bg: #343a40;
+    --selected-row: #3a3320;
+
+    --message-success-bg: #0a3622;
+    --message-warning-bg: #664d03;
+    --message-error-bg: #2c0b0e;
+    --message-info-bg: #032830;
+
+    --leiste-fg: rgba(255, 255, 255, .65);
+    --leiste-fg-hover: rgba(255, 255, 255, .8);
+    --leiste-aktiv: #fff;
+    --leiste-bg: #2b3035;
+    --leiste-menue-bg: #212529;
+    --leiste-menue-rand: rgba(255, 255, 255, .15);
+    --leiste-menue-hover-bg: #2b3035;
+    --leiste-leise: rgba(222, 226, 230, .75);
+    --leiste-knopf-rand: rgba(255, 255, 255, .15);
+    --leiste-knopf-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    --demo-bg: #332701;
+    --demo-fg: #ffda6a;
+    --demo-rand: #997404;
+}
+
+/* The button colours stay the same in both themes, because green on white
+   works on a dark background too. */
+:root,
+html[data-theme="light"],
+html[data-theme="dark"] {
+    --button-bg: #198754;
+    --button-hover-bg: #157347;
+    --default-button-bg: #198754;
+    --default-button-hover-bg: #157347;
+    --close-button-bg: #6c757d;
+    --close-button-hover-bg: #5c636a;
+    --delete-button-bg: #dc3545;
+    --delete-button-hover-bg: #bb2d3b;
+    /* "Add" is green on the site, here it was grey. */
+    --object-tools-bg: #198754;
+    --object-tools-hover-bg: #157347;
+
+    /* Identical to Bootstrap's '--bs-font-sans-serif'. The short version
+       ended up with another font than the site on Linux. There it is
+       decided by which name is available first. */
+    --font-family-primary: system-ui, -apple-system, "Segoe UI", Roboto,
+        "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
+}
+
+/* ---------- Dimensions: the same font and the same radii as in front ---------- */
+
+body {
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* The admin underlines every link, the site none. Underlined is here as
+   there only on hover.
+   The '!important' is intentional: Django's rule is a ':not()' chain with
+   an ID in it ('#content-main.app-list a') and thus more specific than
+   anything that does without an ID. Rebuilding the chain would mean
+   updating it with every Django update. */
+a:link,
+a:visited {
+    text-decoration: none !important;
+}
+
+a:focus,
+a:hover {
+    text-decoration: underline !important;
+}
+
+#content h1,
+.dashboard #content h1 {
+    font-weight: 500;
+    font-size: 1.75rem;
+}
+
+/* The module headers are sometimes <caption>, sometimes <h2>. They should look the same. */
+#content h2,
+#content-main h2 {
+    font-size: 1rem;
+}
+
+/* Cards: on the site they have a fine border and a calm header, no
+   coloured bar. */
+.module {
+    border: 1px solid var(--border-color);
+    border-radius: .375rem;
+    overflow: hidden;
+    background: var(--body-bg);
+}
+
+.module caption,
+.module > h2,
+.inline-group > h2,
+#changelist-filter > h2,
+#changelist-filter > h3 {
+    background: var(--darkened-bg);
+    color: var(--body-fg);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 500;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+/* Buttons and input fields in Bootstrap shape. */
+.button,
+input[type="submit"],
+input[type="button"],
+.submit-row input,
+a.button,
+.object-tools a {
+    border-radius: .375rem;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+/* The admin writes the default button in capitals ("SICHERN") with a rule
+   that outweighs the one above. The site writes no button that way. */
+.submit-row input.default {
+    text-transform: none;
+}
+
+/* The admin makes uppercase pills of these, on ':link' and ':visited',
+   which are more specific than the rule above. */
+.object-tools a:link,
+.object-tools a:visited {
+    padding: .375rem .75rem;
+    border-radius: .375rem;
+    font-size: .875rem;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+/* "Add" and "View site" carry an icon on the right as background. The rule
+   above took its space, and the plus lay on the last letter. */
+.object-tools a.addlink:link,
+.object-tools a.addlink:visited,
+.object-tools a.viewsitelink:link,
+.object-tools a.viewsitelink:visited {
+    padding-right: 1.75rem;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="url"],
+input[type="number"],
+input[type="tel"],
+textarea,
+select,
+.vTextField {
+    border: 1px solid var(--border-color);
+    border-radius: .375rem;
+    padding: .375rem .75rem;
+    background: var(--body-bg);
+    color: var(--body-fg);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: 0;
+    border-color: #75b798;
+    box-shadow: 0 0 0 .25rem rgba(25, 135, 84, .25);
+}
+
+/* Lists: fine lines instead of boxes, and the name leads to the row in
+   black as in front. */
+#result_list thead th {
+    background: var(--darkened-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+#result_list tbody td,
+#result_list tbody th {
+    border-bottom: 1px solid var(--hairline-color);
+}
+
+#result_list tbody th a {
+    color: var(--body-fg);
+    font-weight: 500;
+}
+
+.messagelist li {
+    border-radius: .375rem;
+    color: var(--body-fg);
+}
+
+div.breadcrumbs {
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* ---------- The bar at the top ---------- */
+/* The site's Bootstrap bar, rebuilt without Bootstrap: the same dimensions,
+   tones and the same behaviour ('navbar-expand-lg', 'sticky-top', 'dropdown').
+   The values are measured, not estimated. Whoever changes something here
+   puts both bars side by side in the browser. The entries are in
+   'templates/admin/components/navbar.html'. */
+
+:root {
+    --leiste-hoehe: 3.5rem;
+    /* The height of the demo banner, measured by 'js/demo_band.js'. Without
+       banner and without script zero, then everything sits where it sat. */
+    --band-hoehe: 0px;
+}
+
+/* The admin gives '#container' the height of the window. A sticky bar
+   detached again after exactly one window height, because its container
+   ends there. With 'min-height' the footer stays at the bottom and the bar
+   at the top. */
+#container {
+    height: auto;
+    min-height: 100%;
+}
+
+/* Jump targets (the link "Skip to content") would otherwise land under the bar. */
+html {
+    scroll-padding-top: calc(var(--band-hoehe) + var(--leiste-hoehe));
+}
+
+/* The admin's sidebar sticks as well, below the bar, not behind it. */
+#nav-sidebar {
+    top: calc(var(--band-hoehe) + var(--leiste-hoehe));
+    max-height: calc(100vh - var(--band-hoehe) - var(--leiste-hoehe));
+}
+
+.leiste {
+    position: sticky;
+    /* The demo banner stands above, the bar attaches itself below. */
+    top: var(--band-hoehe);
+    z-index: 1020;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    box-sizing: border-box;
+    min-height: var(--leiste-hoehe);
+    padding: .5rem .75rem;
+    background: var(--leiste-bg);
+    border-bottom: 1px solid var(--border-color);
+    font-family: var(--font-family-primary);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.leiste-eintraege,
+.leiste-eintraege li,
+.leiste-menue,
+.leiste-menue li {
+    /* The admin sets lists to squares and list items to 13 pixels. Here a
+       dot would otherwise stand between every entry, and the font would be
+       smaller than in front. */
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.leiste a,
+.leiste summary {
+    display: block;
+    padding: .5rem;
+    color: var(--leiste-fg);
+    text-decoration: none;
+    transition: color .15s ease-in-out;
+}
+
+/* The bar follows the site's navigation bar: no underline, and on hover the
+   font only gets a little bolder. The '!important' overrides the general
+   link rule further up, which needs one itself. */
+.leiste a:hover,
+.leiste a:focus,
+.leiste summary:hover,
+.leiste summary:focus {
+    color: var(--leiste-fg-hover);
+    text-decoration: none !important;
+}
+
+/* The brand stands bold, like the brand name on the site. */
+.leiste .leiste-marke,
+.leiste .leiste-marke:hover,
+.leiste .leiste-marke:focus {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-right: 1rem;
+    padding: .3125rem 0;
+    color: var(--leiste-aktiv);
+    font-size: 1.25rem;
+}
+
+.leiste-klapp {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+}
+
+.leiste-eintraege {
+    display: flex;
+}
+
+.leiste-rechts {
+    margin-left: auto;
+}
+
+/* Dropdown menus: <details> can do that itself. 'js/admin_navbar.js' only
+   closes them again on a click beside them. */
+.leiste details {
+    position: relative;
+}
+
+.leiste summary {
+    cursor: pointer;
+    list-style: none;
+}
+
+.leiste summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Bootstrap's triangle ('dropdown-toggle::after'), no font character: that
+   looked different depending on the font and never stood at the same height. */
+.leiste summary::after {
+    content: "";
+    display: inline-block;
+    margin-left: .255em;
+    vertical-align: .255em;
+    border-top: .3em solid;
+    border-right: .3em solid transparent;
+    border-bottom: 0;
+    border-left: .3em solid transparent;
+}
+
+.leiste details[open] > summary {
+    color: var(--leiste-aktiv);
+}
+
+.leiste-menue {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    min-width: 10rem;
+    margin-top: .125rem;
+    padding: .5rem 0;
+    background: var(--leiste-menue-bg);
+    background-clip: padding-box;
+    border: 1px solid var(--leiste-menue-rand);
+    border-radius: .375rem;
+}
+
+.leiste-menue.leiste-menue-rechts {
+    right: 0;
+    left: auto;
+}
+
+.leiste-menue li a,
+.leiste-menue li button {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    padding: .25rem 1rem;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    font: inherit;
+    text-align: left;
+    white-space: nowrap;
+    color: var(--body-fg);
+    cursor: pointer;
+}
+
+.leiste-menue li a:hover,
+.leiste-menue li a:focus,
+.leiste-menue li button:hover,
+.leiste-menue li button:focus {
+    background: var(--leiste-menue-hover-bg);
+    color: var(--body-fg);
+}
+
+.leiste-menue hr {
+    height: 0;
+    margin: .5rem 0;
+    border: 0;
+    border-top: 1px solid var(--leiste-menue-rand);
+    background: none;
+}
+
+/* The chosen appearance, language and difference colour get a tick. For the
+   appearance the script sets it, otherwise the template. */
+.leiste-menue [data-thema]::before,
+.leiste-menue [data-sprache]::before,
+.leiste-menue [data-farben]::before {
+    content: "  ";
+    white-space: pre;
+}
+
+.leiste-menue [data-thema][aria-current="true"]::before,
+.leiste-menue [data-sprache][aria-current="true"]::before,
+.leiste-menue [data-farben][aria-current="true"]::before {
+    content: "✓ ";
+}
+
+/* Subheading in the user menu ('dropdown-header'). */
+.leiste-menue .leiste-kopf {
+    padding: .5rem 1rem;
+    color: #6c757d;
+    font-size: .875rem;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.leiste-menue .leiste-version {
+    padding: .25rem 1rem;
+    color: var(--leiste-leise);
+    font-size: .875em;
+}
+
+/* The button for the collapsible menu: only in narrow windows. The checkbox
+   stays there for the keyboard and shows its focus on the button. */
+.leiste-schalter {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    opacity: 0;
+}
+
+.leiste-knopf {
+    display: none;
+    margin-left: auto;
+    padding: .25rem .75rem;
+    border: 1px solid var(--leiste-knopf-rand);
+    border-radius: .375rem;
+    color: var(--leiste-fg);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.leiste-knopf-icon {
+    display: inline-block;
+    width: 1.5em;
+    height: 1.5em;
+    vertical-align: middle;
+    background: var(--leiste-knopf-icon) center / 100% no-repeat;
+}
+
+.leiste-schalter:focus-visible + .leiste-knopf {
+    box-shadow: 0 0 0 .25rem;
+}
+
+/* Below 992 pixels the bar collapses. That is the same threshold as
+   'navbar-expand-lg' in front. */
+@media (max-width: 991.98px) {
+    .leiste-knopf {
+        display: inline-block;
+    }
+
+    .leiste-klapp {
+        display: none;
+        flex-basis: 100%;
+    }
+
+    .leiste-schalter:checked ~ .leiste-klapp {
+        display: block;
+    }
+
+    .leiste-eintraege {
+        flex-direction: column;
+    }
+
+    .leiste-eintraege:not(.leiste-rechts) {
+        margin-bottom: .5rem;
+    }
+
+    .leiste-rechts {
+        margin-left: 0;
+    }
+
+    .leiste-eintraege > li > a,
+    .leiste summary {
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    .leiste-menue,
+    .leiste-menue.leiste-menue-rechts {
+        position: static;
+    }
+}
+
+/* ---------- The backup card on the start page ---------- */
+
+.backup-tabelle {
+    width: 100%;
+}
+
+.backup-tabelle td,
+.backup-tabelle th {
+    padding: .35rem .5rem;
+    text-align: left;
+    /* "Size" must not break in the middle of the word only because the column
+       is narrow, because the card stands in the admin's narrow column. */
+    white-space: nowrap;
+}
+
+.backup-tabelle td:first-child,
+.backup-tabelle th:first-child {
+    width: 100%;
+}
+
+.backup-hinweis {
+    color: var(--body-quiet-color);
+    font-size: .8125rem;
+}
+
+/* The banner and the badge of the demo stock. The same components as on
+   the site ('components/demo_band.html'), the same tones as in 'site.css'.
+   Here they stand as own rules, because there is no Bootstrap in the admin. */
+.demo-band {
+    position: sticky;
+    top: 0;
+    z-index: 1025;
+    padding: .25rem 1rem;
+    background: var(--demo-bg);
+    color: var(--demo-fg);
+    border-bottom: 1px solid var(--demo-rand);
+    font-size: .875rem;
+    text-align: center;
+}
+
+.demo-marke {
+    display: inline-block;
+    padding: .3em .65em .4em;
+    border-radius: .375rem;
+    background: #ffc107;
+    color: #000;
+    font-size: .75rem;
+    font-weight: 700;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+/* ------------------------------------------------------------------ *
+ * Use the width of the screen
+ *
+ * The admin is built for narrow columns: its start page stands in
+ * 600 pixels, and in the forms every field lies alone on a row. On a
+ * desktop two thirds of the area on the right thus stayed empty. Both
+ * stay as they are below 992 pixels, because there it is right.
+ * ------------------------------------------------------------------ */
+
+/* The start page: instead of a 600 pixel wide column a grid that lays as
+   many boxes side by side as fit. */
+.dashboard #content {
+    width: auto;
+    max-width: 100%;
+}
+
+@media (min-width: 992px) {
+    /* Content and "Recent actions" side by side. The admin places both side
+       by side with floats and a negative margin, and as soon as the content
+       takes the full width, the sidebar slips below it. A grid holds the
+       space without calculating. */
+    .dashboard #content.colMS {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 17rem;
+        gap: 1.5rem;
+        margin-right: 0;
+    }
+
+    /* The heading stands above both. Without this it would occupy the first
+       cell and push the content into the narrow column. */
+    .dashboard #content > h1 {
+        grid-column: 1 / -1;
+    }
+
+    .dashboard #content-main {
+        grid-column: 1;
+        float: none;
+        width: auto;
+    }
+
+    .dashboard #content-related {
+        grid-column: 2;
+        grid-row: 2;
+        float: none;
+        width: auto;
+        margin: 0;
+    }
+
+    .dashboard #content-main {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    .dashboard #content-main > .module {
+        margin-bottom: 0;
+    }
+
+    /* The backup stands on its own: it carries running text and a table and
+       would not be readable in a narrow column. */
+    .dashboard #content-main > #backup-modul {
+        grid-column: 1 / -1;
+    }
+}
+
+/* The forms: two fields side by side where there is room. Headings,
+   descriptions and everything that builds wide keep the whole row. */
+@media (min-width: 1200px) {
+    form fieldset.module.aligned {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(26rem, 1fr));
+        column-gap: 2.5rem;
+        align-items: start;
+    }
+
+    form fieldset.module.aligned > h2,
+    form fieldset.module.aligned > .description,
+    form fieldset.module.aligned > .form-row.field-password,
+    form fieldset.module.aligned > .form-row:has(textarea),
+    form fieldset.module.aligned > .form-row:has(select[multiple]),
+    form fieldset.module.aligned > .form-row:has(.selector),
+    form fieldset.module.aligned > .form-row:has(table) {
+        grid-column: 1 / -1;
+    }
+
+    /* One row per field stays one row: the grid only arranges them side by
+       side, it does not restructure them. */
+    form fieldset.module.aligned > .form-row {
+        border-bottom: none;
+    }
+}
+
+/* Input fields follow the column instead of stopping at 20em. The width
+   includes padding and border. Without that the field was wider than its
+   column by both, and the row ('overflow: hidden') cut off its right edge. */
+.vTextField,
+.vURLField,
+.vEmailField,
+.vFileField {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 32rem;
+}
+
+/* A selection is as wide as its longest entry. A long inventory name pushed
+   it out of the column, and the links beside it with it. Now it shrinks, and
+   the links stay beside it. Not the search fields ('autocomplete_fields'):
+   their selection is hidden, and the visible field keeps its own width. */
+.related-widget-wrapper:has(> select:not([multiple], .admin-autocomplete)) {
+    flex-wrap: nowrap;
+    max-width: 100%;
+}
+
+.related-widget-wrapper > select:not([multiple], .admin-autocomplete) {
+    min-width: 0;
+}
+
+/* A list of boxes (the sites of an account) and its "+" stood side by side,
+   the "+" beside the first entry. Now it stands below the list. */
+.related-widget-wrapper:has(input[type="checkbox"]) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .25rem 0;
+}
+
+/* On a phone Django sizes every field from the window ('100vw - 30px'). That
+   ignores the card's border and a scrollbar, and the right edge of every
+   field was lost. The selector outweighs Django's, whose file comes later. */
+@media (max-width: 767px) {
+    form fieldset.module.aligned .form-row > div {
+        max-width: 100%;
+    }
+}
+
+/* The mail texts: the placeholders as a plain list, and the preview the way a
+   mail program shows plain text. Line breaks stay, long lines wrap instead of
+   pushing the page sideways. */
+.platzhalterliste {
+    margin: 0 0 .5rem;
+    padding-left: 1.2rem;
+}
+
+.platzhalterliste li {
+    list-style: disc;
+    padding: .1rem 0;
+}
+
+.mailvorschau-kopf {
+    margin: 1rem 0 .25rem;
+    color: var(--body-quiet-color);
+}
+
+.mailvorschau-kopf:first-child {
+    margin-top: 0;
+}
+
+pre.mailvorschau {
+    margin: .25rem 0 0;
+    padding: .75rem 1rem;
+    max-width: 48rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 1.5;
+    background: var(--darkened-bg);
+    border: 1px solid var(--hairline-color);
+    border-radius: .375rem;
+}

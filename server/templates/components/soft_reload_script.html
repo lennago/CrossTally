@@ -1,0 +1,10 @@
+{% load i18n static %}
+{# "Refresh" without losing what is typed ('static/js/soft_reload.js').          #}
+{#                                                                                 #}
+{# The texts stand here and not in the script: gettext does not work in a '.js'  #}
+{# file. 'wert' is what to say if the refresh fails, 'weggefallen' what to say   #}
+{# about rows that vanished meanwhile with their inputs. The placeholder is in   #}
+{# braces because Django doubles a '%' when reading the template.                #}
+<script src="{% static 'js/soft_reload.js' %}"
+    data-wert="{{ wert }}"
+    data-weggefallen="{% translate '{anzahl} Zeilen sind inzwischen weg, ihre Eingaben auch.' %}"></script>

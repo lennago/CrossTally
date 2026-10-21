@@ -1,0 +1,107 @@
+Artikel;Lieferant;Unnamed: 2;VKPreis;Lagerwert
+201 VK - Getränke - Zentral;;;;
+103001;Cola 0,5 l;Zentraleinkauf;€ ;0,00
+;gekauft in Kiste(n) zu 24 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103002;Cola zuckerfrei 0,5 l;Zentraleinkauf;€ ;0,00
+;gekauft in Kiste(n) zu 24 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103003;Orangenlimonade 0,5 l;Zentraleinkauf;€ ;0,00
+;gekauft in Kiste(n) zu 24 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103004;Zitronenlimonade 0,5 l;Zentraleinkauf;€ ;0,00
+;gekauft in Kiste(n) zu 24 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103005;Sirup Cola 10 l;Zentraleinkauf;€ ;0,00
+;gekauft in Karnister zu 10 ltr;Bestand: 0,00 Liter zu;0,00 =;0,00
+103006;Mineralwasser 0,25 l;Zentraleinkauf;€ ;0,00
+;gekauft in Kiste(n) zu 24 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103007;Apfelsaft 0,2 l;Zentraleinkauf;€ ;0,00
+;gekauft in Kiste(n) zu 24 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103008;Orangensaft 0,2 l;Zentraleinkauf;€ ;0,00
+;gekauft in Kiste(n) zu 24 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103009;Apfelschorle 0,5 l;Zentraleinkauf;€ ;0,00
+;gekauft in Kiste(n) zu 12 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103010;Eistee Pfirsich 0,5 l;Zentraleinkauf;€ ;0,00
+;gekauft in Kiste(n) zu 12 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103011;Bier 0,33 l;Zentraleinkauf;€ ;0,00
+;gekauft in Kiste(n) zu 20 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103012;Weißwein 0,2 l;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 12 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103013;Rotwein 0,2 l;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 12 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+Summe: 201 VK - Getränke - Zentral;0,00;;;
+210 VK - Popcorn;;;;
+103101;Mais für Popcorn;Zentraleinkauf;€ ;0,00
+;gekauft in Sack(Säcke) zu 22,5 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+103102;Popcornsalz;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 10 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+103103;Popcornzucker;Zentraleinkauf;€ ;0,00
+;gekauft in Sack(Säcke) zu 25 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+103104;Kokosfett;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 12,5 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+Summe: 210 VK - Popcorn;0,00;;;
+211 VK - Nachos;;;;
+103201;Nachochips;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 8 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+103202;Käsesauce;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 6 Liter;Bestand: 0,00 Liter zu;0,00 =;0,00
+103203;Salsasauce;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 6 Liter;Bestand: 0,00 Liter zu;0,00 =;0,00
+Summe: 211 VK - Nachos;0,00;;;
+220 VK - Süßwaren - Zentral;;;;
+103301;Fruchtgummi lose;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 3 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+103302;Schokolinsen lose;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 3 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+103303;Lakritz lose;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 3 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+103305;Schokoriegel;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 40 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103306;Keksriegel;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 40 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+Summe: 220 VK - Süßwaren - Zentral;0,00;;;
+230 VK - Eis;;;;
+103401;Eis Vanille;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 20 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103402;Eis Schokolade;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 20 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103403;Eis Erdbeer;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 20 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103404;Eishörnchen;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 24 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+Summe: 230 VK - Eis;0,00;;;
+240 VK - Heißgetränke;;;;
+103501;Kaffeebohnen;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 6 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+103502;Kakaopulver;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 10 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+103503;Teebeutel;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 200 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+Summe: 240 VK - Heißgetränke;0,00;;;
+250 EK - Verpackung;;;;
+103601;Popcorntüte klein;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 500 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103602;Popcorntüte groß;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 300 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103603;Nachoschale;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 400 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103604;Becher 0,4 l;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 1000 Becher;Bestand: 0,00 Becher zu;0,00 =;0,00
+103605;Deckel groß;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 1000 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103606;Trinkhalm;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 2500 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+Summe: 250 EK - Verpackung;0,00;;;
+260 VK - Herzhaftes;;;;
+103701;Würstchen;Zentraleinkauf;€ ;0,00
+;gekauft in Glas zu 40 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103702;Hotdogbrötchen;Zentraleinkauf;€ ;0,00
+;gekauft in Beutel zu 50 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+Summe: 260 VK - Herzhaftes;0,00;;;
+290 EK - Sonstiges;;;;
+103801;Sprühsahne;Zentraleinkauf;€ ;0,00
+;gekauft in Karton zu 12000 gramm;Bestand: 0,00 g zu;0,00 =;0,00
+Summe: 290 EK - Sonstiges;0,00;;;
+299 - Pfand und Gutscheine;;;;
+103901;Becherpfand;Zentraleinkauf;€ ;0,00
+;gekauft in Stück(e) zu 1 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103902;Wertgutschein;Zentraleinkauf;€ ;0,00
+;gekauft in Stück(e) zu 1 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+Summe: 299 - Pfand und Gutscheine;0,00;;;

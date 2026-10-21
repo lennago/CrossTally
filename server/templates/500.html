@@ -1,0 +1,17 @@
+{% extends "components/error_page.html" %}
+{% load i18n %}
+
+{# Rendered by Django without a request and without context processors: no   #}
+{# 'user', no 'app_name', no demo band. 'base.html' copes with the empty      #}
+{# values, so the page still wears the application's dress. Until 10/2026    #}
+{# Django answered with its bare "Server Error (500)".                        #}
+
+{% block title %}{% translate "Serverfehler" %}{% endblock title %}
+
+{% block fehlercode %}{% translate "Fehler 500" %}{% endblock fehlercode %}
+{% block ueberschrift %}{% translate "Da ist etwas schiefgegangen" %}{% endblock ueberschrift %}
+{% block erklaerung %}{% translate "Die Anwendung konnte die Seite nicht aufbauen. Der Fehler ist im Protokoll des Servers festgehalten. Bitte die Seite noch einmal laden. Bleibt es dabei, sag es der Administration." %}{% endblock erklaerung %}
+
+{% block weiter %}
+<a href="{% url 'login' %}" class="btn btn-success">{% translate "Zur Startseite" %}</a>
+{% endblock weiter %}

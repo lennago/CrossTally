@@ -1,0 +1,13 @@
+{% load i18n static %}
+{# Save notes while typing ('static/js/notes.js').                           #}
+{#                                                                           #}
+{# The states stand here and not in the script: gettext does not work in a   #}
+{# '.js' file. The script reads them at startup from its own tag             #}
+{# ('document.currentScript.dataset'). 'abgemeldet' is for a session that    #}
+{# has expired.                                                              #}
+<script src="{% static 'js/notes.js' %}"
+    data-laeuft="{% translate 'Notizen werden gesichert …' %}"
+    data-fertig="{% translate 'Notizen gesichert' %}"
+    data-offen="{% translate 'Nicht gesichert' %}"
+    data-fehler="{% translate 'Notizen noch nicht gesichert. Bitte speichern.' %}"
+    data-abgemeldet="{% translate 'Notizen nicht gesichert, denn die Anmeldung ist abgelaufen. Melde dich in einem anderen Tab neu an und drücke dann hier „Notizen speichern“.' %}"></script>

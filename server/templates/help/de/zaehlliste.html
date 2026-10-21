@@ -1,0 +1,79 @@
+<h3>Zwei Reiter</h3>
+<p>
+    <strong>Artikel auswählen</strong> bestimmt, <em>welche</em> Artikel an {{ ort.name }}
+    vorkommen. <strong>Zählliste</strong> bestimmt <em>Reihenfolge und Gebinde</em>. So, wie
+    die Ware im Regal steht, erscheint sie in der Zähl-App.
+</p>
+<h3>Zählliste</h3>
+<p>
+    Die Liste ist nach <strong>Inventurarten</strong> unterteilt, wie die Reiter der
+    Zähl-App. Jede Art hat ihren eigenen Abschnitt und darin ihre eigene Reihenfolge. Zu
+    welcher Art ein Artikel gehört, steht am Artikel, nicht in der Liste. Ein
+    Rezepturartikel steht unter der ersten Art seiner Zutaten. Wechselt ein Artikel die Art,
+    rückt er an jedem Ort, der ihn erwartet, ans Ende seiner neuen Art. Eine Inventur ohne
+    diese Art gibt ihm keine Zeile. Gibt es nur eine Inventurart, entfällt die Unterteilung.
+</p>
+<p>
+    Zeilen lassen sich am Griff ziehen, aber nur innerhalb ihres Abschnitts. Hält man eine am oberen oder unteren Rand, scrollt die
+    Liste mit. Die Pfeile verschieben um eine Zeile, die Pfeile mit Strich ganz nach oben oder
+    unten im Abschnitt. Jede Änderung der Reihenfolge ist sofort gesichert. Je Gebinde ein Kästchen: angehakt entsteht dafür bei der nächsten
+    Inventur eine Zeile. Mindestens eines muss angehakt sein, sonst bekäme der Artikel hier
+    gar keine Zeile. Bei abwiegbarer Ware genügt stattdessen das Wiegen. Die Menge daneben
+    ist der übliche Bestand. Sie steht beim Zählen grau im leeren Feld, als Anhaltspunkt,
+    nicht als Vorbelegung.
+</p>
+<p>
+    Ein inaktives Gebinde steht mit seiner Vorgabe grau und mit „inaktiv“ in der Zeile. In
+    neuen Inventuren bekommt es keine Zeile. Was davon noch im Regal steht, wird in einem
+    aktiven Gebinde gezählt, wenn nötig über die Suche. Die Vorgabe bleibt stehen und gilt
+    wieder, sobald das Gebinde wieder aktiv ist.
+</p>
+<p>
+    Über der Spalte wirkt das Menü <strong>Alle Zeilen</strong> auf die ganze Liste: alle
+    Gebinde anwählen oder abwählen, nur das lose Einzelstück („Einzeln“) überall anwählen
+    oder abwählen, das Wiegen überall anwählen oder abwählen. Was nichts ändern würde, ist
+    ausgegraut. Beim Abwählen von Gebinden gehen die eingetragenen Mengen verloren. Stehen
+    welche da, fragt der Eintrag vorher nach. Gespeichert ist auch das erst mit „Speichern“,
+    oder beim Wechsel in den Reiter <strong>Artikel auswählen</strong>: der speichert vorher,
+    was in der Liste geändert wurde.
+</p>
+<p>
+    <strong>Aktualisieren</strong> oben rechts holt die Liste neu vom Server, ohne die
+    Haken und Mengen zu verwerfen, die hier schon eingetragen sind. So erscheint ein Gebinde,
+    das gerade in einem anderen Tab angelegt wurde, in seiner Zeile.
+</p>
+<p>
+    Die Pfeile und das × wirken auch dann, wenn eine Zeile nicht in Ordnung ist, etwa ein
+    abwiegbarer Artikel ohne Gebinde und ohne Wiegen. Die übrigen Zeilen werden dabei
+    gespeichert. Eine geänderte Zeile, die nicht in Ordnung ist, meldet das. Nur
+    „Speichern“ verlangt eine Liste ohne Fehler.
+</p>
+<p>
+    Bei Ware, die sich abwiegen lässt, steht darunter das Kästchen <strong>Wiegen</strong>:
+    angehakt gehört an diesem Ort auch die Waage zur Zählung. Liegt die Ware hier nur im Karton,
+    bleibt es leer. Sonst stünde bei jeder Inventur eine Zeile offen, die niemand ausfüllt. In
+    der Zähl-App lässt sich trotzdem wiegen. Der Abschluss fragt dann, ob das Wiegen hier
+    dazukommen soll.
+</p>
+<p>
+    Ein neu aufgenommener Artikel steht <strong>ohne</strong> diesen Haken da. Nur wo eine
+    Ware gar kein Gebinde hat, ist er gesetzt: die Waage ist dann der einzige Weg, sie zu
+    zählen, und ohne den Haken bekäme sie keine Zeile.
+</p>
+<p>
+    Fehlt ein Gebinde, wird es beim Hausartikel angelegt. Der Verweis in der Zeile führt
+    direkt zum Abschnitt „Gebinde“ seiner Bearbeitungsseite. Eine laufende Inventur behält
+    ihre Reihenfolge. Änderungen gelten ab der nächsten.
+</p>
+<h3>Artikel auswählen</h3>
+<p>
+    Ein Artikel in der Zählliste heißt: hier wird er erwartet. Das steuert die
+    Vollständigkeitsprüfung und die Reihenfolge beim Zählen. Gezählt werden darf
+    trotzdem alles, Unerwartetes wird beim Zählen als solches markiert. In welcher
+    Reihenfolge und in welchen Gebinden, steht im Reiter <strong>Zählliste</strong>. Ein
+    neu hinzugefügter Artikel kommt dort mit allen aktiven Gebinden angehakt an.
+    Rezepturartikel stehen nur dort zur Wahl, wo sich ihre Rezeptur auflösen lässt. Ein
+    eingestellter Artikel lässt sich hier nicht aufnehmen. Erst wieder aktivieren, auf
+    seiner Seite.
+</p>
+{% include "help/de/shared/search_order.html" %}

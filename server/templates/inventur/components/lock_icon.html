@@ -1,0 +1,11 @@
+{# A lock, drawn: a character sits differently in every font. With 'offen' the  #}
+{# shackle stands open on the right.                                            #}
+{# Call: {% include "inventur/components/lock_icon.html" with offen=True %}      #}
+<svg class="schloss" viewBox="0 0 16 16" width="1em" height="1em" aria-hidden="true" focusable="false">
+    <rect x="3" y="7" width="10" height="8" rx="1.5" fill="currentColor"/>
+    {% if offen %}
+    <path d="M11 4.5a3 3 0 0 0-6 0V7" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    {% else %}
+    <path d="M5 7V5a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    {% endif %}
+</svg>

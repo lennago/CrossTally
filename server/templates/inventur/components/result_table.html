@@ -1,0 +1,63 @@
+{% load i18n %}
+{# Counted, expected and difference per house article.                           #}
+{#                                                                               #}
+{# The same table for two states: during the count the rows are computed,        #}
+{# after closing they come from the frozen results. Both are delivered by        #}
+{# 'services.ergebniszeilen' as 'Ergebniszeile'. The template therefore          #}
+{# does not have to know where the numbers come from.                            #}
+<div class="table-responsive">
+    <table class="table table-sm table-hover align-middle mb-0">
+        <thead>
+            <tr>
+                <th scope="col">{% translate "Nr." %}</th>
+                <th scope="col">{% translate "Bezeichnung" %}</th>
+                <th scope="col" class="text-center">{% translate "Ist" %}</th>
+                <th scope="col" class="text-center">{% translate "Soll" %}</th>
+                <th scope="col" class="text-center">{% translate "Differenz" %}</th>
+                <th scope="col">{% translate "Einheit" %}</th>
+                <th scope="col">{% translate "Notiz" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for zeile in zeilen %}
+            <tr{% if zeile.auffaellig %} class="tabellenzeile-auffaellig"{% endif %}>
+                <td class="font-monospace text-body-secondary">
+                    {{ zeile.hausartikel.artikelnummer|default:"–" }}
+                </td>
+                <td>
+                    {# The product name, the house's designation small where it differs. #}
+                    <a href="{{ zeile.hausartikel.get_absolute_url }}"
+                        class="link-body-emphasis link-offset-2 text-decoration-none">
+                        {% include "katalog/components/artikel_name.html" with artikel=zeile.hausartikel %}
+                    </a>
+                    {% if not zeile.hausartikel.aktiv %}
+                    <span class="badge bg-body-secondary text-body border ms-1">{{ zeile.hausartikel.get_status_display|lower }}</span>
+                    {% endif %}
+                </td>
+                <td class="text-center font-monospace">{{ zeile.ist_text }}</td>
+                <td class="text-center font-monospace text-body-secondary">
+                    {% if zeile.sollbestand is None %}{% translate "&mdash;" %}{% else %}{{ zeile.soll_text }}{% endif %}
+                </td>
+                <td class="text-center font-monospace fw-semibold">
+                    {% if zeile.differenz is None %}
+                    <span class="text-body-secondary fw-normal" title="{% translate 'Für diesen Artikel kam kein Soll herein' %}">
+                        {% translate "kein Soll" %}
+                    </span>
+                    {% else %}
+                    <span class="{{ zeile.differenz_klasse }}">{{ zeile.differenz_text }}</span>
+                    {% endif %}
+                </td>
+                <td class="text-body-secondary small">{{ zeile.einheit.kurz }}</td>
+                {# Taken over from the review view at closing.    #}
+                <td class="small">{{ zeile.notiz }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center text-body-secondary py-4">
+                    {% translate "Noch nichts gezählt und kein Sollbestand eingelesen." %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

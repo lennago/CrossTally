@@ -1,0 +1,19 @@
+{% extends "components/delete_page.html" %}
+{% load i18n %}
+
+{% block art %}{% translate "Warenfamilie löschen" %}{% endblock art %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'warenfamilie_list' %}">{% translate "Warenfamilien" %}</a></li>
+{% endblock pfad %}
+
+{% block folgen %}
+{% if familie.unterfamilien.exists %}
+<p class="small text-body-secondary">
+    {% blocktranslate count anzahl=familie.unterfamilien.count %}Die eine Unterfamilie bleibt bestehen und rückt eine Ebene nach oben.{% plural %}Die {{ anzahl }} Unterfamilien bleiben bestehen und rücken eine Ebene nach oben.{% endblocktranslate %}
+</p>
+{% endif %}
+<p class="mb-0 small text-body-secondary">
+    {% blocktranslate count anzahl=familie.anzahl_waren %}Die eine Ware bleibt bestehen. Sie steht danach ohne Zuordnung und sammelt sich in den Auswertungen unter „Ohne Warenfamilie“.{% plural %}Die {{ anzahl }} Waren bleiben bestehen. Sie stehen danach ohne Zuordnung und sammeln sich in den Auswertungen unter „Ohne Warenfamilie“.{% endblocktranslate %}
+</p>
+{% endblock folgen %}

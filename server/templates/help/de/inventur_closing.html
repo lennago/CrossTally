@@ -1,0 +1,76 @@
+<h3>Nicht mehr aktiv, aber gezählt</h3>
+<p>
+    Wer einen inaktiven oder eingestellten Artikel im Regal findet, kann ihn in der Zähl-App
+    trotzdem zählen. Hier lässt er sich wieder aktivieren. Bei einem eingestellten geht das nur,
+    solange kein anderer Artikel seine Nummer oder seine Ware übernommen hat. Sonst steht der
+    Grund in der Zeile. Ein eingestellter Artikel bekommt dabei seine Plätze in den
+    Zähllisten an der alten Stelle zurück, soweit er sie sich gemerkt hat. Die gezählte Menge
+    geht in jedem Fall ins Ergebnis.
+</p>
+<h3>Unerwartet gezählt</h3>
+<p>
+    Was in der Zähl-App über die Suche dazukam und eine Menge trägt, kann in die Zählliste
+    des Orts: der Artikel samt Gebinde, nur das Gebinde, wenn der Artikel dort schon steht,
+    oder das Wiegen. Aufgenommenes kommt ans Ende der Liste. Eine leer gebliebene Zeile ist
+    kein Fund, und ein eingestellter Artikel wird nirgends mehr erwartet. Beide stehen hier
+    nicht.
+</p>
+<h3>Erwartet, aber nichts eingetragen</h3>
+<p>
+    Ein Gebinde aus der Zählliste, in das niemand etwas eingetragen hat oder das in der App
+    gelöscht wurde. Herausgenommen wird nur dieses Gebinde an diesem Ort. Der Artikel bleibt
+    mit seinen übrigen. Die Waage steht hier nur, wenn der Artikel dort auch ein aktives
+    Gebinde hat. Hat er dort nur die Waage, wird er in der Zählliste des Orts herausgenommen.
+    Wurde der Artikel nirgends gezählt, steht er außerdem unter „Gar nicht gezählt“.
+</p>
+<h3>Gar nicht gezählt</h3>
+<p>
+    Aufgeführt ist, wozu nichts eingetragen wurde und wo „Soll zählt“ nicht gesetzt ist.
+    <strong>Inaktiv</strong> heißt: gerade nicht im Sortiment, kommt wieder. Der Artikel
+    bleibt in den Zähllisten, bekommt aber keine Zeile mehr, bis er wieder aktiv ist.
+    <strong>Einstellen</strong> heißt: vorbei. Er fällt aus allen Zähllisten und gibt
+    Nummer und Ware frei. Beides betrifft nur den Satz in {{ inventur.haus.name }}.
+    <strong>Nach … wechseln</strong> legt den Artikel in eine andere Inventurart, etwa
+    in die Jahresinventur, wenn er nur einmal im Jahr gezählt werden soll. Hat die Ware
+    weitere Artikel, kommt dieselbe Frage wie auf der Seite des Artikels: nur dieser
+    Artikel oder alle Artikel der Ware, auch in den anderen Häusern.
+</p>
+<h3>Gezählt, aber ohne Soll</h3>
+<p>
+    Diese Artikel wurden gezählt, haben aber kein Soll, weder aus der Datei noch von Hand.
+    Ohne Soll friert die Zeile <strong>ohne Differenz</strong> ein. Der Fund sähe aus, als
+    passte er. <strong>Soll 0</strong> heißt: die Warenwirtschaft führt hier keinen Bestand,
+    alles Gezählte ist Überschuss. Ein <strong>eigener Wert</strong> steht in der Einheit, in
+    der {{ inventur.haus.name }} den Artikel führt. Die Einheit steht hinter dem Feld. Der
+    Wert darf negativ sein. Die Wahl gilt erst mit dem Abschluss und nur für diese Inventur.
+    Bis dahin lässt sie sich hier zurücknehmen.
+</p>
+<h3>Gezählt, aber in keiner Art dieser Inventur</h3>
+<p>
+    Diese Artikel gehören zu keiner der Arten, die diese Inventur zählt
+    ({{ inventur.arten_anzeige }}), wurden in der App aber dazugezählt. Die Menge geht so
+    oder so ins Ergebnis. <strong>In … aufnehmen</strong> legt den Artikel in eine der Arten
+    dieser Inventur. Ab der nächsten Inventur dieser Art bekommt er dann seine Zeilen. Auch
+    hier fragt die Seite, ob das nur für diesen Artikel gilt oder für alle Artikel der Ware.
+    Aufgeführt ist nur, was selbst gezählt wurde, nicht, was als Zutat eines
+    Rezepturartikels mitlief.
+</p>
+<h3>Im Lauf schon entschieden</h3>
+<p>
+    Hat ein anderes Haus desselben Tages beim Abschluss eine Art für alle Artikel einer Ware
+    gewählt, steht das an der Zeile. Für die ganze Ware lässt sich das hier nicht umdrehen,
+    nur für diesen Artikel. Wer es anders will, ändert es danach an der Ware selbst.
+</p>
+<h3>In einem fremden Behälter gewogen</h3>
+<p>
+    Die Zähl-App bietet beim Wiegen zuletzt auch die Behälter anderer Häuser an. Wurde so
+    einer benutzt, stimmt die Zuordnung offenbar nicht: der Behälter gehört zu diesem
+    Artikel, oder es gibt ihn auch in diesem Haus. Mit einer Antwort steht er beim nächsten
+    Mal weiter vorn. Die Wiegung selbst gilt in jedem Fall.
+</p>
+<h3>Gewogen mit 0 g</h3>
+<p>
+    Eine 0 auf der Waage heißt: hier war nichts zu wiegen. Sie gilt als gezählt, mit der Menge
+    null, und löst in keinem Block eine Frage aus. Die Waage steht nicht zum Herausnehmen da,
+    und der gewählte Behälter zählt nicht als fremd.
+</p>

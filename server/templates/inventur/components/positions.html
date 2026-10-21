@@ -1,0 +1,96 @@
+{% load i18n %}
+{% load mengen %}
+{# The count positions of a running inventory, grouped by location.              #}
+{#                                                                               #}
+{# Read-only: entering happens in the PWA. The locations are collapsed           #}
+{# because a house easily reaches two hundred positions, and the header          #}
+{# with "12 of 18" already answers the question of progress. Per location        #}
+{# in the order of the counting app ('nach_ort').                                #}
+{% for block in orte %}
+<details class="border rounded mb-2" data-gruppe="ort:{{ block.ort.pk }}">
+    <summary class="px-3 py-2 bg-body-tertiary d-flex justify-content-between gap-3">
+        <span>
+            <span class="text-body-secondary small">
+    {% blocktranslate with name=block.ort.bereich.name %}{{ name }} &middot;{% endblocktranslate %}
+</span>
+            <strong>{{ block.ort.name }}</strong>
+        </span>
+        <span class="small {% if block.gezaehlt == block.zeilen|length %}text-success{% else %}text-body-secondary{% endif %}">
+    {% blocktranslate with gezaehlt=block.gezaehlt zeilen=block.zeilen|length %}{{ gezaehlt }} von {{ zeilen }} gezählt{% endblocktranslate %}
+</span>
+    </summary>
+
+    <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th scope="col">{% translate "Artikel" %}</th>
+                    <th scope="col">{% translate "Gezählt als" %}</th>
+                    <th scope="col" class="text-center">{% translate "Eingabe" %}</th>
+                    <th scope="col" class="text-center">{% translate "Ergibt" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for zeile in block.zeilen %}
+                <tr{% if zeile.menge is None %} class="text-body-secondary"{% endif %}>
+                    <td>
+                        {# The product name as in the counting app, the house's #}
+                        {# designation small.                                    #}
+                        {% with artikel=zeile.artikel %}
+                        <a href="{{ artikel.get_absolute_url }}"
+                            class="link-body-emphasis link-offset-2 text-decoration-none">
+                            {% include "katalog/components/artikel_name.html" %}
+                        </a>
+                        {% endwith %}
+                        {% if zeile.position.unerwartet %}
+                        <span class="badge bg-body-secondary text-body border ms-1"
+                            title="{% translate 'Beim Zählen dazugekommen, nicht aus den Erwartungen' %}">
+                            {% translate "unerwartet" %}
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="small">
+                        {{ zeile.worin }}
+                    </td>
+                    <td class="text-center font-monospace">
+                        {# Weighed per vessel. Every row brings its own tare.              #}
+                        {% if zeile.position.wird_gewogen %}
+                        {% for wiegung in zeile.position.wiegungen.all %}
+                        <div class="small">
+                            {{ wiegung.brutto_gramm|menge_kurz }} g
+                            <span class="text-body-secondary">
+    {% blocktranslate with name=wiegung.behaelter.anzeigename %}&minus; {{ name }}{% endblocktranslate %}
+</span>
+                        </div>
+                        {% empty %}
+                        <span class="text-body-secondary">{% translate "&mdash;" %}</span>
+                        {% endfor %}
+                        {% elif zeile.position.eingabemenge is None %}
+                        <span class="text-body-secondary">{% translate "&mdash;" %}</span>
+                        {% else %}
+                        {{ zeile.position.eingabemenge|menge_kurz }}
+                        {% endif %}
+                    </td>
+                    <td class="text-center font-monospace">
+                        {% if zeile.menge is None %}
+                        <span class="text-body-secondary">{% translate "&mdash;" %}</span>
+                        {% else %}
+                        {{ zeile.menge_text }}
+                        <span class="text-body-secondary small">{{ zeile.einheit.kurz }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</details>
+{% empty %}
+<p class="text-body-secondary small mb-0">
+    {% if arten_reiter %}
+    {% translate "In diesem Reiter gibt es keine Zählpositionen." %}
+    {% else %}
+    {% translate "Zu dieser Inventur gibt es keine Zählpositionen. Im Haus ist an keinem Ort ein Artikel erwartet. Die Zähllisten der Orte füllen sich unter „Häuser und Orte“." %}
+    {% endif %}
+</p>
+{% endfor %}

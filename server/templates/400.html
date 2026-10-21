@@ -1,0 +1,16 @@
+{% extends "components/error_page.html" %}
+{% load i18n %}
+
+{# A request Django refuses before any view sees it ('SuspiciousOperation',  #}
+{# a host that is not allowed, a broken multipart body). Until 10/2026 this  #}
+{# was Django's bare "Bad Request (400)".                                     #}
+
+{% block title %}{% translate "Ungültige Anfrage" %}{% endblock title %}
+
+{% block fehlercode %}{% translate "Fehler 400" %}{% endblock fehlercode %}
+{% block ueberschrift %}{% translate "Diese Anfrage ließ sich nicht verarbeiten" %}{% endblock ueberschrift %}
+{% block erklaerung %}{% translate "Die Anfrage war unvollständig oder kam in einer Form, die der Server nicht annimmt. Bitte zurückgehen und es noch einmal versuchen." %}{% endblock erklaerung %}
+
+{% block weiter %}
+<a href="{% url 'login' %}" class="btn btn-success">{% translate "Zur Startseite" %}</a>
+{% endblock weiter %}

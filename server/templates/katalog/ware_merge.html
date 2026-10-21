@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% firstof hausartikel.name artikel.name as titelname %}{% blocktranslate with name=titelname %}{{ name }} zusammenführen{% endblocktranslate %}{% endblock title %}
+
+{% block content %}
+<div class="container py-4 max-breite-46">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            {# Started from a house article, the way back leads to it. #}
+            {% if hausartikel %}
+            <li class="breadcrumb-item"><a href="{{ hausartikel.haus.get_absolute_url }}">{{ hausartikel.haus.name }}</a></li>
+            <li class="breadcrumb-item">
+                <a href="{{ hausartikel.get_absolute_url }}">{{ hausartikel.name }}</a>
+            </li>
+            {% else %}
+            <li class="breadcrumb-item"><a href="{% url 'ware_list' %}">{% translate "Waren" context "Liste aller Waren" %}</a></li>
+            <li class="breadcrumb-item">
+                <a href="{{ artikel.get_absolute_url }}">{{ artikel.name }}</a>
+            </li>
+            {% endif %}
+            <li class="breadcrumb-item active" aria-current="page">{% translate "Zusammenführen" %}</li>
+        </ol>
+    </nav>
+
+    <div class="kopfleiste bg-body py-2 mb-1">
+        <h1 class="h3 mb-0">
+    {% firstof hausartikel.name artikel.name as titelname %}{% blocktranslate with name=titelname %}„{{ name }}“ zusammenführen{% endblocktranslate %}
+</h1>
+    </div>
+    <p class="text-body-secondary small mb-3">
+        {% translate "Eine der beiden Waren bleibt, die andere geht in ihr auf: ihre Hausartikel, Gebinde und Rezepturzeilen ziehen um, sie selbst verschwindet danach." %}
+    </p>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="card mb-3">
+            <div class="card-body">
+                {{ form|crispy }}
+            </div>
+        </div>
+
+        {# The preview: what would happen, and the questions among it. Nothing    #}
+        {# is written until its button. It names the choice it shows in          #}
+        {# 'gezeigt', and the view writes only for that one.                     #}
+        {% if vorschau %}
+        <p class="small text-body-secondary">
+            {% translate "Bis hierhin ist nichts verändert. Unten steht, was geschehen würde. Geschrieben wird erst mit „Endgültig zusammenführen“." %}
+        </p>
+        <input type="hidden" name="bestaetigt" value="1">
+        <input type="hidden" name="gezeigt" value="{{ signatur }}">
+
+        {# Only what overlaps in the packs. Same names with the same quantity    #}
+        {# do not stand here, because that is the same product and merges       #}
+        {# without asking.                                                       #}
+        {% if aufloesen %}
+        <div class="card border-warning-subtle mb-3">
+            <div class="card-header bg-body-tertiary">
+                {% translate "Gebinde klären" %}
+            </div>
+            <div class="card-body">
+                <p class="small text-body-secondary">
+                    {% translate "Beide führen Gebinde, die sich nicht von selbst zusammenlegen lassen. Erst danach wird geschrieben. Bis hierhin ist nichts verändert." %}
+                </p>
+                {{ aufloesen|crispy }}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if paare %}
+        <div class="card mb-3">
+            <div class="card-header bg-body-tertiary">{% translate "Was mit den Gebinden geschieht" %}</div>
+            <ul class="list-group list-group-flush small">
+                {% for paar in paare %}
+                <li class="list-group-item">
+                    <strong>{{ paar.quelle.anzeigename }}</strong>
+                    <span class="text-body-secondary">
+                        · {{ paar.menge|floatformat:"-3" }}
+                        {{ ziel.basiseinheit.kurz }}
+                    </span>
+                    {# The loose single unit exists only in pieces. Absorbed into      #}
+                    {# litres or kilograms it is a pack like any other, under its name. #}
+                    {% if paar.wird_gebinde %}
+                    <span class="badge rounded-pill text-bg-warning-subtle border text-body ms-1">
+    {% blocktranslate with name=paar.quelle.name %}wird ein gewöhnliches Gebinde „{{ name }}“{% endblocktranslate %}
+</span>
+                    {% endif %}
+                    {% if paar.landet_inaktiv %}
+                    {# Merged into an inactive pack it would count nothing in new  #}
+                    {# inventories. The question above decides.                   #}
+                    <span class="badge rounded-pill text-bg-warning-subtle border text-body ms-1">
+    {% blocktranslate with name=paar.ziel.anzeigename %}„{{ name }}“ ist hier inaktiv{% endblocktranslate %}
+</span>
+                    {% endif %}
+                    {% if paar.art == "gleich" %}
+                    <span class="badge rounded-pill bg-body-secondary text-body border text-body ms-1">
+                        {% translate "gleiches Gebinde, verschmilzt" %}
+                    </span>
+                    {% elif paar.art == "namenswahl" %}
+                    <span class="badge rounded-pill text-bg-warning-subtle border text-body ms-1">
+    {% blocktranslate with name=paar.ziel.name %}dieselbe Menge wie „{{ name }}“{% endblocktranslate %}
+</span>
+                    {% elif paar.art == "umbenennen" %}
+                    <span class="badge rounded-pill text-bg-warning-subtle border text-body ms-1">
+                        {% translate "Name schon vergeben, andere Menge" %}
+                    </span>
+                    {% else %}
+                    <span class="badge rounded-pill bg-body-secondary text-body border text-body ms-1">
+                        {% translate "zieht um" %}
+                    </span>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {# Houses that carry both: the row of the absorbed product is            #}
+        {# discontinued there and counts as the staying one. Per expectation of  #}
+        {# it a tick whether it goes over. The staying row stays as it is.       #}
+        {% if doppelte %}
+        <div class="card border-warning-subtle mb-3">
+            <div class="card-header bg-body-tertiary">
+                {% translate "Häuser, die beide führen" %}
+            </div>
+            <div class="card-body">
+                <p class="small text-body-secondary">
+                    {% translate "Dort wird der Artikel der aufgelösten Ware eingestellt und zählt künftig als der bleibende: sein Sollbestand aus der Warenwirtschaft kommt beim Einlesen dazu. Am bleibenden Artikel ändert sich nichts. Steht er am selben Ort schon, werden Gebinde und erwartete Mengen zusammengezählt." %}
+                </p>
+                {% for eintrag in doppelte.haeuser %}
+                {% with dublette=eintrag.dublette %}
+                <fieldset class="mb-3">
+                    <legend class="h6">{{ dublette.haus.name }}</legend>
+                    <p class="small mb-2">
+    {% blocktranslate with geht=dublette.quelle.artikelnummer|default:"–" geht_name=dublette.quelle.name bleibt=dublette.ziel.artikelnummer|default:"–" bleibt_name=dublette.ziel.name %}{{ geht }} „{{ geht_name }}“ wird eingestellt und zählt künftig als {{ bleibt }} „{{ bleibt_name }}“.{% endblocktranslate %}
+</p>
+                    {% if eintrag.erwartungen %}
+                    <div class="ms-3">
+                        <div class="small text-body-secondary mb-1">{% translate "Erwartungen übernehmen" %}</div>
+                        {% for feld in eintrag.erwartungen %}
+                        {{ feld|as_crispy_field }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </fieldset>
+                {% endwith %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+
+        <div class="card mb-3">
+            <div class="card-header bg-body-tertiary">
+                {% if quelle %}{% translate "Bleibt bestehen" %}{% else %}{% translate "Diese Ware" %}{% endif %}
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    <strong>{{ ziel.name }}</strong>
+                    <span class="text-body-secondary">
+                        · {{ ziel.basiseinheit.kurz }}{% with art=ziel.inventurart %}{% if art %} · {{ art.name }}{% endif %}{% endwith %}
+                    </span>
+                </p>
+                <div>
+                    {% for artikel in ziel.hausartikel.all %}
+                    {% if artikel.aktiv %}
+                    <span class="badge rounded-pill text-bg-secondary me-1">
+                        {{ artikel.haus.name }}
+                        <span class="font-monospace">{{ artikel.artikelnummer|default:"–" }}</span>
+                    </span>
+                    {% endif %}
+                    {% empty %}
+                    <span class="text-body-secondary small">{% translate "bislang in keinem Haus geführt" %}</span>
+                    {% endfor %}
+                </div>
+                <div class="mt-2">
+                    {% for gebinde in ziel.gebinde.all %}
+                    <span class="badge rounded-pill bg-body-secondary text-body border text-body me-1">
+                        {{ gebinde.anzeigename }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="fussleiste d-flex flex-wrap gap-2 bg-body border-top py-3">
+            {% if vorschau %}
+            <button class="btn btn-danger" type="submit"
+                data-rueckfrage="{% blocktranslate with quelle=quelle.name ziel=ziel.name %}„{{ quelle }}“ in „{{ ziel }}“ aufgehen lassen?{% endblocktranslate %} {% translate "Die Ware lässt sich danach nicht wiederherstellen." %}">
+                {% translate "Endgültig zusammenführen" %}
+            </button>
+            {% else %}
+            <button class="btn btn-primary" type="submit">{% translate "Vorschau" %}</button>
+            {% endif %}
+            <a href="{% if hausartikel %}{{ hausartikel.get_absolute_url }}{% else %}{{ artikel.get_absolute_url }}{% endif %}" class="btn btn-outline-secondary">{% translate "Abbrechen" %}</a>
+        </div>
+    </form>
+
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% include "components/ware_merge_script.html" %}
+{% endblock extra_scripts %}

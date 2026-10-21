@@ -1,0 +1,5 @@
+{% load i18n static %}
+{# Searchable select lists: Tom Select and our script that attaches it to every <select>.    #}
+<script src="{% static 'vendor/tom-select/tom-select.complete.min.js' %}"></script>
+{% translate "Tippen zum Suchen …" as suchen %}
+{% include "components/script.html" with name="select" wert=suchen %}

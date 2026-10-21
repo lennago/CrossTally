@@ -1,0 +1,162 @@
+{% load i18n %}
+{# A table of the review list, flat or as one group among many.                    #}
+{#                                                                                 #}
+{# Expects 'zeilen', 'spalten' (the headers), 'gegliedert', 'inventur' and         #}
+{# 'notiz_hoechstlaenge', the longest note the server stores.                      #}
+{# Grouped, the product group column is left out, it stands in the group's        #}
+{# header, and the headers do not sort. The column widths are fixed so several    #}
+{# groups stay flush below one another: each is its own table in its own          #}
+{# collapsible, and without fixed widths the columns would drift apart.            #}
+{# The name column takes what is left. A minimum width on the table keeps it      #}
+{# at 16rem or more, below that the table scrolls instead of squeezing it.        #}
+{#                                                                                 #}
+{# With the difference by hand there is no target: its column and "Target counts" #}
+{# go, and the difference becomes a field ('Inventur.differenz_von_hand').        #}
+{% with von_hand=inventur.differenz_von_hand %}
+<div class="table-responsive">
+    <table class="table table-sm table-hover align-middle mb-0 tabelle-fest {% if gegliedert %}min-breite-64{% else %}min-breite-76{% endif %}">
+        <colgroup>
+            <col class="breite-6">
+            <col>
+            {% if not gegliedert %}<col class="breite-12">{% endif %}
+            <col class="breite-7">
+            {% if von_hand %}
+            <col class="breite-8">
+            {% else %}
+            <col class="breite-6">
+            <col class="breite-6">
+            <col class="breite-7">
+            {% endif %}
+            <col class="breite-16">
+        </colgroup>
+        <thead>
+            <tr>
+                {% include "components/column_header.html" with kopf=spalten.nummer aus=gegliedert %}
+                {% include "components/column_header.html" with kopf=spalten.name aus=gegliedert %}
+                {% if not gegliedert %}
+                {% include "components/column_header.html" with kopf=spalten.warengruppe %}
+                {% endif %}
+                {% include "components/column_header.html" with kopf=spalten.ist aus=gegliedert klasse="text-center" %}
+                {% if not von_hand %}
+                {% include "components/column_header.html" with kopf=spalten.soll aus=gegliedert klasse="text-center" %}
+                {% endif %}
+                {% include "components/column_header.html" with kopf=spalten.differenz aus=gegliedert klasse="text-center" %}
+                {% if not von_hand %}
+                <th scope="col" class="text-center" title="{% translate 'Beim Abschluss gilt der Sollbestand als Ergebnis' %}">
+                    {% translate "Soll&nbsp;zählt" %}
+                </th>
+                {% endif %}
+                <th scope="col">{% translate "Notiz" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for zeile in zeilen %}
+            <tr data-zeile="{{ zeile.hausartikel.pk }}"{% if zeile.auffaellig %} class="tabellenzeile-auffaellig"{% endif %}>
+                <td class="font-monospace text-body-secondary text-truncate">
+                    {{ zeile.artikelnummer|default:"–" }}
+                </td>
+                {# At the top the product as maintained. Below it the house's              #}
+                {# designation, needed by whoever looks for the numbers in the ERP.        #}
+                <td class="text-truncate" title="{{ zeile.hausartikel.name }}">
+                    <a href="{{ zeile.hausartikel.get_absolute_url }}"
+                        class="link-body-emphasis link-offset-2 text-decoration-none">
+                        {{ zeile.hausartikel.ware.name }}
+                    </a>
+                    {% if not zeile.hausartikel.aktiv %}
+                    <span class="badge bg-body-secondary text-body border ms-1">{{ zeile.hausartikel.get_status_display|lower }}</span>
+                    {% endif %}
+                    <span class="d-block text-body-secondary small text-truncate">
+                        {{ zeile.hausartikel.name }}
+                    </span>
+                    <span data-wert="stand-{{ zeile.hausartikel.pk }}">
+                        {% if not zeile.gezaehlt %}
+                        <span class="badge bg-body-secondary text-body border"
+                            title="{% translate 'Es gibt Zählpositionen, aber es ist noch nichts eingetragen' %}">
+                            {% translate "noch nicht gezählt" %}
+                        </span>
+                        {% endif %}
+                    </span>
+                </td>
+                {% if not gegliedert %}
+                <td class="text-body-secondary small text-truncate" title="{{ zeile.warengruppe }}">
+                    {{ zeile.warengruppe }}
+                </td>
+                {% endif %}
+                {# The counted first: it is the result of the work. The expected  #}
+                {# stands next to it and is only the comparison value.            #}
+                {# 'data-wert' sits on a span and not on the cell: Bootstrap paints #}
+                {# every table cell itself, and the mark of "Refresh values" did   #}
+                {# not show there ('.wert-neu').                                   #}
+                <td class="text-center font-monospace fs-6 fw-semibold">
+                    <span data-wert="ist-{{ zeile.hausartikel.pk }}">{{ zeile.ist_text }}
+                        <span class="text-body-secondary small fw-normal">{{ zeile.einheit.kurz }}</span></span>
+                </td>
+                {% if von_hand %}
+                {# Typed in from the inventory management system, saved like a note.  #}
+                {# The field carries no 'data-wert': "Refresh values" leaves what     #}
+                {# someone types alone.                                               #}
+                <td>
+                    <input type="hidden" name="differenz_vorher_{{ zeile.hausartikel.pk }}" value="{{ zeile.differenz_eingabe }}">
+                    <input type="text" inputmode="decimal"
+                        class="form-control form-control-sm text-end font-monospace {{ zeile.differenz_klasse }}"
+                        name="differenz_{{ zeile.hausartikel.pk }}" value="{{ zeile.differenz_eingabe }}"
+                        aria-label="{% blocktranslate with name=zeile.hausartikel.name %}Differenz zu {{ name }}{% endblocktranslate %}"
+                        title="{% blocktranslate with einheit=zeile.einheit.kurz %}In {{ einheit }}, ein Minus heißt: Es fehlt etwas{% endblocktranslate %}"
+                        placeholder="—">
+                </td>
+                {% else %}
+                <td class="text-center font-monospace text-body-secondary">
+                    <span data-wert="soll-{{ zeile.hausartikel.pk }}">{% if zeile.sollbestand is None %}{% translate "&mdash;" %}{% else %}{{ zeile.soll_text }}{% endif %}</span>
+                </td>
+                <td class="text-center font-monospace fw-semibold">
+                    <span data-wert="differenz-{{ zeile.hausartikel.pk }}">
+                        {% if zeile.differenz is None %}
+                        <span class="text-body-secondary fw-normal" title="{% translate 'Für diesen Artikel kam kein Soll herein' %}">
+                            {% translate "&mdash;" %}
+                        </span>
+                        {% else %}
+                        {# The colour belongs inside: "Refresh values" swaps the     #}
+                        {# content of the marked span, the classes in it come along. #}
+                        <span class="{{ zeile.differenz_klasse }}">{{ zeile.differenz_text }}</span>
+                        {% endif %}
+                    </span>
+                </td>
+                {# Only takes effect at closing: until then what was counted stays, #}
+                {# the tick does not touch the count positions.                     #}
+                <td class="text-center">
+                    {% if zeile.sollbestand is None %}
+                    <span class="text-body-secondary" title="{% translate 'Ohne Sollbestand gibt es nichts zu übernehmen' %}">
+                        {% translate "&mdash;" %}
+                    </span>
+                    {% else %}
+                    <input class="form-check-input" type="checkbox"
+                        name="sollstattist_{{ zeile.hausartikel.pk }}"
+                        aria-label="{% blocktranslate with name=zeile.hausartikel.name %}Soll zählt bei {{ name }}{% endblocktranslate %}"
+                        title="{% blocktranslate with soll=zeile.soll_text %}Beim Abschluss gilt {{ soll }} als Ergebnis{% endblocktranslate %}"
+                        {% if zeile.soll_statt_ist %}checked{% endif %}>
+                    <input type="hidden" name="sollstattist_vorher_{{ zeile.hausartikel.pk }}" value="{% if zeile.soll_statt_ist %}1{% endif %}">
+                    {% endif %}
+                </td>
+                {% endif %}
+                <td>
+                    {# What the row showed. Saved is only what was changed here, so an  #}
+                    {# older page in a second tab cannot empty a note written elsewhere #}
+                    {# ('notizen_speichern'). The script moves it along after saving.   #}
+                    <input type="hidden" name="notiz_vorher_{{ zeile.hausartikel.pk }}" value="{{ zeile.notiz }}">
+                    <textarea class="form-control form-control-sm" rows="1"
+                        name="notiz_{{ zeile.hausartikel.pk }}" maxlength="{{ notiz_hoechstlaenge }}"
+                        aria-label="{% blocktranslate with name=zeile.hausartikel.name %}Notiz zu {{ name }}{% endblocktranslate %}"
+                        placeholder="—">{{ zeile.notiz }}</textarea>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="{% if von_hand %}6{% else %}8{% endif %}" class="text-center text-body-secondary py-4">
+                    {% translate "Keine Zeile passt zu dieser Suche." %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endwith %}

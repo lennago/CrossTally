@@ -1,0 +1,13 @@
+{% extends "components/form_page.html" %}
+{% load i18n %}
+
+{% block title %}{% blocktranslate with name=bereich.name %}{{ name }} umbenennen{% endblocktranslate %}{% endblock title %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'haus_list' %}">{% translate "Häuser" %}</a></li>
+<li class="breadcrumb-item">
+    <a href="{{ bereich.haus.get_absolute_url }}">{{ bereich.haus.name }}</a>
+</li>
+{% endblock pfad %}
+
+{% block bearbeiten %}{% blocktranslate with name=bereich.name %}{{ name }} umbenennen{% endblocktranslate %}{% endblock bearbeiten %}

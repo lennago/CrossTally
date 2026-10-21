@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ object }}{% endblock title %}
+
+{% block content %}
+<div class="container py-4">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'user_list' %}">{% translate "Benutzer" %}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ object }}</li>
+        </ol>
+    </nav>
+
+    <div class="kopfleiste bg-body py-2 d-flex flex-wrap gap-2 justify-content-between align-items-start mb-3">
+        <div>
+            <h1 class="h3 mb-1">{{ object }}</h1>
+            <div>
+                {% if object.is_superuser %}
+                <span class="badge rounded-pill text-bg-primary">{% translate "Administrator" %}</span>
+                {% elif object.is_staff %}
+                <span class="badge rounded-pill text-bg-secondary">{% translate "Führungskraft" %}</span>
+                {% else %}
+                <span class="badge rounded-pill bg-body-secondary text-body border">{% translate "Zähler" context "Rolle" %}</span>
+                {% endif %}
+                {# Invited: no password and never signed in, waiting for the link from the mail. #}
+                {% if object.ist_eingeladen %}
+                <span class="badge rounded-pill text-bg-info-subtle text-info-emphasis border border-info-subtle"
+                    title="{% translate 'Angelegt ohne Passwort. Die Person setzt es über den Link aus der E-Mail und ist damit freigeschaltet.' %}">
+                    {% translate "eingeladen" %}
+                </span>
+                {% elif not object.is_active %}
+                <span
+                    class="badge rounded-pill text-bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                    {% translate "deaktiviert" %}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        {# Only an administrator changes an administrator. Otherwise the        #}
+        {# permission system could be circumvented through them.                #}
+        {% if not object.is_superuser or user.is_superuser %}
+        <div class="d-flex flex-wrap gap-2">
+            {% if object.ist_eingeladen and mail_moeglich %}
+            <form method="post" action="{% url 'user_einladen' object.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-secondary"
+                    title="{% translate 'Einen neuen Link schicken, etwa wenn der alte abgelaufen ist.' %}">
+                    {% translate "Einladung erneut senden" %}
+                </button>
+            </form>
+            {% endif %}
+            <a href="{% url 'user_edit' object.pk %}" class="btn btn-sm btn-outline-secondary">{% translate "Bearbeiten" %}</a>
+            <a href="{% url 'user_delete' object.pk %}" class="btn btn-sm btn-outline-danger">{% translate "Löschen" %}</a>
+        </div>
+        {% else %}
+        <span class="text-body-secondary small">
+            {% translate "Administratoren ändert nur ein Administrator." %}
+        </span>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3 text-body-secondary fw-normal">{% translate "Benutzername" %}</dt>
+                <dd class="col-sm-9 font-monospace">{{ object.username }}</dd>
+
+                <dt class="col-sm-3 text-body-secondary fw-normal">{% translate "Vorname" %}</dt>
+                <dd class="col-sm-9">{{ object.first_name }}</dd>
+
+                <dt class="col-sm-3 text-body-secondary fw-normal">{% translate "Nachname" %}</dt>
+                <dd class="col-sm-9">{{ object.last_name }}</dd>
+
+                <dt class="col-sm-3 text-body-secondary fw-normal">{% translate "E-Mail" %}</dt>
+                <dd class="col-sm-9"><a href="mailto:{{ object.email }}">{{ object.email }}</a></dd>
+
+                <dt class="col-sm-3 text-body-secondary fw-normal">{% translate "Häuser" %}</dt>
+                <dd class="col-sm-9">
+                    {% if object.gilt_fuer_alle_haeuser %}
+                    <span class="badge rounded-pill bg-body-secondary text-body border">{% translate "alle Häuser" %}</span>
+                    {% else %}
+                    {% for haus in object.haeuser.all %}
+                    <span class="badge rounded-pill bg-body-secondary text-body border">{{ haus.name }}</span>
+                    {% empty %}
+                    <span class="text-body-secondary">{% translate "keinem Haus zugeordnet" %}</span>
+                    {% endfor %}
+                    {% endif %}
+                </dd>
+
+                <dt class="col-sm-3 text-body-secondary fw-normal">{% translate "Registriert am" %}</dt>
+                <dd class="col-sm-9">{{ object.date_joined|date:"SHORT_DATETIME_FORMAT" }}</dd>
+
+                <dt class="col-sm-3 text-body-secondary fw-normal">{% translate "Letzte Anmeldung" %}</dt>
+                <dd class="col-sm-9 mb-0">{% translate "nie" as nie %}{{ object.last_login|date:"SHORT_DATETIME_FORMAT"|default:nie }}</dd>
+            </dl>
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

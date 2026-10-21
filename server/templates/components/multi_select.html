@@ -1,0 +1,43 @@
+{% load i18n %}
+{# A multi-select in the filter: a menu full of checkboxes with its own     #}
+{# "Apply", for product families and product groups.                        #}
+{#                                                                          #}
+{#   {% include "components/multi_select.html"                              #}
+{#      with wahl=filterform.familienwahl titel="Warenfamilie" %}           #}
+{#                                                                          #}
+{# 'wahl' is a 'katalog.forms.Mehrfachwahl'. The surroundings (applied only #}
+{# with the button, a menu closed without it springs back) are in           #}
+{# 'multi_select.js'. '[data-sammelwahl]' is exempt from the live filter.   #}
+{# 'data-vorgabe' tells the filter script which checkboxes would be ticked  #}
+{# without a value: if the choice matches the default, it stays out of the  #}
+{# address. Where the entries form a tree (product families), an entry      #}
+{# below another is indented and carries the value above it in 'data-oben': #}
+{# a tick on the entry above sets every entry below, and each of them can   #}
+{# still be set on its own afterwards.                                      #}
+<span class="form-label small mb-1 d-block">{{ titel }}</span>
+<div class="dropdown" data-sammelwahl>
+    <button class="form-select form-select-sm text-start text-truncate" type="button"
+        data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+        <span data-ersetzen="wahl-{{ wahl.feld }}">{{ wahl.text }}</span>
+    </button>
+    <div class="dropdown-menu p-2 shadow min-breite-18">
+        <div class="d-flex gap-3 mb-2 small">
+            <button type="button" class="btn btn-link btn-sm p-0" data-alle="1">{% translate "Alle" %}</button>
+            <button type="button" class="btn btn-link btn-sm p-0" data-alle="0">{% translate "Keine" %}</button>
+        </div>
+        <div class="max-hoehe-18 overflow-y-auto">
+            {% for eintrag in wahl.kaestchen %}
+            <div class="form-check{% if eintrag.tiefe %} wahl-ebene-{{ eintrag.tiefe }}{% endif %}">
+                <input class="form-check-input" type="checkbox" name="{{ wahl.feld }}"
+                    value="{{ eintrag.wert }}" id="{{ wahl.feld }}-{{ eintrag.wert }}"
+                    data-vorgabe="{% if eintrag.vorgabe %}1{% else %}0{% endif %}"{% if eintrag.oben %} data-oben="{{ eintrag.oben }}"{% endif %}{% if eintrag.gewaehlt %} checked{% endif %}>
+                <label class="form-check-label{% if eintrag.kursiv %} fst-italic{% endif %}"
+                    for="{{ wahl.feld }}-{{ eintrag.wert }}">{{ eintrag.name }}</label>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm w-100 mt-2" data-uebernehmen>
+            {% translate "Übernehmen" %}
+        </button>
+    </div>
+</div>

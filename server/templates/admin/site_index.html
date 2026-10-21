@@ -1,0 +1,83 @@
+{% extends "admin/index.html" %}
+{% load i18n %}
+
+{# The start page of the administration: the models that still stand here,    #}
+{# and the backups. Neither exists in the web interface.                      #}
+
+{% block content %}
+{{ block.super }}
+
+<div class="module" id="backup-modul">
+    <h2>{% translate "Backup" %}</h2>
+
+    <div class="px-3 py-2">
+        <p class="backup-hinweis">
+            {% translate "Ein Backup ist der ganze Datenstand in einer verschlüsselten Datei: Konten mit Passkeys, Katalog, Häuser, Inventuren, Erscheinungsbild mit Logo, Impressum und Datenschutztext, die Mailtexte und die Anmeldeversuche am falschen Admin. Geschrieben wird nach" %} <code>{{ ordner }}</code>
+    {% blocktranslate %}. Es bleiben die {{ behalten }} jüngsten Stände liegen.{% endblocktranslate %}
+</p>
+
+        {# Writing takes a moment. Until the page comes back the button is  #}
+        {# locked and says so ('submit_once.js'), otherwise a second click  #}
+        {# wrote a second file.                                             #}
+        <form method="post" action="{% url 'admin:backup_erstellen' %}"
+            data-einmal="{% translate 'Backup wird erstellt …' %}">
+            {% csrf_token %}
+            <input type="submit" class="default" value="{% translate 'Backup erstellen' %}">
+        </form>
+
+        {% if laufende_zaehlungen %}
+        <p class="backup-hinweis">
+            <strong>{% translate "Einspielen geht gerade nicht:" %}</strong>
+            {% translate "in der Zählung steht" %}
+            {% for inventur in laufende_zaehlungen %}{{ inventur }}{% if not forloop.last %}, {% endif %}{% endfor %}.
+            {% translate "Die Zähl-Apps halten Zeilen des jetzigen Stands. Nach einem Einspielen könnten sie Gezähltes nicht mehr zuordnen. Erst abschließen oder zurück in die Vorbereitung." %}
+        </p>
+        {% endif %}
+
+        {% if staende %}
+        <table class="backup-tabelle">
+            <thead>
+                <tr>
+                    <th scope="col">{% translate "Stand" %}</th>
+                    <th scope="col">{% translate "Größe" %}</th>
+                    <th scope="col"><span class="visually-hidden">{% translate "Aktionen" %}</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stand in staende %}
+                <tr>
+                    <td>
+                        {% blocktranslate with zeit=stand.zeitpunkt|date:"SHORT_DATETIME_FORMAT" %}{{ zeit }} Uhr{% endblocktranslate %}
+                        {# An old state from before 09/2026. Whoever copies it away should know. #}
+                        {% if not stand.verschluesselt %}
+                        <span class="backup-hinweis">{% translate "unverschlüsselt" %}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ stand.groesse }}</td>
+                    <td>
+                        {% if laufende_zaehlungen %}
+                        <span class="backup-hinweis">{% translate "gesperrt" %}</span>
+                        {# With a key set the restore refuses it. The console encrypts it first. #}
+                        {% elif not stand.einspielbar %}
+                        <span class="backup-hinweis">{% translate "erst verschlüsseln" %}</span>
+                        {% else %}
+                        <a href="{% url 'admin:backup_einspielen' stand.name %}">
+                            {% translate "Einspielen" %}
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="backup-hinweis">{% translate "Noch kein Stand gesichert." %}</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extrabody %}
+{{ block.super }}
+{% include "components/script.html" with name="submit_once" %}
+{% endblock extrabody %}

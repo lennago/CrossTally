@@ -1,0 +1,24 @@
+<h3>Die Liste</h3>
+<p>
+    Alle Konten mit Rolle, Häusern und letzter Anmeldung, auf der Website oder in der
+    Zähl-App. Solange die Zähl-App angemeldet bleibt, ändert sich das Datum nicht.
+    <strong>Zähler</strong> benutzen nur die Zähl-App, <strong>Führungskräfte</strong> auch
+    diese Weboberfläche, <strong>Administratoren</strong> dazu die Verwaltung. Die
+    Spaltenköpfe sortieren.
+</p>
+<h3>Was die Marken sagen</h3>
+<p>
+    <strong>eingeladen</strong> heißt: ohne Passwort angelegt und noch nie
+    angemeldet.{% if mail_moeglich %} Die Person hat den Link aus der E-Mail noch nicht
+    benutzt.{% else %} Ohne Mailserver geht keine Einladung hinaus. Ein Administrator setzt
+    in der Verwaltung ein Passwort und schaltet das Konto aktiv.{% endif %}
+    <strong>deaktiviert</strong> heißt: das Konto ist überall abgemeldet und kann sich nicht
+    anmelden, auch nicht in der Zähl-App, bis es jemand wieder aktiviert.
+</p>
+<h3>Wer wen ändert</h3>
+<p>
+    Führungskräfte legen Konten an und ändern Zähler und andere Führungskräfte. Einen
+    Administrator ändert oder löscht nur ein Administrator. Die E-Mail-Adresse ändert die
+    Person selbst oder ein Administrator. Das Passwort ändert die Person selbst. Wer seines
+    vergessen hat, bekommt von einem Administrator in der Verwaltung ein neues gesetzt.
+</p>

@@ -1,0 +1,31 @@
+<h3>Was eine Ware ist</h3>
+<p>
+    Dieselbe Ware über alle Häuser hinweg. An ihr hängen Basiseinheit und Gebinde. Sie
+    gelten überall. Was ein einzelnes Haus daraus führt (Nummer, Bezeichnung, Warengruppe,
+    Inventurart), steht am Hausartikel darunter. Die Spalte „Inventurart“ zeigt die Art
+    der Artikel und ändert sie für alle auf einmal.
+</p>
+{% include "help/de/shared/sammelstatus.html" %}
+{% include "help/de/shared/inventurart.html" %}
+<h3>Suchen und Filtern</h3>
+<p>
+    Die Suche geht über Bezeichnung, Artikelnummer, EAN, Warengruppe und Warenfamilie. Wer
+    die Familie darüber tippt, findet auch die Waren in den Familien darunter. Ein Tippfehler
+    stört nicht: findet die Suche nichts, zeigt sie, was ähnlich heißt. Nummern müssen stimmen.
+</p>
+{% include "help/de/shared/search_order.html" %}
+<p>
+    Warenfamilie und Warengruppe sind Mehrfachauswahlen und wirken erst mit „Übernehmen“.
+    Unter „Geführt in“ wechselt ein Klick je Haus zwischen <em>egal</em>, <em>muss</em> und
+    <em>nicht</em>. Ist nichts auf <em>muss</em>, genügt eines der übrigen Häuser. Der Filter
+    „Inventurart“ findet eine gemischte Ware unter jeder ihrer Arten, und „Gemischt“ zeigt
+    nur diese.
+</p>
+<p>
+    Die Spalte „Abwiegen“ schaltet das Wiegen für die Ware in jedem Haus. Fehlt dafür noch
+    das Gewicht einer Einheit, sagt es die Meldung. „Nein“ löst dabei die Behälter der Ware.
+</p>
+<p>
+    Was die Warenwirtschaft als Artikel führt, ohne dass es eine Ware ist, liegt in der Warenfamilie
+    <em>Nicht zählbar</em> und steht hier nur, wenn sie im Filter gewählt ist.
+</p>

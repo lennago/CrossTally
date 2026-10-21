@@ -1,0 +1,83 @@
+<h3>What a passkey is</h3>
+<p>
+    A passkey replaces the password with the device: when signing in, the device asks for
+    face, finger or PIN, and the browser confirms to the application that it is you. There
+    is nothing to type and nothing anyone could guess or intercept. The password stays valid
+    alongside, say for a foreign device.
+</p>
+<h3>Creating one</h3>
+<p>
+    A passkey belongs to the device it is created on. With Apple and Google it travels to the
+    other devices of the same account. Whoever works with several devices creates one per
+    device and gives it a name to tell them apart. Signing in then needs no username: the
+    button <strong>Sign in with passkey</strong> is enough.
+</p>
+<p>
+    Before creating one, the page asks for your password, and only then does the device ask
+    for face, finger or PIN. That way nobody creates a passkey who only has your device in
+    hand or finds a session left open. A wrong password counts like a failed attempt at
+    signing in. After too many the account is temporarily locked from here, signing in
+    included.
+</p>
+<p>
+    If your account has no password, you confirm with one of your passkeys instead. After
+    <strong>Confirm with passkey</strong> the device asks for face, finger or PIN, and only
+    the passkeys of your account are offered. The confirmation holds for two minutes. If the
+    dialog breaks off while creating the passkey, simply try again within that time. Without
+    a password and without a passkey there is nothing to confirm with. Then an administrator
+    can set a password for you.
+</p>
+<h3>Where it is kept</h3>
+<p>
+    Where the passkey is stored is up to the device: in Windows Hello, in the iCloud Keychain,
+    in Google Password Manager or in another password manager. A password manager in the
+    browser usually catches the request and offers to store the passkey itself. Whoever would
+    rather keep it on the device picks the other option in its window or switches off saving
+    passkeys there. If you leave the name field empty, the passkey is named after its store,
+    say “Windows Hello” or “iCloud Keychain”. That way you see where it ended up.
+</p>
+{% if mail_moeglich %}
+<p>
+    Every new and every removed passkey comes as an e-mail. Whoever did not add it notices
+    that way.
+</p>
+{% endif %}
+<h3>Removing one</h3>
+<p>
+    A device that got lost loses its access here: removing takes the passkey out of the
+    application and signs your account out everywhere. On the website that applies at once,
+    in the counting app within an hour at the latest. You stay signed in only where you
+    remove the passkey. Whatever the counting app has not sent yet stays and goes out after
+    the next sign-in. On the device the passkey stays and is simply unknown then. There it
+    can be deleted in the device's settings.
+</p>
+<p>
+    Before removing a passkey the page asks for your password, as before creating one.
+    Otherwise somebody who finds a session left open could remove your passkeys and sign
+    you out everywhere, while the session they found stays signed in. A wrong password
+    counts like a failed attempt at signing in. If your account has no password, you first
+    confirm at the top of the page with one of your passkeys. The confirmation holds for two
+    minutes, for several passkeys in a row too.
+</p>
+<p>
+    Without a password your last passkey is the only way into your account, and a new one is
+    confirmed with one you have. That is why the page asks once more before the last one is
+    removed. Once it is gone, you sign in again only after an administrator has set a
+    password for you. So create the new one first and remove the old one afterwards.
+</p>
+<h3>In the counting app</h3>
+<p>
+    The counting app has the same passkeys in its account menu. Whoever counts on the phone
+    creates the passkey there, because the installed app on the iPhone has a storage of its
+    own, and a passkey from the browser does not reach it. The app asks for the password
+    before creating and before removing one as well, and an account without a password
+    confirms there with one of its passkeys too. Signing in to the app then only takes
+    “Sign in with passkey”.
+</p>
+<h3>What comes with it</h3>
+<p>
+    Passkeys are bound to the application's address. If it moves to another domain, the old
+    ones no longer apply, and every device creates a new one. An administrator can remove
+    passkeys in the administration, say when somebody no longer has their device. Then too
+    the account is signed out everywhere afterwards.
+</p>

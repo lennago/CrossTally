@@ -1,0 +1,10 @@
+{% extends "components/form_page.html" %}
+{% load i18n %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'user_list' %}">{% translate "Benutzer" %}</a></li>
+{% endblock pfad %}
+
+{% block extra_scripts %}
+{% include "components/script.html" with name="role_choice" %}
+{% endblock extra_scripts %}

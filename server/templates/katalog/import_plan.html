@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% blocktranslate with name=haus.name %}Importplan {{ name }}{% endblocktranslate %}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'haus_list' %}">{% translate "Häuser" %}</a></li>
+            <li class="breadcrumb-item">
+                <a href="{{ haus.get_absolute_url }}">{{ haus.name }}</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'hausartikel_import' haus.pk %}">{% translate "Import" %}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{% translate "Prüfen" %}</li>
+        </ol>
+    </nav>
+
+    <div class="kopfleiste bg-body py-2 mb-1">
+        <h1 class="h3 mb-0">{% translate "Was angelegt würde" %}</h1>
+    </div>
+    <p class="text-body-secondary small mb-3">
+        {% translate "Bis hierher ist" %} <strong>{% translate "nichts" %}</strong>
+    {% blocktranslate with name=haus.name %}gespeichert. Hier steht nur, was eine Entscheidung braucht. Was {{ name }} schon genau so führt, fehlt. Artikelnummer, Bezeichnung, Warengruppe und Einheit stehen fest, sie kommen aus der Datei. Fehlende Warengruppen entstehen von selbst.{% endblocktranslate %}
+</p>
+
+    {# The products stand here once: Tom Select fills every field            #}
+    {# from them (see 'NurGewaehlteOption').                                 #}
+    {{ formset.optionen|json_script:"ware-optionen" }}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="schritt" value="uebernehmen">
+        <input type="hidden" name="format" value="{{ format }}">
+        {{ formset.management_form }}
+
+        {% for fehler in formset.non_form_errors %}
+        <div class="alert alert-danger">{{ fehler }}</div>
+        {% endfor %}
+
+        {% include "components/expand_buttons.html" %}
+        {% for block in formset.bloecke %}
+        {# Open by default: work happens here, not looking up. What someone      #}
+        {# collapses is remembered by 'expand.js'. A block with an error message #}
+        {# stays open nonetheless.                                               #}
+        <details class="border rounded mb-3" data-gruppe="import:{{ block.kennung }}" data-anfangs-offen open>
+            <summary class="px-3 py-2 bg-body-tertiary d-flex justify-content-between gap-3">
+                <strong>{{ block.titel }}</strong>
+                <span class="text-body-secondary small">
+                    <span data-anzahl-block="{{ block.kennung }}">{{ block.anzahl }}</span> {% translate "Artikel" context "hinter einer Zahl" %}
+                </span>
+            </summary>
+
+            <div class="text-center text-body-secondary py-4" data-leer-block="{{ block.kennung }}"
+                {% if block.anzahl %}hidden{% endif %}>
+                {% translate "Nichts in dieser Gruppe." %}
+            </div>
+
+            {# One level down the product groups. Empty ones are included as long #}
+            {# as rows can move into this block, and are hidden.                  #}
+            {% for gruppe in block.gruppen %}
+            <details class="border-top" data-gruppe="import:{{ block.kennung }}:{{ gruppe.name }}"
+                data-warengruppe-block="{{ block.kennung }}:{{ gruppe.nummer }}"
+                data-anfangs-offen open {% if not gruppe.zeilen %}hidden{% endif %}>
+                {# A grid ('warengruppen-kopf'): the buttons stand in the middle of  #}
+                {# every group, however long its name. A long name is shortened,    #}
+                {# the whole one is in the tooltip.                                 #}
+                <summary class="warengruppen-kopf px-3 py-2">
+                    <strong class="small text-truncate" title="{{ gruppe.anzeige }}">{{ gruppe.anzeige }}</strong>
+                    {# The whole product group at once. Served by 'import_plan.js'.    #}
+                    <span class="btn-group btn-group-sm" role="group"
+                        aria-label="{% translate 'Ganze Warengruppe setzen' %}">
+                        {% for wert, text in block.vorgehen %}
+                        <button type="button" class="btn btn-outline-secondary" data-alle-setzen="{{ wert }}">{{ text }}</button>
+                        {% endfor %}
+                    </span>
+                    <span class="text-body-secondary small text-nowrap">
+                        <span data-anzahl-warengruppe="{{ block.kennung }}:{{ gruppe.nummer }}">{{ gruppe.zeilen|length }}</span> {% translate "Artikel" context "hinter einer Zahl" %}
+                    </span>
+                </summary>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="breite-6" scope="col">{% translate "Nr." %}</th>
+                                <th scope="col">{% translate "Bezeichnung" %}</th>
+                                <th class="breite-20" scope="col">{% translate "Ware" %}</th>
+                                <th class="breite-7" scope="col">{% translate "Einheit" %}</th>
+                                <th class="breite-14" scope="col">{% translate "Gebinde" %}</th>
+                                <th class="breite-11" scope="col">{% translate "Inventurart" %}</th>
+                                <th class="breite-19" scope="col">{% translate "Vorgehen" %}</th>
+                            </tr>
+                        </thead>
+                        {# The rows move by script between the blocks and there into their #}
+                        {# product group. Django reads them via the field names, not via   #}
+                        {# their position.                                                 #}
+                        <tbody data-block="{{ block.kennung }}" data-warengruppe="{{ gruppe.nummer }}">
+                            {% for zeile in gruppe.zeilen %}
+                            <tr data-zeile data-warengruppe="{{ gruppe.nummer }}">
+                                <td class="font-monospace text-body-secondary align-top pt-3">
+                                    {{ zeile.artikelnummer.value }}
+                                    {# Only those with a value: every row travels back with the  #}
+                                    {# submit, and a missing field reads as empty.               #}
+                                    {% for feld in zeile.feste_felder %}{{ feld }}{% endfor %}
+                                </td>
+
+                                <td class="align-top pt-3">
+                                    {{ zeile.name.value }}
+                                    {{ zeile.name.errors }}
+                                </td>
+
+                                {% if zeile.nur_bestand %}
+                                {# The record keeps its product, its packs and its type.        #}
+                                <td class="align-top pt-3">
+                                    {{ zeile.warenname }}
+                                    {{ zeile.ware.as_hidden }}{{ zeile.neuer_ware.as_hidden }}
+                                </td>
+                                <td class="text-body-secondary small align-top pt-3">
+                                    {{ zeile.einheit_anzeige }}
+                                </td>
+                                <td>{{ zeile.gebinde.as_hidden }}</td>
+                                <td>{{ zeile.inventurart.as_hidden }}</td>
+                                {% else %}
+                                <td>
+                                    {{ zeile.ware }}
+                                    {{ zeile.ware.errors }}
+                                    {# Only needed if nothing existing is chosen above.     #}
+                                    <div class="mt-1"
+                                        data-neu-wenn-leer="{{ zeile.ware.id_for_label }}">
+                                        {{ zeile.neuer_ware }}
+                                        {{ zeile.neuer_ware.errors }}
+                                    </div>
+                                </td>
+
+                                <td class="text-body-secondary small align-top pt-3">
+                                    {{ zeile.einheit_anzeige }}
+                                    {# Only if the house counts in another dimension than the  #}
+                                    {# chosen product. The script hides it otherwise.          #}
+                                    <div class="mt-1" data-umrechnung
+                                        data-dimension="{{ zeile.einheit_dimension }}"
+                                        data-einheit="{{ zeile.einheit_anzeige }}">
+                                        <label class="form-label small mb-0" for="{{ zeile.faktor_zur_ware.id_for_label }}"
+                                            data-umrechnung-text>{{ zeile.faktor_zur_ware.label }}</label>
+                                        {{ zeile.faktor_zur_ware }}
+                                        {{ zeile.faktor_zur_ware.errors }}
+                                    </div>
+                                </td>
+
+                                <td>{{ zeile.gebinde }}{{ zeile.gebinde.errors }}</td>
+                                <td>
+                                    {{ zeile.inventurart }}
+                                    {{ zeile.inventurart.errors }}
+                                </td>
+                                {% endif %}
+                                <td>
+                                    {% include "components/button_group.html" with feld=zeile.vorgehen %}
+                                    {% if zeile.zeilenart == "umbenannt" %}
+                                    {# Only asked with "Replace", the script  #}
+                                    {# hides it otherwise.                    #}
+                                    <div class="mt-1" data-nur-bei-ersetzen>
+                                        <div class="text-body-secondary small">{{ zeile.status_neu.label }}</div>
+                                        {% include "components/button_group.html" with feld=zeile.status_neu %}
+                                    </div>
+                                    {% endif %}
+                                    {% if zeile.teile_waehlbar %}
+                                    {# Several deviations: what "Change" takes over of them. #}
+                                    <div class="mt-1" data-nur-bei-aendern>
+                                        <div class="text-body-secondary small">{{ zeile.uebernehmen.label }}</div>
+                                        {% include "components/button_group.html" with feld=zeile.uebernehmen %}
+                                    </div>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% if zeile.hinweiszeilen %}
+                            <tr class="tabellenzeile-auffaellig" data-hinweis>
+                                <td colspan="7" class="small">
+                                    {% for text in zeile.hinweiszeilen %}<div>{{ text }}</div>{% endfor %}
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+            {% endfor %}
+        </details>
+        {% endfor %}
+
+        <div class="fussleiste d-flex align-items-center flex-wrap gap-3 mt-4 bg-body border-top py-3">
+            {# As long as a conflict is open, the script disables the button.    #}
+            {# Without script the server rejects the plan.                       #}
+            <button class="btn btn-success" type="submit" data-uebernehmen>{% translate "Jetzt übernehmen" %}</button>
+            <a href="{{ haus.get_absolute_url }}" class="btn btn-outline-secondary">{% translate "Abbrechen" %}</a>
+            <span class="text-danger small" data-offene-konflikte hidden>
+                {% translate "Offene Konflikte:" %} <span data-offen></span>{% translate ". Übernommen wird erst, wenn über jeden entschieden ist." %}
+            </span>
+            <span class="text-body-secondary small">
+                {% translate "Alles wird in einem Zug geschrieben. Eine Zeile, die sich nicht übernehmen lässt, bleibt liegen und wird danach genannt. Die anderen gehen durch." %}
+            </span>
+        </div>
+    </form>
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% include "components/script.html" with name="or_new" %}
+{% translate "1 {haus} = wie viele {ware}?" as umrechnung %}
+{% include "components/script.html" with name="import_plan" wert=umrechnung %}
+{% endblock extra_scripts %}

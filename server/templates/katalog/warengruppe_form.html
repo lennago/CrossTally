@@ -1,0 +1,26 @@
+{% extends "components/form_page.html" %}
+{% load i18n %}
+
+{% block title %}{% if object %}{% blocktranslate with name=object.name %}{{ name }} bearbeiten{% endblocktranslate %}{% else %}{% translate "Neue Warengruppe" %}{% endif %}{% endblock title %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'warengruppe_list' %}">{% translate "Warengruppen" %}</a></li>
+{% endblock pfad %}
+
+{% block neu %}{% translate "Neue Warengruppe" %}{% endblock neu %}
+
+{% block unterzeile %}
+{% if object %}
+<div class="text-body-secondary small">
+    {% blocktranslate with hausartikel=object.hausartikel.all|length %}{{ hausartikel }} Hausartikel in dieser Gruppe{% endblocktranslate %}
+</div>
+{% endif %}
+{% endblock unterzeile %}
+
+{% block kopf_knoepfe %}
+{% if object %}
+<a href="{% url 'warengruppe_delete' object.pk %}" class="btn btn-outline-danger btn-sm">{% translate "Löschen" %}</a>
+{% endif %}
+{% endblock kopf_knoepfe %}
+
+{% block abbrechen_url %}{% url 'warengruppe_list' %}{% endblock abbrechen_url %}

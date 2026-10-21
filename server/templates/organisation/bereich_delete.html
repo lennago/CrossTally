@@ -1,0 +1,39 @@
+{% extends "components/delete_page.html" %}
+{% load i18n %}
+
+{% block art %}{% translate "Bereich löschen" %}{% endblock art %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'haus_list' %}">{% translate "Häuser" %}</a></li>
+<li class="breadcrumb-item">
+    <a href="{{ bereich.haus.get_absolute_url }}">{{ bereich.haus.name }}</a>
+</li>
+{% endblock pfad %}
+
+{% block frage %}
+{% blocktranslate with name=bereich.name haus=bereich.haus.name %}Soll <strong>{{ name }}</strong> in {{ haus }} wirklich gelöscht werden?{% endblocktranslate %}
+{% endblock frage %}
+
+{% block folgen %}
+{% if bereich.orte.all %}
+<p class="mb-2">{% translate "Damit verschwinden auch:" %}</p>
+<ul class="mb-0">
+    {% for ort in bereich.orte.all %}
+    <li>
+        {{ ort.name }}
+        <span class="text-body-secondary">
+            - {% blocktranslate with anzahl=ort.anzahl_erwartungen %}{{ anzahl }} erwartete Artikel{% endblocktranslate %}
+        </span>
+    </li>
+    {% endfor %}
+</ul>
+<p class="text-body-secondary small mt-3 mb-0">
+    {% translate "Die Artikel selbst bleiben. Nur die Zuordnung, dass sie hier vorkommen, geht verloren. Soll der Bereich nur anders heißen, hilft" %}
+    <a href="{% url 'bereich_edit' bereich.pk %}">{% translate "Umbenennen" %}</a>.
+</p>
+{% else %}
+<p class="text-body-secondary small mb-0">
+    {% translate "Der Bereich ist leer und kann gefahrlos entfernt werden." %}
+</p>
+{% endif %}
+{% endblock folgen %}

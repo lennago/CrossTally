@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n %}
+{# After the confirmation. Nobody is signed in here as a rule: the page says  #}
+{# where to go, because that depends on the role, and the role is not known.  #}
+
+{% block title %}{% translate "E-Mail-Adresse bestätigt" %}{% endblock title %}
+
+{% block content %}
+<div class="container py-5 max-breite-30">
+
+    <div class="card">
+        <div class="card-body p-4">
+
+            <h1 class="h4 mb-2">{% translate "E-Mail-Adresse bestätigt" %}</h1>
+            <p class="mb-3">
+                {% if email %}
+                {% blocktranslate %}<strong>{{ email }}</strong> ist jetzt die Adresse deines Kontos. Alle Mails gehen von nun an dorthin.{% endblocktranslate %}
+                {% else %}
+                {% translate "Die Adresse ist übernommen. Alle Mails gehen von nun an dorthin." %}
+                {% endif %}
+            </p>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'pwa' %}" class="btn btn-success">{% translate "Zur Zähl-App" %}</a>
+                <a href="{% url 'login' %}" class="btn btn-outline-secondary">{% translate "Zur Website" %}</a>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

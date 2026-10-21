@@ -1,0 +1,29 @@
+{% extends "components/split_page.html" %}
+{% load i18n %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'haus_list' %}">{% translate "Häuser" %}</a></li>
+<li class="breadcrumb-item">
+    <a href="{{ ort.haus.get_absolute_url }}">{{ ort.haus.name }}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{{ ort.bereich.get_absolute_url }}">{{ ort.bereich.name }}</a>
+</li>
+{% endblock pfad %}
+
+{% block einleitung %}
+{% blocktranslate with name=ort.name bereich=ort.bereich.name %}Neben {{ name }} entsteht ein zweiter Ort im Bereich {{ bereich }}. Ein Klick auf einen Artikel schiebt ihn auf die andere Seite.{% endblocktranslate %}
+{% endblock einleitung %}
+
+{% block zeile %}
+{{ eintrag.artikel.warenname }}
+{% for vorgabe in eintrag.gebinde_vorgaben.all %}
+<span class="badge rounded-pill bg-body-secondary text-body border ms-1">{{ vorgabe.gebinde.anzeigename }}</span>
+{% endfor %}
+{% endblock zeile %}
+
+{% block leer %}
+{% blocktranslate with name=ort.name %}An {{ name }} wird noch nichts erwartet. Aufteilen lässt sich trotzdem, der neue Ort bleibt dann leer.{% endblocktranslate %}
+{% endblock leer %}
+
+{% block neu_titel %}{% translate "Neuer Ort" %}{% endblock neu_titel %}

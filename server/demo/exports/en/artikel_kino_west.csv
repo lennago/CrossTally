@@ -1,0 +1,107 @@
+Article;Supplier;Unnamed: 2;Sales price;Stock value
+201 Sales - Beverages - Central;;;;
+103001;Cola 0.5 l;Central purchasing;€ ;0,00
+;gekauft in Kiste(n) zu 24 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103002;Cola sugar-free 0.5 l;Central purchasing;€ ;0,00
+;gekauft in Kiste(n) zu 24 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103003;Orange soda 0.5 l;Central purchasing;€ ;0,00
+;gekauft in Kiste(n) zu 24 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103004;Lemon soda 0.5 l;Central purchasing;€ ;0,00
+;gekauft in Kiste(n) zu 24 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103005;Syrup cola 10 l;Central purchasing;€ ;0,00
+;gekauft in Karnister zu 10 ltr;Bestand: 0,00 Liter zu;0,00 =;0,00
+103006;Sparkling water 0.25 l;Central purchasing;€ ;0,00
+;gekauft in Kiste(n) zu 24 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103007;Apple juice 0.2 l;Central purchasing;€ ;0,00
+;gekauft in Kiste(n) zu 24 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103008;Orange juice 0.2 l;Central purchasing;€ ;0,00
+;gekauft in Kiste(n) zu 24 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103009;Apple spritzer 0.5 l;Central purchasing;€ ;0,00
+;gekauft in Kiste(n) zu 12 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103010;Iced tea peach 0.5 l;Central purchasing;€ ;0,00
+;gekauft in Kiste(n) zu 12 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103011;Beer 0.33 l;Central purchasing;€ ;0,00
+;gekauft in Kiste(n) zu 20 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103012;White wine 0.2 l;Central purchasing;€ ;0,00
+;gekauft in Karton zu 12 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103013;Red wine 0.2 l;Central purchasing;€ ;0,00
+;gekauft in Karton zu 12 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+Summe: 201 Sales - Beverages - Central;0,00;;;
+210 Sales - Popcorn;;;;
+103101;Corn for popcorn;Central purchasing;€ ;0,00
+;gekauft in Sack(Säcke) zu 22,5 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+103102;Popcorn salt;Central purchasing;€ ;0,00
+;gekauft in Karton zu 10 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+103103;Popcorn sugar;Central purchasing;€ ;0,00
+;gekauft in Sack(Säcke) zu 25 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+103104;Coconut oil;Central purchasing;€ ;0,00
+;gekauft in Karton zu 12,5 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+Summe: 210 Sales - Popcorn;0,00;;;
+211 Sales - Nachos;;;;
+103201;Nacho chips;Central purchasing;€ ;0,00
+;gekauft in Karton zu 8 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+103202;Cheese sauce;Central purchasing;€ ;0,00
+;gekauft in Karton zu 6 Liter;Bestand: 0,00 Liter zu;0,00 =;0,00
+103203;Salsa sauce;Central purchasing;€ ;0,00
+;gekauft in Karton zu 6 Liter;Bestand: 0,00 Liter zu;0,00 =;0,00
+Summe: 211 Sales - Nachos;0,00;;;
+220 Sales - Confectionery - Central;;;;
+103301;Fruit gums loose;Central purchasing;€ ;0,00
+;gekauft in Karton zu 3 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+103302;Chocolate beans loose;Central purchasing;€ ;0,00
+;gekauft in Karton zu 3 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+103303;Liquorice loose;Central purchasing;€ ;0,00
+;gekauft in Karton zu 3 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+103305;Chocolate bar;Central purchasing;€ ;0,00
+;gekauft in Karton zu 40 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103306;Biscuit bar;Central purchasing;€ ;0,00
+;gekauft in Karton zu 40 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+Summe: 220 Sales - Confectionery - Central;0,00;;;
+230 Sales - Ice cream;;;;
+103401;Ice cream vanilla;Central purchasing;€ ;0,00
+;gekauft in Karton zu 20 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103402;Ice cream chocolate;Central purchasing;€ ;0,00
+;gekauft in Karton zu 20 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103403;Ice cream strawberry;Central purchasing;€ ;0,00
+;gekauft in Karton zu 20 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103404;Ice cream cone;Central purchasing;€ ;0,00
+;gekauft in Karton zu 24 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+Summe: 230 Sales - Ice cream;0,00;;;
+240 Sales - Hot drinks;;;;
+103501;Coffee beans;Central purchasing;€ ;0,00
+;gekauft in Karton zu 6 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+103502;Cocoa powder;Central purchasing;€ ;0,00
+;gekauft in Karton zu 10 kg;Bestand: 0,00 kg zu;0,00 =;0,00
+103503;Tea bags;Central purchasing;€ ;0,00
+;gekauft in Karton zu 200 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+Summe: 240 Sales - Hot drinks;0,00;;;
+250 Purch - Packaging;;;;
+103601;Popcorn bag small;Central purchasing;€ ;0,00
+;gekauft in Karton zu 500 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103602;Popcorn bag large;Central purchasing;€ ;0,00
+;gekauft in Karton zu 300 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103603;Nacho tray;Central purchasing;€ ;0,00
+;gekauft in Karton zu 400 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103604;Cup 0.4 l;Central purchasing;€ ;0,00
+;gekauft in Karton zu 1000 Becher;Bestand: 0,00 Becher zu;0,00 =;0,00
+103605;Lid large;Central purchasing;€ ;0,00
+;gekauft in Karton zu 1000 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103606;Drinking straw;Central purchasing;€ ;0,00
+;gekauft in Karton zu 2500 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+Summe: 250 Purch - Packaging;0,00;;;
+260 Sales - Savoury;;;;
+103701;Sausage;Central purchasing;€ ;0,00
+;gekauft in Glas zu 40 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103702;Hot dog bun;Central purchasing;€ ;0,00
+;gekauft in Beutel zu 50 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+Summe: 260 Sales - Savoury;0,00;;;
+290 Purch - Miscellaneous;;;;
+103801;Spray cream;Central purchasing;€ ;0,00
+;gekauft in Karton zu 12000 gramm;Bestand: 0,00 g zu;0,00 =;0,00
+Summe: 290 Purch - Miscellaneous;0,00;;;
+299 - Deposits and vouchers;;;;
+103901;Cup deposit;Central purchasing;€ ;0,00
+;gekauft in Stück(e) zu 1 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+103902;Gift voucher;Central purchasing;€ ;0,00
+;gekauft in Stück(e) zu 1 Stück(e);Bestand: 0,00 Stück(e) zu;0,00 =;0,00
+Summe: 299 - Deposits and vouchers;0,00;;;

@@ -1,0 +1,27 @@
+# Findings of the weekly image scan ('audit.yml') that are accepted for now.
+#
+# Only what cannot be fixed from here belongs in this file: the newest image
+# of the vendor still contains the vulnerability. Accepted does not mean
+# harmless. It means that nothing can be done but wait.
+#
+# Every entry names the file it applies to, what is affected and an expiry
+# date. After that date the finding turns the run red again and is looked at
+# anew. A new finding turns it red at once. An entry whose finding is gone is
+# removed.
+#
+# Caddy 2.11.7 (October 2026) is the newest release and is built with Go
+# 1.26.8. The fixes are in Go 1.26.9 and in golang.org/x/net 0.60.0. Only a
+# new release of Caddy brings them, and 'caddy:2-alpine' follows it by itself.
+vulnerabilities:
+  - id: CVE-2026-78667
+    paths: [usr/bin/caddy]
+    statement: Go 1.26.8 in Caddy 2.11.7 (net/http, Range headers), fixed in Go 1.26.9
+    expired_at: 2026-11-09
+  - id: CVE-2026-78669
+    paths: [usr/bin/caddy]
+    statement: golang.org/x/net 0.59.0 and Go 1.26.8 in Caddy 2.11.7, fixed in 0.60.0 and Go 1.26.9
+    expired_at: 2026-11-09
+  - id: CVE-2026-97031
+    paths: [usr/bin/caddy]
+    statement: Go 1.26.8 in Caddy 2.11.7 (crypto/tls, ECH), fixed in Go 1.26.9
+    expired_at: 2026-11-09

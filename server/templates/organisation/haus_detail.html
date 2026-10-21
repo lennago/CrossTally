@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ haus.name }}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'haus_list' %}">{% translate "Häuser" %}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ haus.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="kopfleiste bg-body py-2 d-flex flex-wrap gap-2 justify-content-between align-items-start mb-3">
+        <div>
+            <h1 class="h3 mb-1">{{ haus.name }}</h1>
+            <div class="text-body-secondary small">
+                {% blocktranslate with aktiv=anzahl_aktiv %}{{ aktiv }} aktive Hausartikel{% endblocktranslate %}
+                {% for art, anzahl in haus.arten_zahlen %}· {{ art.name }} {{ anzahl }} {% endfor %}
+                · {% blocktranslate with inaktiv=anzahl_inaktiv eingestellt=anzahl_eingestellt bereiche=haus.bereiche.all|length orte=haus.alle_orte.count %}{{ inaktiv }} inaktiv · {{ eingestellt }} eingestellt · {{ bereiche }} Bereiche · {{ orte }} Orte{% endblocktranslate %}
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'hausartikel_list' haus.pk %}" class="btn btn-outline-secondary btn-sm">
+                {% translate "Hausartikel" %}
+            </a>
+            <a href="{% url 'hausartikel_add' haus.pk %}" class="btn btn-success btn-sm">
+                {% translate "Neuer Hausartikel" %}
+            </a>
+            <a href="{% url 'hausartikel_import' haus.pk %}" class="btn btn-outline-secondary btn-sm">
+                {% translate "Importieren" %}
+            </a>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'haus_edit' haus.pk %}" class="btn btn-sm btn-outline-secondary">{% translate "Bearbeiten" %}</a>
+                <a href="{% url 'haus_delete' haus.pk %}" class="btn btn-sm btn-outline-danger">{% translate "Löschen" %}</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-header bg-body-tertiary">{% translate "Bereiche und Orte" %}</div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">{% translate "Bereich / Ort" %}</th>
+                                <th scope="col" class="text-center">{% translate "Erwartete Artikel" %}</th>
+                                <th class="breite-8" scope="col"><span class="visually-hidden">{% translate "Aktionen" %}</span></th>
+                            </tr>
+                        </thead>
+                        {# One body per area: the header row belongs to its      #}
+                        {# locations and should not slip away when reading.      #}
+                        {% for bereich in haus.bereiche.all %}
+                        <tbody class="border-top">
+                            <tr class="tabellenzeile-ruhig">
+                                <th scope="rowgroup" colspan="2">
+                                    <a href="{{ bereich.get_absolute_url }}"
+                                        class="link-body-emphasis link-offset-2 text-decoration-none">
+                                        {{ bereich.name }}
+                                    </a>
+                                </th>
+                                <td class="text-end">
+                                    <a href="{{ bereich.get_absolute_url }}"
+                                        class="btn btn-outline-secondary btn-sm">{% translate "Orte" %}</a>
+                                </td>
+                            </tr>
+                            {% for ort in bereich.orte.all %}
+                            <tr>
+                                <td class="ps-4">
+                                    <a href="{{ ort.get_absolute_url }}"
+                                        class="link-body-emphasis link-offset-2 text-decoration-none">
+                                        {{ ort.name }}
+                                    </a>
+                                </td>
+                                <td class="text-center text-body-secondary font-monospace">
+                                    {{ ort.anzahl_erwartungen }}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'zaehlliste' ort.pk %}"
+                                        class="btn btn-outline-secondary btn-sm">{% translate "Zählliste" %}</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="ps-4 text-body-secondary small py-3">
+                                    {% translate "Noch kein Ort in diesem Bereich. Angelegt wird er" %}
+                                    <a href="{{ bereich.get_absolute_url }}">{% translate "hier" %}</a>.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        {% empty %}
+                        <tbody>
+                            <tr>
+                                <td colspan="3" class="text-center text-body-secondary py-5">
+                                    {% translate "Noch keine Bereiche in diesem Haus. Ein Bereich fasst zusammengehörige Orte, etwa „Theke“ mit Thekenfront, Rückseite und Gefrierfach." %}
+                                </td>
+                            </tr>
+                        </tbody>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card mb-4">
+                <div class="card-header bg-body-tertiary d-flex justify-content-between">
+                    <span>{% translate "Zähler dieses Hauses" %}</span>
+                    <a href="{% url 'haus_edit' haus.pk %}" class="small link-secondary">{% translate "Bearbeiten" %}</a>
+                </div>
+                <div class="card-body">
+                    {% for person in haus.zugehoerige_benutzer %}
+                    <a href="{{ person.get_absolute_url }}"
+                        class="badge rounded-pill bg-body-secondary text-body border text-body text-decoration-none me-1">
+                        {{ person }}{% if person.gilt_fuer_alle_haeuser %} *{% endif %}
+                    </a>
+                    {% empty %}
+                    <span class="text-body-secondary">
+                        {% translate "Diesem Haus ist noch niemand zugeordnet." %}
+                    </span>
+                    {% endfor %}
+                    <p class="text-body-secondary small mt-3 mb-0">
+                        {% translate "Mit * sind Führungskräfte und Admins gekennzeichnet. Sie sind keinem einzelnen Haus zugeordnet. Gezählt wird, wer an der Inventur selbst eingetragen ist. Die Liste hier schlägt dort vor." %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-body-tertiary">{% translate "Neuer Bereich" %}</div>
+                <div class="card-body">
+                    <form method="post" novalidate data-sofort>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <button class="btn btn-success" type="submit">{% translate "Bereich anlegen" %}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h2 class="h5 mb-0">{% translate "Zuletzt geänderte Hausartikel" %}</h2>
+        <a href="{% url 'hausartikel_list' haus.pk %}" class="small link-secondary">
+            {% blocktranslate with anzahl=anzahl_artikel %}alle {{ anzahl }} durchsuchen{% endblocktranslate %}
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th scope="col">{% translate "Nr." %}</th>
+                    <th scope="col">{% translate "Bezeichnung" %}</th>
+                    <th scope="col">{% translate "Warengruppe" %}</th>
+                    <th scope="col">{% translate "Ware" %}</th>
+                    <th scope="col" class="text-end">{% translate "Einheit" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for artikel in neueste_artikel %}
+                <tr {% if not artikel.aktiv %}class="ausgegraut"{% endif %}>
+                    <td class="font-monospace text-body-secondary">{{ artikel.artikelnummer|default:"–" }}</td>
+
+                    <td>
+                        <a href="{{ artikel.get_absolute_url }}?von=haus:{{ haus.pk }}"
+                            class="link-body-emphasis link-offset-2 text-decoration-none">
+                            {% include "katalog/components/artikel_name.html" %}
+                        </a>
+                        {% if not artikel.aktiv %}
+                        <span class="badge bg-body-secondary text-body border ms-1">{{ artikel.get_status_display|lower }}</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <a href="{{ artikel.warengruppe.get_absolute_url }}"
+                            class="link-secondary link-offset-2 text-decoration-none">
+                            {{ artikel.warengruppe.anzeigename }}
+                        </a>
+                    </td>
+
+                    <td>
+                        <a href="{{ artikel.ware.get_absolute_url }}"
+                            class="link-secondary link-offset-2 text-decoration-none">
+                            {{ artikel.ware.name }}
+                        </a>
+                    </td>
+
+                    <td class="text-end text-body-secondary">
+                        {{ artikel.basiseinheit.kurz }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-body-secondary py-5">
+                        {% translate "Dieses Haus führt noch keine Hausartikel. Entweder" %}
+                        <a href="{% url 'hausartikel_add' haus.pk %}">{% translate "einzeln anlegen" %}</a>
+                        {% translate "oder den" %}
+                        <a href="{% url 'hausartikel_import' haus.pk %}">{% translate "Artikelstamm einlesen" %}</a>.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if anzahl_artikel > neueste_artikel|length %}
+    <a href="{% url 'hausartikel_list' haus.pk %}" class="btn btn-outline-secondary btn-sm">
+        {% blocktranslate with anzahl=anzahl_artikel %}Alle {{ anzahl }} Hausartikel durchsuchen{% endblocktranslate %}
+    </a>
+    {% endif %}
+
+</div>
+{% endblock content %}

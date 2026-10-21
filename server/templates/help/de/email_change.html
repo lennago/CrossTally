@@ -1,0 +1,32 @@
+<h3>Eine neue Adresse</h3>
+<p>
+    Hier änderst du die E-Mail-Adresse deines Kontos.{% if bestaetigung %} An die neue Adresse
+    geht zuerst eine Mail mit einem Link. Erst wenn du ihn bestätigt hast, gilt sie. Bis dahin
+    bleibt die bisherige, und ein Tippfehler schneidet dich nicht von deinen Mails ab.{% else %}
+    Die neue Adresse gilt sofort.{% endif %} In der Zähl-App geht das genauso, über das
+    Kontomenü.
+</p>
+{% if bestaetigung %}
+<h3>Der Link</h3>
+<p>
+    Er gilt {{ tage }} Tag{{ tage|pluralize:"e" }} und nur einmal. Trägst du vorher eine
+    andere Adresse ein, gilt nur noch der neue Link. Ein neues Passwort nimmt ihn zurück,
+    ebenso ein entfernter Passkey oder ein deaktiviertes Konto. Wer dein Gerät oder dein
+    Passwort hatte, kommt so nicht mehr an die Adresse heran. Dann trägst du sie einfach noch
+    einmal ein.
+</p>
+{% endif %}
+<h3>Passwort oder Passkey</h3>
+<p>
+    Vorher fragt die Seite nach deinem Passwort. Eine offene Sitzung allein genügt nicht, denn
+    wer die Adresse ändert, könnte das Konto übernehmen.{% if mail_moeglich %} Mit der neuen
+    Adresse und „Passwort vergessen?“ ginge das leicht.{% endif %} Ein falsches Passwort zählt
+    wie ein Fehlversuch beim Anmelden.
+</p>
+<p>
+    Hat dein Konto kein Passwort, bestätigst du stattdessen mit einem deiner Passkeys. Nach
+    <strong>Mit Passkey bestätigen</strong> fragt das Gerät nach Gesicht, Finger oder PIN.
+    Danach hast du zwei Minuten, um die Adresse abzuschicken. Ohne Passwort und ohne Passkey
+    gibt es nichts, womit du bestätigen könntest. Dann kann dir ein Administrator ein Passwort
+    setzen.
+</p>

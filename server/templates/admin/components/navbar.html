@@ -1,0 +1,125 @@
+{% load i18n %}
+{# The navigation bar for the admin.                                           #}
+{#                                                                             #}
+{# The same entries as in 'templates/base.html', only without Bootstrap: there #}
+{# they carry its classes, here 'static/admin_site.css' suffices. Whoever adds #}
+{# an entry adds it in both places. A test keeps both lists side by side       #}
+{# ('django_project/test_admin_site.py', "Leiste"). Loading Bootstrap into the #}
+{# admin reformatted every list in it.                                         #}
+{% load static %}
+
+<nav class="leiste">
+    <a class="leiste-marke" href="{% url 'inventur_list' %}">
+        <img src="{% if eigenes_logo %}{% url 'icon' name='logo' %}?stand={{ logo_stand }}{% else %}{% static 'logo.svg' %}{% endif %}"
+            alt="" width="28" height="28">
+        {{ app_name }}
+        {% include "components/demo_marke.html" %}
+    </a>
+
+    {# The collapsible menu for narrow windows, without script: the checkbox   #}
+    {# remembers the state, the stylesheet reads it via ':checked'. It stays   #}
+    {# reachable for the keyboard, hidden it is only for the eye.              #}
+    <input class="leiste-schalter" type="checkbox" id="leiste-schalter" aria-label="{% translate 'Navigation umschalten' %}">
+    <label class="leiste-knopf" for="leiste-schalter"><span class="leiste-knopf-icon"></span></label>
+
+    <div class="leiste-klapp">
+        <ul class="leiste-eintraege">
+            <li><a href="{% url 'inventur_list' %}">{% translate "Inventuren" %}</a></li>
+            <li>
+                <details name="leiste">
+                    <summary>{% translate "Stammdaten" %}</summary>
+                    <ul class="leiste-menue">
+                        <li><a href="{% url 'ware_list' %}">{% translate "Waren" %}</a></li>
+                        <li><a href="{% url 'rezepturartikel_list' %}">{% translate "Rezepturartikel" %}</a></li>
+                        <li><a href="{% url 'warenfamilie_list' %}">{% translate "Warenfamilien" %}</a></li>
+                        <li><a href="{% url 'warengruppe_list' %}">{% translate "Warengruppen" %}</a></li>
+                        <li><a href="{% url 'behaelter_list' %}">{% translate "Behälter" %}</a></li>
+                        <li><a href="{% url 'inventurart_list' %}">{% translate "Inventurarten" %}</a></li>
+                        <li>
+                            <hr>
+                        </li>
+                        <li><a href="{% url 'haus_list' %}">{% translate "Häuser und Orte" %}</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li><a href="{% url 'auswertung' %}">{% translate "Auswertungen" %}</a></li>
+            <li><a href="{% url 'pwa' %}" target="_blank">{% translate "Zähl-App" %}</a></li>
+            <li><a href="{% url 'user_list' %}">{% translate "Benutzer" %}</a></li>
+        </ul>
+
+        <ul class="leiste-eintraege leiste-rechts">
+            <li>
+                <details name="leiste">
+                    <summary>{{ user.username }}</summary>
+                    <ul class="leiste-menue leiste-menue-rechts">
+                        <li><a href="{% url 'admin:index' %}">{% translate "Verwaltung" %}</a></li>
+                        <li>
+                            <hr>
+                        </li>
+                        <li class="leiste-kopf">{% translate "Darstellung" %}</li>
+                        <li><button type="button" data-thema="auto">{% translate "Automatisch" %}</button></li>
+                        <li><button type="button" data-thema="light">{% translate "Hell" %}</button></li>
+                        <li><button type="button" data-thema="dark">{% translate "Dunkel" %}</button></li>
+                        <li>
+                            <hr>
+                        </li>
+                        <li class="leiste-kopf">{% translate "Sprache" %}</li>
+                        {% for kuerzel, name in sprachen %}
+                        <li>
+                            <form method="post" action="{% url 'sprachwahl' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="sprache" value="{{ kuerzel }}">
+                                <input type="hidden" name="weiter" value="{{ request.get_full_path }}">
+                                <button type="submit" data-sprache="{{ kuerzel }}"
+                                    aria-current="{% if kuerzel == user.sprache %}true{% else %}false{% endif %}">{{ name }}</button>
+                            </form>
+                        </li>
+                        {% endfor %}
+                        <li>
+                            <hr>
+                        </li>
+                        {# The same entries as in front. The difference stands here as a raw #}
+                        {# number without colour, so the choice acts on the website and on   #}
+                        {# the sheets. A test keeps both bars the same.                      #}
+                        <li class="leiste-kopf">{% translate "Farben der Differenz" %}</li>
+                        {% for kuerzel, name in farbwahl %}
+                        <li>
+                            <form method="post" action="{% url 'farbwahl' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="farben" value="{{ kuerzel }}">
+                                <input type="hidden" name="weiter" value="{{ request.get_full_path }}">
+                                <button type="submit" data-farben="{{ kuerzel }}"
+                                    aria-current="{% if kuerzel == user.differenzfarben %}true{% else %}false{% endif %}">{{ name }}</button>
+                            </form>
+                        </li>
+                        {% endfor %}
+                        <li>
+                            <hr>
+                        </li>
+                        <li><a href="{% url 'passkey_list' %}">{% translate "Passkeys" %}</a></li>
+                        <li><a href="{% url 'password_change' %}">{% translate "Passwort ändern" %}</a></li>
+                        <li><a href="{% url 'email_aendern' %}">{% translate "E-Mail-Adresse ändern" %}</a></li>
+                        <li>
+                            <hr>
+                        </li>
+                        <li>
+                            <form method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit">{% translate "Abmelden" %}</button>
+                            </form>
+                        </li>
+                        <li>
+                            <hr>
+                        </li>
+                        {% if rueckmeldung_link %}
+                        <li><a href="{{ rueckmeldung_link }}">{% translate "Problem oder Wunsch melden" %}</a></li>
+                        {% endif %}
+                        <li class="leiste-version">
+    {% blocktranslate %}Version {{ app_version }}{% endblocktranslate %}
+</li>
+                    </ul>
+                </details>
+            </li>
+        </ul>
+    </div>
+</nav>

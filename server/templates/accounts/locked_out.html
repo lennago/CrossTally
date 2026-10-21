@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{# After too many failed attempts. Locked is the combination of user name and   #}
+{# address, not the account as such (see 'accounts/lockout.py').                #}
+
+{% block title %}{% translate "Vorübergehend gesperrt" %}{% endblock title %}
+
+{% block content %}
+<div class="container py-5 max-breite-36">
+
+    <div class="card">
+        <div class="card-body p-4">
+
+            <h2 class="h4 mb-3">{% translate "Zu viele Fehlversuche" %}</h2>
+
+            <p>{{ meldung }}</p>
+
+            <p class="mb-4">
+    {% blocktranslate count minuten=sperrminuten %}Die Sperre gilt eine Minute und löst sich danach von selbst.{% plural %}Die Sperre gilt {{ minuten }} Minuten und löst sich danach von selbst.{% endblocktranslate %}
+    {% translate "Weißt du dein Passwort nicht mehr, wende dich an einen Administrator. Er setzt es in der Verwaltung neu." %}
+    {% if mail_moeglich %}{% translate "Oder du setzt es über „Passwort vergessen?“ auf der Anmeldeseite selbst neu." %}{% endif %}
+    {% translate "Auch mit einem neuen Passwort geht es von hier aus erst nach Ablauf der Sperre weiter. Ein Administrator kann sie in der Verwaltung früher aufheben." %}
+</p>
+
+            <a href="{% url 'login' %}" class="btn btn-outline-secondary">{% translate "Zurück zur Anmeldung" %}</a>
+
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

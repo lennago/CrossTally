@@ -1,0 +1,64 @@
+{% load i18n %}
+{# Page navigation with direct jump. Included above and below long lists:          #}
+{# {% include "components/pagination.html" with stelle="oben" %}                   #}
+{# 'stelle' keeps the field ids apart when the component stands twice on           #}
+{# the same page.                                                                  #}
+{% if is_paginated %}
+<nav aria-label="{% if stelle == 'oben' %}{% translate 'Seitennavigation oben' %}{% else %}{% translate 'Seitennavigation unten' %}{% endif %}"
+    class="d-flex flex-wrap justify-content-center align-items-center gap-3 my-3">
+
+    <ul class="pagination pagination-sm mb-0">
+        {# 'querystring' keeps the active filters when paging. Only ask for the #}
+        {# page numbers if they exist, otherwise the paginator throws an        #}
+        {# EmptyPage that no 'default' filter catches.                          #}
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="{% querystring page=1 %}" title="{% translate 'Erste Seite' %}">{% translate "&laquo;" %}</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="{% querystring page=page_obj.previous_page_number %}">
+                {% translate "Zurück" %}
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">{% translate "&laquo;" %}</span></li>
+        <li class="page-item disabled"><span class="page-link">{% translate "Zurück" %}</span></li>
+        {% endif %}
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{% querystring page=page_obj.next_page_number %}">{% translate "Weiter" %}</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="{% querystring page=page_obj.paginator.num_pages %}"
+                title="{% translate 'Letzte Seite' %}">{% translate "&raquo;" %}</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">{% translate "Weiter" %}</span></li>
+        <li class="page-item disabled"><span class="page-link">{% translate "&raquo;" %}</span></li>
+        {% endif %}
+    </ul>
+
+    <form method="get" class="d-flex align-items-center gap-2 small mb-0">
+        {# Send the active filters along, otherwise the jump would leave them behind.  #}
+        {% for schluessel, werte in request.GET.lists %}
+        {% if schluessel != "page" %}
+        {% for wert in werte %}
+        <input type="hidden" name="{{ schluessel }}" value="{{ wert }}">
+        {% endfor %}
+        {% endif %}
+        {% endfor %}
+
+        <label class="text-body-secondary" for="seite-{{ stelle|default:'unten' }}">{% translate "Seite" %}</label>
+        <input type="number" class="form-control form-control-sm breite-5"
+            id="seite-{{ stelle|default:'unten' }}" name="page" min="1"
+            max="{{ page_obj.paginator.num_pages }}" value="{{ page_obj.number }}"
+            aria-label="{% translate 'Seitenzahl' %}">
+        <span class="text-body-secondary">
+    {% blocktranslate with num_pages=page_obj.paginator.num_pages %}von {{ num_pages }}{% endblocktranslate %}
+</span>
+        <button class="btn btn-outline-secondary btn-sm" type="submit">{% translate "Los" %}</button>
+    </form>
+
+</nav>
+{% endif %}

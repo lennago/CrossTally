@@ -1,0 +1,474 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load mengen %}
+
+{# Between "really close?" and freezing: what the count shows about the         #}
+{# master data. Without a tick nothing changes, see 'inventur/closing/'.        #}
+
+{% block title %}{% blocktranslate %}Vor dem Abschluss: {{ inventur }}{% endblocktranslate %}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4 max-breite-80">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'inventur_list' %}">{% translate "Inventuren" %}</a></li>
+            {% if lauf %}
+            <li class="breadcrumb-item"><a href="{{ lauf.get_absolute_url }}">{{ lauf }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item">
+                <a href="{{ inventur.get_absolute_url }}">{{ inventur }}</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'inventur_pruefen' inventur.pk %}">{% translate "Prüfen" %}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{% translate "Abschließen" %}</li>
+        </ol>
+    </nav>
+
+    <div class="kopfleiste bg-body py-2 mb-1">
+        <h1 class="h3 mb-0">{% translate "Vor dem Abschluss" %}</h1>
+    </div>
+    <p class="text-body-secondary mb-3">
+    {% blocktranslate with name=inventur.haus.name %}Beim Zählen hat sich gezeigt, wo die Stammdaten von {{ name }} nicht mehr zum Regal passen. Noch ist nichts eingefroren. Was hier angehakt ist, wird zusammen mit dem Abschluss geändert.{% endblocktranslate %}
+<strong>{% translate "Ohne Haken bleibt alles, wie es ist." %}</strong>
+    </p>
+
+    {# From "Close all" in the run: one house after the other, see               #}
+    {# 'views.lauf_fortsetzen'.                                                  #}
+    {% if lauf %}
+    <div class="alert alert-light border py-2 small">
+        <strong>
+    {% blocktranslate %}Gemeinsamer Abschluss {{ lauf }}:{% endblocktranslate %}
+</strong>
+        {% for haus in lauf.inventuren %}
+        {% if haus.pk == inventur.pk %}<strong>
+    {% blocktranslate with name=haus.haus.name %}{{ name }} (jetzt){% endblocktranslate %}
+</strong>{% elif haus.status == "ABGESCHLOSSEN" %}{% blocktranslate with name=haus.haus.name %}{{ name }} abgeschlossen{% endblocktranslate %}{% else %}{% blocktranslate with name=haus.haus.name %}{{ name }} wartet{% endblocktranslate %}{% endif %}{% if not forloop.last %} {% translate "&middot;" %} {% endif %}
+        {% endfor %}
+        <div class="text-body-secondary mt-1">
+            {% translate "Danach geht es mit dem nächsten Haus weiter. Was hier für alle Artikel einer Ware entschieden wird, gilt in jedem Haus und steht dort schon fest." %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if fehler %}
+    <div class="alert alert-danger">
+        <p class="mb-1">{% translate "Abgeschlossen wurde nichts. Diese Antworten lassen sich nicht umsetzen:" %}</p>
+        <ul class="mb-0">
+            {% for text in fehler %}<li>{{ text }}</li>{% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {# The states of the numbers and the remarks the review list showed. #}
+        {# If either changed since then, it goes back there.                #}
+        {% if zaehlstand %}<input type="hidden" name="zaehlstand" value="{{ zaehlstand }}">{% endif %}
+        {% if bemerkungsstand %}<input type="hidden" name="bemerkungsstand" value="{{ bemerkungsstand }}">{% endif %}
+
+        {% if klaerung.wiederaufnahmen %}
+        <div class="card mb-4">
+            <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center">
+                <span>{% translate "Nicht mehr aktiv, aber gezählt: wieder aktivieren?" %}</span>
+                <label class="small mb-0">
+                    <input type="checkbox" class="form-check-input me-1" data-alle="wiederaufnehmen">
+                    {% translate "alle" %}
+                </label>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <tbody>
+                        {% for eintrag in klaerung.wiederaufnahmen %}
+                        <tr>
+                            <td class="breite-2-5">
+                                <input type="checkbox" class="form-check-input" name="wiederaufnehmen"
+                                    value="{{ eintrag.schluessel }}" id="wieder-{{ eintrag.schluessel }}"
+                                    {% if eintrag.hinderung %}disabled{% elif eintrag.schluessel in entscheidungen.wiederaufnehmen %}checked{% endif %}>
+                            </td>
+                            <td class="font-monospace text-body-secondary breite-7">
+                                {{ eintrag.hausartikel.artikelnummer|default:"–" }}
+                            </td>
+                            <td>
+                                <label for="wieder-{{ eintrag.schluessel }}" class="mb-0">
+                                    {% include "katalog/components/artikel_name.html" with artikel=eintrag.hausartikel %}
+                                </label>
+                            </td>
+                            <td class="small text-body-secondary">
+                                {% blocktranslate with status=eintrag.hausartikel.get_status_display|lower datum=eintrag.hausartikel.gueltig_bis|date:"SHORT_DATE_FORMAT" %}{{ status }} seit {{ datum }}{% endblocktranslate %}
+                                {% if eintrag.hinderung %}&middot; {% blocktranslate with grund=eintrag.hinderung %}geht nicht: {{ grund }}{% endblocktranslate %}{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if klaerung.neue_erwartungen %}
+        <div class="card mb-4">
+            <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center">
+                <span>{% translate "Unerwartet gezählt: in die Zählliste aufnehmen?" %}</span>
+                <label class="small mb-0">
+                    <input type="checkbox" class="form-check-input me-1" data-alle="aufnehmen">
+                    {% translate "alle" %}
+                </label>
+            </div>
+            <div class="card-body py-2 small text-body-secondary">
+                {% translate "Aufgenommenes steht bei der nächsten Inventur am Ende der Zählliste des Orts. Umsortiert wird dort." %}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <tbody>
+                        {% for eintrag in klaerung.neue_erwartungen %}
+                        <tr>
+                            <td class="breite-2-5">
+                                <input type="checkbox" class="form-check-input" name="aufnehmen"
+                                    value="{{ eintrag.schluessel }}" id="auf-{{ eintrag.schluessel }}"
+                                    {% if eintrag.hinderung %}disabled{% elif eintrag.schluessel in entscheidungen.aufnehmen %}checked{% endif %}>
+                            </td>
+                            <td class="small text-body-secondary breite-14">
+                                {{ eintrag.ort.bereich.name }} · {{ eintrag.ort.name }}
+                            </td>
+                            <td>
+                                <label for="auf-{{ eintrag.schluessel }}" class="mb-0">
+                                    {{ eintrag.artikel.warenname }}
+                                </label>
+                            </td>
+                            <td class="small breite-12">
+    {% blocktranslate with menge=eintrag.menge %}gezählt: {{ menge }}{% endblocktranslate %}
+</td>
+                            <td class="small text-body-secondary">
+                                {% if eintrag.hinderung %}
+                                {% blocktranslate with grund=eintrag.hinderung %}geht nicht: {{ grund }}{% endblocktranslate %}
+                                {% elif eintrag.gewogen and eintrag.artikel_schon_erwartet %}
+                                {% translate "das Wiegen kommt dazu" %}
+                                {% elif eintrag.gebinde and eintrag.artikel_schon_erwartet %}
+                                {% blocktranslate with gebinde=eintrag.gebinde.anzeigename %}das Gebinde „{{ gebinde }}“ kommt dazu{% endblocktranslate %}
+                                {% elif eintrag.gebinde %}
+                                {% blocktranslate with gebinde=eintrag.gebinde.anzeigename %}Artikel samt Gebinde „{{ gebinde }}“ kommt dazu{% endblocktranslate %}
+                                {% else %}
+                                {% translate "der Artikel kommt dazu" %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if klaerung.ungezaehlte_gebinde %}
+        <div class="card mb-4">
+            <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center">
+                <span>{% translate "Erwartet, aber nichts eingetragen: aus der Zählliste nehmen?" %}</span>
+                <label class="small mb-0">
+                    <input type="checkbox" class="form-check-input me-1" data-alle="herausnehmen">
+                    {% translate "alle" %}
+                </label>
+            </div>
+            <div class="card-body py-2 small text-body-secondary">
+                {% translate "Herausgenommen wird nur das Gebinde oder das Wiegen an diesem Ort. Der Artikel bleibt in der Zählliste, samt seinen übrigen Gebinden." %}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <tbody>
+                        {% for eintrag in klaerung.ungezaehlte_gebinde %}
+                        <tr>
+                            <td class="breite-2-5">
+                                <input type="checkbox" class="form-check-input" name="herausnehmen"
+                                    value="{{ eintrag.schluessel }}" id="raus-{{ eintrag.schluessel }}"
+                                    {% if eintrag.schluessel in entscheidungen.herausnehmen %}checked{% endif %}>
+                            </td>
+                            <td class="small text-body-secondary breite-14">
+                                {{ eintrag.ort.bereich.name }} · {{ eintrag.ort.name }}
+                            </td>
+                            <td>
+                                <label for="raus-{{ eintrag.schluessel }}" class="mb-0">
+                                    {{ eintrag.artikel.warenname }}
+                                </label>
+                            </td>
+                            <td class="breite-12">{{ eintrag.bezeichnung }}</td>
+                            <td class="small text-body-secondary">
+                                {% if eintrag.in_der_app_geloescht %}{% translate "in der App gelöscht" %}{% else %}{% translate "leer geblieben" %}{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if klaerung.ungezaehlte_artikel %}
+        <div class="card mb-4">
+            <div class="card-header bg-body-tertiary d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <span>{% translate "Gar nicht gezählt: inaktiv setzen, einstellen oder in eine andere Inventurart wechseln?" %}</span>
+                <span class="d-flex gap-2 small" data-alle-antworten>
+                    {% translate "alle:" %}
+                    <button type="button" class="btn btn-link btn-sm p-0" data-setze="">{% translate "nichts" %}</button>
+                    <button type="button" class="btn btn-link btn-sm p-0" data-setze="{{ INAKTIV_SETZEN }}">{% translate "inaktiv" %}</button>
+                    <button type="button" class="btn btn-link btn-sm p-0" data-setze="{{ EINSTELLEN }}">{% translate "einstellen" %}</button>
+                </span>
+            </div>
+            <div class="card-body py-2 small text-body-secondary">
+                {% translate "Aufgeführt ist, wozu nichts eingetragen wurde und wo „Soll zählt“ nicht gesetzt ist. Ein Wechsel der Art fragt, ob er nur für diesen Artikel oder für alle Artikel der Ware gilt." %}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <tbody>
+                        {% for eintrag in klaerung.ungezaehlte_artikel %}
+                        <tr>
+                            <td class="font-monospace text-body-secondary breite-7">
+                                {{ eintrag.hausartikel.artikelnummer|default:"–" }}
+                            </td>
+                            <td>
+                                {% include "katalog/components/artikel_name.html" with artikel=eintrag.hausartikel %}
+                                <div class="small text-body-secondary">{{ eintrag.hausartikel.inventurart.name }}</div>
+                            </td>
+                            <td class="small text-body-secondary breite-9">
+                                {% if eintrag.sollbestand is not None %}
+                                {% blocktranslate with menge=eintrag.sollbestand|menge_kurz einheit=eintrag.hausartikel.basiseinheit.kurz %}Soll {{ menge }} {{ einheit }}{% endblocktranslate %}
+                                {% else %}{% translate "ohne Soll" %}{% endif %}
+                            </td>
+                            <td class="breite-38">
+                                <div class="d-flex flex-wrap gap-3 small text-nowrap">
+                                    {% with name="ungezaehlt_"|add:eintrag.schluessel %}
+                                    <label class="form-check mb-0">
+                                        <input class="form-check-input" type="radio" name="{{ name }}" value=""
+                                            {% if not eintrag.antwort %}checked{% endif %}>
+                                        {% translate "nichts ändern" %}
+                                    </label>
+                                    <label class="form-check mb-0">
+                                        <input class="form-check-input" type="radio" name="{{ name }}" value="{{ INAKTIV_SETZEN }}"
+                                            {% if eintrag.antwort == INAKTIV_SETZEN %}checked{% endif %}>
+                                        {% translate "inaktiv setzen" %}
+                                    </label>
+                                    <label class="form-check mb-0">
+                                        <input class="form-check-input" type="radio" name="{{ name }}" value="{{ EINSTELLEN }}"
+                                            {% if eintrag.antwort == EINSTELLEN %}checked{% endif %}>
+                                        {% translate "einstellen" %}
+                                    </label>
+                                    {% for art in eintrag.andere_arten %}
+                                    {# As text first: 'add' would try to sum a #}
+                                    {# number and give up.                      #}
+                                    {% with nummer=art.pk|stringformat:"s" %}{% with wert=WECHSEL_PRAEFIX|add:nummer %}
+                                    <label class="form-check mb-0">
+                                        <input class="form-check-input" type="radio" name="{{ name }}" value="{{ wert }}"
+                                            data-wechsel {% if eintrag.antwort == wert %}checked{% endif %}>
+                                        {% blocktranslate with art=art.name %}nach „{{ art }}“{% endblocktranslate %}
+                                    </label>
+                                    {% endwith %}{% endwith %}
+                                    {% endfor %}
+                                    {% endwith %}
+                                </div>
+                                {% include "inventur/components/type_scope.html" with eintrag=eintrag %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if klaerung.ohne_soll %}
+        <div class="card mb-4">
+            <div class="card-header bg-body-tertiary d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <span>{% translate "Gezählt, aber ohne Soll: Sollbestand setzen?" %}</span>
+                <span class="d-flex gap-2 small" data-alle-soll>
+                    {% translate "alle:" %}
+                    <button type="button" class="btn btn-link btn-sm p-0" data-setze-soll="">{% translate "ohne Soll" %}</button>
+                    <button type="button" class="btn btn-link btn-sm p-0" data-setze-soll="{{ SOLL_NULL }}">{% translate "Soll 0" %}</button>
+                </span>
+            </div>
+            <div class="card-body py-2 small text-body-secondary">
+                {% translate "Diese Artikel wurden gezählt, haben aber kein Soll. Ohne Soll friert die Zeile ohne Differenz ein." %}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <tbody>
+                        {% for eintrag in klaerung.ohne_soll %}
+                        {% with einheit=eintrag.hausartikel.basiseinheit.kurz %}
+                        <tr>
+                            <td class="font-monospace text-body-secondary breite-7">
+                                {{ eintrag.hausartikel.artikelnummer|default:"–" }}
+                            </td>
+                            <td>
+                                {% include "katalog/components/artikel_name.html" with artikel=eintrag.hausartikel %}
+                                {% if not eintrag.hausartikel.aktiv %}
+                                <span class="badge bg-body-secondary text-body border ms-1">{{ eintrag.hausartikel.get_status_display|lower }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="small breite-12">
+    {% blocktranslate with ist_text=eintrag.ist_text %}gezählt: {{ ist_text }} {{ einheit }}{% endblocktranslate %}
+</td>
+                            <td class="breite-34">
+                                <div class="d-flex flex-wrap align-items-center gap-3 small text-nowrap">
+                                    {% with name="soll_"|add:eintrag.schluessel %}
+                                    <label class="form-check mb-0">
+                                        <input class="form-check-input" type="radio" name="{{ name }}" value=""
+                                            {% if not eintrag.antwort %}checked{% endif %}>
+                                        {% translate "ohne Soll" %}
+                                    </label>
+                                    <label class="form-check mb-0">
+                                        <input class="form-check-input" type="radio" name="{{ name }}" value="{{ SOLL_NULL }}"
+                                            {% if eintrag.antwort == SOLL_NULL %}checked{% endif %}>
+                                        {% translate "Soll 0" %}
+                                    </label>
+                                    <label class="form-check mb-0">
+                                        <input class="form-check-input" type="radio" name="{{ name }}" value="{{ SOLL_EIGENER_WERT }}"
+                                            {% if eintrag.antwort == SOLL_EIGENER_WERT %}checked{% endif %}>
+                                        {% translate "eigener Wert" %}
+                                    </label>
+                                    {% endwith %}
+                                    <span class="input-group input-group-sm breite-11">
+                                        <input type="text" inputmode="decimal" class="form-control"
+                                            name="sollwert_{{ eintrag.schluessel }}" value="{{ eintrag.wert }}"
+                                            aria-label="{% blocktranslate with name=eintrag.hausartikel.name %}Eigener Sollbestand für {{ name }}{% endblocktranslate %}"
+                                            data-sollwert="{{ eintrag.schluessel }}">
+                                        <span class="input-group-text">{{ einheit }}</span>
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endwith %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if klaerung.ausserhalb %}
+        <div class="card mb-4">
+            <div class="card-header bg-body-tertiary">
+                {% translate "Gezählt, aber in keiner Inventurart dieser Inventur: in eine aufnehmen?" %}
+            </div>
+            <div class="card-body py-2 small text-body-secondary">
+                {% translate "Die gezählte Menge geht in jedem Fall ins Ergebnis. Aufgenommen bekommt der Artikel ab der nächsten Inventur dieser Art seine Zeilen." %}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <tbody>
+                        {% for eintrag in klaerung.ausserhalb %}
+                        <tr>
+                            <td class="font-monospace text-body-secondary breite-7">
+                                {{ eintrag.hausartikel.artikelnummer|default:"–" }}
+                            </td>
+                            <td>
+                                {% include "katalog/components/artikel_name.html" with artikel=eintrag.hausartikel %}
+                                <div class="small text-body-secondary">
+                                    {% blocktranslate with art=eintrag.hausartikel.inventurart.name %}zählt in „{{ art }}“{% endblocktranslate %}
+                                </div>
+                            </td>
+                            <td class="small breite-12">
+    {% blocktranslate with ist_text=eintrag.ist_text name=eintrag.hausartikel.basiseinheit.kurz %}gezählt: {{ ist_text }} {{ name }}{% endblocktranslate %}
+</td>
+                            <td class="breite-38">
+                                <label class="visually-hidden" for="in-art-{{ eintrag.schluessel }}">
+                                    {% blocktranslate with name=eintrag.hausartikel.name %}Inventurart für {{ name }}{% endblocktranslate %}
+                                </label>
+                                <select class="form-select form-select-sm w-auto" name="in_art_{{ eintrag.schluessel }}"
+                                    id="in-art-{{ eintrag.schluessel }}" data-wechsel>
+                                    <option value="">{% translate "nicht aufnehmen" %}</option>
+                                    {% for art in eintrag.ziele %}
+                                    {% with nummer=art.pk|stringformat:"s" %}
+                                    <option value="{{ nummer }}" {% if eintrag.antwort == nummer %}selected{% endif %}>
+                                        {% blocktranslate with art=art.name %}in „{{ art }}“ aufnehmen{% endblocktranslate %}
+                                    </option>
+                                    {% endwith %}
+                                    {% endfor %}
+                                </select>
+                                {% include "inventur/components/type_scope.html" with eintrag=eintrag %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if klaerung.fremde_behaelter %}
+        <div class="card mb-4">
+            <div class="card-header bg-body-tertiary">
+                {% translate "In einem fremden Behälter gewogen: zuordnen?" %}
+            </div>
+            <div class="card-body py-2 small text-body-secondary">
+    {% blocktranslate with name=inventur.haus.name %}Diese Behälter sind weder dem Artikel noch {{ name }} zugeordnet. Die Wiegungen gelten in jedem Fall. Mit einer Zuordnung steht der Behälter beim nächsten Mal weiter vorn in der Auswahl der Zähl-App.{% endblocktranslate %}
+</div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <tbody>
+                        {% for eintrag in klaerung.fremde_behaelter %}
+                        <tr>
+                            <td>{{ eintrag.traeger.name }}</td>
+                            <td>
+                                <strong>{{ eintrag.behaelter.anzeigename }}</strong>
+                                <span class="text-body-secondary small">
+                                    &middot; {% blocktranslate with anzahl=eintrag.wiegungen %}{{ anzahl }}× gewogen{% endblocktranslate %}
+                                    {% if eintrag.haeuser %}&middot; {% blocktranslate with haeuser=eintrag.haeuser %}steht in {{ haeuser }}{% endblocktranslate %}{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-3 small text-nowrap">
+                                    {% with name="behaelter_"|add:eintrag.schluessel %}
+                                    <label class="form-check mb-0">
+                                        <input class="form-check-input" type="radio" name="{{ name }}" value=""
+                                            {% if not eintrag.antwort %}checked{% endif %}>
+                                        {% translate "nichts ändern" %}
+                                    </label>
+                                    <label class="form-check mb-0">
+                                        <input class="form-check-input" type="radio" name="{{ name }}" value="{{ DEM_ARTIKEL }}"
+                                            {% if eintrag.antwort == DEM_ARTIKEL %}checked{% endif %}>
+                                        {% translate "diesem Artikel zuordnen" %}
+                                    </label>
+                                    <label class="form-check mb-0">
+                                        <input class="form-check-input" type="radio" name="{{ name }}" value="{{ DEM_HAUS }}"
+                                            {% if eintrag.antwort == DEM_HAUS %}checked{% endif %}>
+    {% blocktranslate with name=inventur.haus.name %}{{ name }} zuordnen{% endblocktranslate %}
+</label>
+                                    {% endwith %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if klaerung.leer %}
+        <p class="text-body-secondary">{% translate "Hier ist nichts mehr zu klären." %}</p>
+        {% endif %}
+
+        <div class="fussleiste d-flex align-items-center flex-wrap gap-2 bg-body border-top py-3">
+            <button class="btn btn-success" type="submit">
+    {% blocktranslate %}{{ inventur }} jetzt abschließen{% endblocktranslate %}
+</button>
+            {% if lauf %}
+            <a href="{{ lauf.get_absolute_url }}" class="btn btn-outline-secondary">
+                {% translate "Zurück zum Lauf" %}
+            </a>
+            {% else %}
+            <a href="{% url 'inventur_pruefen' inventur.pk %}" class="btn btn-outline-secondary">
+                {% translate "Zurück zur Prüfliste" %}
+            </a>
+            {% endif %}
+            <span class="text-body-secondary small ms-2">
+                {% translate "Das Einfrieren lässt sich nicht rückgängig machen." %}
+            </span>
+        </div>
+    </form>
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% include "components/script.html" with name="inventur_closing" wert=SOLL_EIGENER_WERT %}
+{% endblock extra_scripts %}

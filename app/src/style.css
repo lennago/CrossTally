@@ -1,0 +1,109 @@
+/*
+ * Counting happens standing, with one hand, often in the half-dark: large
+ * surfaces, large digits, calm colours. Three of them carry the actual
+ * information: open, started, done.
+ */
+:root {
+    --background: #f7f7f8;
+    --surface: #ffffff;
+    --border: #dfe1e5;
+    --selected: #eef1f6;
+    --text: #16181d;
+    /* Dark enough for the small print on the tinted surfaces (4.9:1 on
+       '--selected', axe 2026-10-09). */
+    --muted: #5b6370;
+    --notice: #fff4d6;
+    --open: #c0392b;
+    /* The counter of a started tab stands small on the light background: 4.6:1. */
+    --partial: #8a6508;
+    --done: #1e7a46;
+    /* What can be tapped and leads on: back, new version, "+". */
+    --accent: #2563eb;
+    --header-height: 3rem;
+    /* The height of the demo banner. Without banner zero, see 'DemoBanner.svelte'. */
+    --banner-height: 0px;
+    color-scheme: light;
+}
+
+/*
+ * Dark no longer by the device alone but by the choice on the account:
+ * 'data-theme' is set by 'services/theme.svelte.js', and already before the
+ * first paint by a small script in 'index.html'. "Automatic" is resolved to
+ * the device there, which is why there is only light and dark here.
+ */
+:root[data-theme="dark"] {
+    --background: #16181d;
+    --surface: #1e2127;
+    --border: #333842;
+    --selected: #272c35;
+    --text: #f2f3f5;
+    --muted: #9aa2ae;
+    --notice: #3b3320;
+    --open: #f07167;
+    --partial: #e3b341;
+    --done: #4ade80;
+    /* The light accent read 2.7:1 on the dark header. This one reads 7:1 on
+       the surfaces and keeps the hue. */
+    --accent: #7aa7ff;
+    color-scheme: dark;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* No zoom on double tap: whoever presses "Next ›" quickly in a row taps
+   twice and got a magnified page instead of the article after next.
+   Swiping and pinching with two fingers remain. */
+html {
+    touch-action: manipulation;
+}
+
+body {
+    margin: 0;
+    background: var(--background);
+    color: var(--text);
+    font-family:
+        system-ui,
+        -apple-system,
+        "Segoe UI",
+        sans-serif;
+    font-size: 16px;
+    /* Room for the devices' bars, otherwise the last row sticks to the edge. */
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+input,
+select,
+button {
+    font: inherit;
+    color: inherit;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--surface);
+}
+
+/* Below 16 px iOS zooms into the field on tap, even where the field only
+   inherits its font from a smaller label text. */
+input,
+select {
+    font-size: max(1em, 16px);
+}
+
+button {
+    cursor: pointer;
+    min-height: 2.75rem;
+}
+
+button:disabled {
+    opacity: 0.5;
+}
+
+button.flat {
+    border: 0;
+    background: none;
+    color: var(--accent);
+    padding: 0.4rem 0.5rem;
+    min-height: 2.25rem;
+}

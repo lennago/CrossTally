@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ warengruppe.anzeigename }}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    {% include "components/breadcrumbs.html" with aktuell=warengruppe.anzeigename %}
+
+    <div class="kopfleiste bg-body py-2 d-flex flex-wrap gap-2 justify-content-between align-items-start mb-3">
+        <div class="kopf-titel">
+            <h1 class="h3 mb-1 d-flex align-items-center gap-2">
+                <span class="text-truncate" title="{{ warengruppe.anzeigename }}">{{ warengruppe.anzeigename }}</span>
+                {% if warengruppe.sammelstatus != "AKTIV" %}
+                <span class="badge bg-body-secondary text-body border flex-shrink-0">{{ warengruppe.sammelstatus_anzeige|lower }}</span>
+                {% endif %}
+            </h1>
+            <div class="text-body-secondary small" data-ersetzen="kopfzahlen">
+    {% blocktranslate with waren=page_obj.paginator.count anzahl_artikel=warengruppe.anzahl_artikel %}{{ waren }} Waren · {{ anzahl_artikel }} Hausartikel{% endblocktranslate %}
+</div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            {# The menu **sets** the type of every house article of the group, it  #}
+            {# does not filter. Every choice asks first, because it hits all rows of #}
+            {# the group. Only those: the type hangs on the house article, and where #}
+            {# another house carries the product under another group, it stays.     #}
+            <div class="d-flex flex-wrap align-items-center gap-2" data-ersetzen="arten">
+                <span class="text-body-secondary small">
+                    {% for art, anzahl in arten_verteilung %}
+                    <span class="text-nowrap">{{ art.name }} <span class="badge bg-body-secondary text-body border">{{ anzahl }}</span></span>
+                    {% endfor %}
+                </span>
+                <span class="text-body-secondary small">{% translate "Alle Artikel zählen in" %}</span>
+                {% url 'warengruppe_inventurart' warengruppe.pk as art_ziel %}
+                {% blocktranslate asvar frage with anzahl=warengruppe.anzahl_artikel gruppe=warengruppe.anzeigename %}Alle {{ anzahl }} Hausartikel aus „{{ gruppe }}“ in diese Inventurart setzen?{% endblocktranslate %}
+                {% include "components/inventurart_menu.html" with ziel=art_ziel arten=inventurarten aktuell=art_der_gruppe gemischt=arten_gemischt titel=warengruppe.anzeigename rueckfrage=frage %}
+            </div>
+
+            {% include "katalog/components/sammelstatus_buttons.html" with satz=warengruppe art="gruppe" %}
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'warengruppe_edit' warengruppe.pk %}"
+                    class="btn btn-sm btn-outline-secondary">{% translate "Bearbeiten" %}</a>
+                <a href="{% url 'warengruppe_delete' warengruppe.pk %}"
+                    class="btn btn-sm btn-outline-danger">{% translate "Löschen" %}</a>
+            </div>
+        </div>
+    </div>
+
+    <div data-liste>
+        {# Forty products per page: the largest group rendered three megabytes at once. #}
+        {% include "components/pagination.html" with stelle="oben" %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th scope="col">{% translate "Ware / Haus" %}</th>
+                        <th class="breite-7" scope="col">{% translate "Nr." %}</th>
+                        <th scope="col">{% translate "Bezeichnung" %}</th>
+                        <th scope="col" class="text-end breite-7">{% translate "Einheit" %}</th>
+                        <th class="breite-10" scope="col">{% translate "Inventurart" %}</th>
+                        <th class="breite-7" scope="col">{% translate "Abwiegen" %}</th>
+                        <th class="breite-19" scope="col"><span class="visually-hidden">{% translate "Aktionen" %}</span></th>
+                    </tr>
+                </thead>
+                {# One body per product: its status and the type of all its      #}
+                {# articles stand on top, the rows below belong to their houses. #}
+                {% for ware in waren %}
+                <tbody class="border-top">
+                    <tr class="tabellenzeile-ruhig">
+                        <th scope="rowgroup" colspan="3">
+                            <a href="{{ ware.get_absolute_url }}?von={{ herkunft|urlencode }}"
+                                class="link-body-emphasis link-offset-2 text-decoration-none">
+                                {{ ware.name }}
+                            </a>
+                            {% with status=ware.warenstatus %}
+                            {% if status != "AKTIV" %}
+                            <span class="badge bg-body-secondary text-body border ms-1">{{ ware.warenstatus_anzeige|lower }}</span>
+                            {% endif %}
+                            {% endwith %}
+                        </th>
+
+                        <td class="text-end text-body-secondary small">
+                            {{ ware.basiseinheit.kurz }}
+                        </td>
+
+                        <td>
+                            {% url 'ware_inventurart' ware.pk as art_ziel %}
+                            {% include "components/inventurart_menu.html" with ziel=art_ziel arten=inventurarten aktuell=ware.inventurart gemischt=ware.arten_gemischt titel=ware.name rueckfrage=ware.art_rueckfrage %}
+                        </td>
+
+                        <td>
+                            {% include "components/weighing_buttons.html" with ware=ware %}
+                        </td>
+
+                        <td class="text-end text-nowrap">
+                            {% include "katalog/components/sammelstatus_buttons.html" with satz=ware art="ware" %}
+                        </td>
+                    </tr>
+
+                    {% for artikel in ware.artikel_der_gruppe %}
+                    <tr {% if not artikel.aktiv %}class="ausgegraut"{% endif %}>
+                        <td class="ps-4">
+                            <a href="{{ artikel.haus.get_absolute_url }}"
+                                class="link-secondary link-offset-2 text-decoration-none">
+                                {{ artikel.haus.name }}
+                            </a>
+                        </td>
+
+                        <td class="font-monospace text-body-secondary">
+                            {{ artikel.artikelnummer|default:"–" }}
+                        </td>
+
+                        <td>
+                            <a href="{{ artikel.get_absolute_url }}?von={{ herkunft|urlencode }}"
+                                class="link-body-emphasis link-offset-2 text-decoration-none">
+                                {% include "katalog/components/artikel_name.html" %}
+                            </a>
+                            {% if not artikel.aktiv %}
+                            <span class="badge bg-body-secondary text-body border ms-1">
+                                {% blocktranslate with status=artikel.get_status_display|lower datum=artikel.gueltig_bis|date:"SHORT_DATE_FORMAT" %}{{ status }} seit {{ datum }}{% endblocktranslate %}
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <td colspan="3"></td>
+
+                        <td class="text-end text-nowrap">
+                            {% include "katalog/components/status_buttons.html" %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                {% empty %}
+                <tbody>
+                    <tr>
+                        <td colspan="7" class="text-center text-body-secondary py-5">
+                            {% translate "In dieser Gruppe liegt noch kein Hausartikel." %}
+                        </td>
+                    </tr>
+                </tbody>
+                {% endfor %}
+            </table>
+        </div>
+        {% include "components/pagination.html" with stelle="unten" %}
+    </div>
+
+</div>
+{% endblock content %}
+

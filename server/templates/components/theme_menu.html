@@ -1,0 +1,8 @@
+{% load i18n %}
+{# The three entries for the appearance, for a Bootstrap dropdown.              #}
+{# The tick is set by 'components/theme_script.html'. The administration has    #}
+{# the same entries in 'admin/components/navbar.html'.                          #}
+<li><h6 class="dropdown-header">{% translate "Darstellung" %}</h6></li>
+<li><button type="button" class="dropdown-item" data-thema="auto">{% translate "Automatisch" %}</button></li>
+<li><button type="button" class="dropdown-item" data-thema="light">{% translate "Hell" %}</button></li>
+<li><button type="button" class="dropdown-item" data-thema="dark">{% translate "Dunkel" %}</button></li>

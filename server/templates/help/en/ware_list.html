@@ -1,0 +1,32 @@
+<h3>What a product is</h3>
+<p>
+    The same product across all sites. Base unit and packs hang on it. They apply everywhere.
+    What a single site carries of it (number, name, article group, inventory type) sits on
+    the article below it. The column “Inventory type” shows the type of the articles and
+    changes it for all of them at once.
+</p>
+{% include "help/en/shared/sammelstatus.html" %}
+{% include "help/en/shared/inventurart.html" %}
+<h3>Searching and filtering</h3>
+<p>
+    The search covers name, article number, EAN, article group and product family. Typing
+    the family above also finds the products in the families below it. A typo does no harm:
+    when the search finds nothing, it shows what sounds alike. Numbers have to be exact.
+</p>
+{% include "help/en/shared/search_order.html" %}
+<p>
+    Product family and article group are multiple selections and only take effect with
+    “Apply”. Under “Carried at”, a click per site switches between <em>any</em>,
+    <em>must</em> and <em>not</em>. If nothing is set to <em>must</em>, one of the other
+    sites is enough. The filter “Inventory type” finds a mixed product under each of its
+    types, and “Mixed” shows only those.
+</p>
+<p>
+    The column “Weighing” switches weighing for the product at every site. If the weight of
+    one unit is still missing for it, the message says so. “No” also removes the product's
+    containers.
+</p>
+<p>
+    What the merchandise management system carries as an article without it being a product lies in the product family
+    <em>Not countable</em> and only appears here when that family is selected in the filter.
+</p>

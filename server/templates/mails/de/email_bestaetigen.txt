@@ -1,0 +1,16 @@
+Neue E-Mail-Adresse für dein Konto bei {{ anwendung }}
+
+Hallo {{ vorname }},
+
+{% if selbst %}
+du hast diese Adresse für dein Konto bei {{ anwendung }} eingetragen.
+{% elif wer %}
+{{ wer }} hat diese Adresse für dein Konto bei {{ anwendung }} eingetragen.
+{% else %}
+diese Adresse wurde für dein Konto bei {{ anwendung }} eingetragen.
+{% endif %}
+
+Über diesen Link bestätigst du sie. Erst dann gilt sie:
+{{ link }}
+
+Der Link gilt {{ tage }} Tage. Hast du nichts eingetragen und erwartest auch nichts, musst du nichts tun. Die Adresse wird dann nicht übernommen.

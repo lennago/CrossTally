@@ -1,0 +1,750 @@
+/* The web interface's own stylesheet: everything Bootstrap does not bring.
+   The administration has its own ('admin_site.css'), the counting app likewise. */
+
+/* The bar sticks at the top. Its height is fixed as a variable so pages
+   with a sticky row of their own can attach themselves below it without
+   measuring it.
+
+   With the demo banner that does not work: its sentence wraps on the phone,
+   and the height hangs on the width of the device. It is therefore measured
+   by 'js/demo_band.js'. Without banner and without script it stays zero, and
+   everything sits where it sits. */
+:root {
+  --nav-hoehe: 3.5rem;
+  --pfad-hoehe: 2.25rem;
+  --band-hoehe: 0px;
+}
+
+/* Without a navigation bar there is nothing the header bar could attach
+   itself below. Its offset would then be a gap through which the text
+   scrolls away upwards. That affects the privacy page: it is the only page
+   with a header bar that is open even without the manager role. */
+body:not(:has(.navbar)) {
+  --nav-hoehe: 0px;
+}
+
+/* Page widths: narrow for forms and confirmations, medium and wide for
+   lists that do not need the whole screen. */
+.seite-schmal {
+  max-width: 42rem;
+}
+.seite-mittel {
+  max-width: 60rem;
+}
+.seite-breit {
+  max-width: 72rem;
+}
+
+/* Long selection lists scroll within themselves instead of stretching the page. */
+.liste-hoch {
+  max-height: 32rem;
+}
+
+/* The help sidebar: subheadings small, paragraphs airy.
+   Read next to the work, not instead of it. */
+.hilfe h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+}
+
+.hilfe h3:first-child {
+  margin-top: 0;
+}
+
+.hilfe p,
+.hilfe li {
+  font-size: 0.9rem;
+}
+
+/* Bootstrap's 'sticky-top' sets 0. The demo banner stands above it, and the
+   bar attaches itself below. Without the banner the variable is zero and it
+   stays at 0. */
+.navbar-fest {
+  top: var(--band-hoehe);
+  min-height: var(--nav-hoehe);
+}
+
+/* Header of every page, whether list, detail or form: title and the buttons
+   next to it stay reachable when scrolling. It attaches itself below the
+   navigation bar, whose height is fixed above. Explanatory text below the
+   title stands outside and scrolls away. The line at the bottom is the
+   counterpart to the one above the footer bar. Without it the content
+   scrolling through below ends in the middle of nowhere. A line instead of a
+   shadow, because that disappears in dark mode and would also be there where
+   nothing lies below. */
+.kopfleiste {
+  position: sticky;
+  top: calc(var(--band-hoehe) + var(--nav-hoehe));
+  z-index: 3;
+  border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+}
+
+/* The button row on the right in the page header may wrap, because on the
+   phone it otherwise stuck out up to 500 pixels beyond the edge, and the
+   whole page could be pushed sideways. If it slips into a line of its own,
+   it stays right. */
+.d-flex.justify-content-between > .d-flex.flex-wrap:last-child {
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
+/* A long title gives way to the buttons: it is shortened (the full name is
+   in the tooltip) instead of pushing the button row below itself. The base
+   width keeps it readable. Only below that does the row wrap. */
+.kopf-titel {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+/* The breadcrumbs stick as well, directly below the navigation bar: the
+   way back should be visible far down in a long list too. Their height is
+   fixed so a header bar can attach itself below. The background reaches
+   beyond the page edge, otherwise the content would show through left and
+   right next to it. */
+main nav[aria-label="breadcrumb"] {
+  position: sticky;
+  top: calc(var(--band-hoehe) + var(--nav-hoehe));
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  min-height: var(--pfad-hoehe);
+  margin-bottom: 0.75rem;
+  background: var(--bs-body-bg);
+  box-shadow:
+    -0.75rem 0 0 var(--bs-body-bg),
+    0.75rem 0 0 var(--bs-body-bg);
+}
+
+main nav[aria-label="breadcrumb"] .breadcrumb {
+  margin-bottom: 0;
+}
+
+main:has(nav[aria-label="breadcrumb"]) .kopfleiste {
+  top: calc(var(--band-hoehe) + var(--nav-hoehe) + var(--pfad-hoehe));
+}
+
+/* An arrow with a bar: "all the way up / down". Drawn instead of as a
+   character (⤒ ⤓), because these arrows are not in every system font.
+   An empty box would appear there. */
+.pfeil-bis-rand {
+  display: inline-block;
+  line-height: 1;
+  border: 0 solid currentColor;
+}
+
+.pfeil-bis-rand.oben {
+  border-top-width: 2px;
+}
+
+.pfeil-bis-rand.unten {
+  border-bottom-width: 2px;
+}
+
+/* The lock of a counting stopped for the check ('lock_icon.html'). Drawn as
+   well. On the text line its body sits where the letters stand. */
+.schloss {
+  vertical-align: -0.125em;
+}
+
+/* A section a link jumps to ('#gebinde'): the sticky bars above would
+   otherwise cover its heading. Room for bar, breadcrumbs and the page
+   header. */
+.sprungziel {
+  scroll-margin-top: calc(
+    var(--band-hoehe) + var(--nav-hoehe) + var(--pfad-hoehe) + 4rem
+  );
+}
+
+/* The counterpart at the bottom edge: the buttons of a form (save, create,
+   cancel). They stick only as long as the form is in view. */
+.fussleiste {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+}
+
+/* Expanded groups have header rows of their own. They should not lie over
+   the sticky bars. */
+details > summary {
+  position: relative;
+  z-index: 1;
+}
+
+/* The product groups in the import plan. A grid keeps the buttons for the
+   whole group in the middle of every heading, whatever the length of the
+   name to their left. The name gives way and is shortened ('text-truncate'),
+   the count on the right keeps its place. The tinted background and the bar
+   on the left set the group apart from its rows: the block heading above
+   already has a tint of its own, and without one the groups drowned
+   between the rows. */
+.warengruppen-kopf {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  background: var(--bs-secondary-bg);
+  border-left: 0.25rem solid var(--bs-primary);
+}
+
+.warengruppen-kopf > :last-child {
+  text-align: right;
+}
+
+/* On the phone the buttons take a row of their own below name and count. */
+@media (max-width: 575.98px) {
+  .warengruppen-kopf {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .warengruppen-kopf > :last-child {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  .warengruppen-kopf > .btn-group {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    justify-self: center;
+  }
+}
+
+/* A ticked entry in a multiple choice as a button row ('button_group.html')
+   carries a check mark. Its fill alone did not say whether it was chosen or
+   only hovered. A single choice needs none: there only one button is filled. */
+.btn-group .btn-check[type="checkbox"]:checked + .btn::before {
+  content: "✓ ";
+}
+
+/* Tom Select brings fixed colours from its Bootstrap 4 days: the chosen
+   value stands in #343a40, in dark mode thus almost invisible on almost
+   the same colour. */
+.ts-wrapper .ts-control,
+.ts-wrapper .ts-control .item,
+.ts-wrapper .ts-control input,
+.ts-dropdown {
+  color: var(--bs-body-color);
+}
+
+.ts-wrapper .ts-control {
+  border-color: var(--bs-border-color);
+}
+
+/* Tom Select pads top and bottom differently ('padding-bottom: 0' with
+   filled fields). The text then sits lower than in the field next to it.
+   Instead of recalculating the values: no padding at all and let the
+   flexbox centre. The selectors need the same specificity as the theme's,
+   '.ts-wrapper.form-select-sm.has-items'. Multiple selections stay out,
+   because there the chips stack, and they need their margin. */
+.ts-wrapper:not(.multi).form-select .ts-control,
+.ts-wrapper:not(.multi).form-control .ts-control,
+.ts-wrapper:not(.multi).form-select-sm.has-items .ts-control,
+.ts-wrapper:not(.multi).form-control-sm.has-items .ts-control {
+  align-items: center;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* Calm interim row in tables. Not 'table-light': that stays light in dark
+   mode too, because Bootstrap does not attach the table's colour variants
+   to the theme. */
+.tabellenzeile-ruhig {
+  --bs-table-bg: var(--bs-tertiary-bg);
+  --bs-table-color: var(--bs-body-color);
+}
+
+/* A row that should catch the eye: deviation in the check list, hint in
+   the import plan. Not 'table-warning', for the same reason: it stays light
+   yellow in dark mode, and the muted texts of the row then stood light on
+   light. The '-subtle' tones follow the theme. */
+.tabellenzeile-auffaellig {
+  --bs-table-bg: var(--bs-warning-bg-subtle);
+  --bs-table-color: var(--bs-body-color);
+}
+
+/* The colour of the difference, so a long list can be skimmed. Green means
+   it fits. Red means something is missing. Yellow means there is more than
+   expected: that is no loss and should therefore not be red. Where there is
+   no difference there is no class either, because without a target nothing
+   was compared. They are assigned in 'inventur/services/display.py'. The
+   '-text-emphasis' tones follow the theme and stay readable in dark mode too.
+
+   In a table the class belongs on an element *in* the cell, never on the
+   '<td>' itself. Bootstrap colours the cells with '.table > :not(caption) > * > *',
+   and that is the more specific rule. On the '<td>' the colour would stay
+   invisible. Inside, hovering with the mouse does not catch it either,
+   because 'table-hover' sets its colour on the cell as well. Bootstrap's
+   utilities only get through because they carry '!important'. */
+.differenz-passt {
+  color: var(--bs-success-text-emphasis);
+}
+
+.differenz-fehlt {
+  color: var(--bs-danger-text-emphasis);
+}
+
+.differenz-mehr {
+  color: var(--bs-warning-text-emphasis);
+}
+
+/* A sum is no finding but an overview. It carries the same colour, only
+   quieter, otherwise the product family's header would outshine the rows below. */
+/* Quiet without opacity: with it a colour that passes in both themes falls
+   under 4.5:1 (as 'opacity-50' did until 09/2026). */
+.differenz-leise {
+  font-weight: normal;
+}
+
+/* How much colour someone wants to see stands on their account
+   ('CustomUser.differenzfarben'). The class for it sits on the '<body>'.
+   Switching off happens here and not when assigning the class: that way the
+   code computing the difference stays free of the question who is looking.
+
+   "Deviations only" takes the colour from the zero. In a check list it is
+   the most frequent row, and whoever looks for the deviations does not want
+   to skim three hundred green numbers. */
+.farben-abweichungen .differenz-passt {
+  color: inherit;
+}
+
+/* "Off" takes the colour from all three. Red and green are not distinct for
+   everyone, and the sign says the same. */
+.farben-aus .differenz-passt,
+.farben-aus .differenz-fehlt,
+.farben-aus .differenz-mehr {
+  color: inherit;
+}
+
+/* What changed with "Refresh values" ('refresh.js'). The mark stays until
+   the next fetch, after a reload nothing is marked. The '-subtle' tones
+   follow the theme. In a table it belongs on a span inside the cell:
+   Bootstrap paints every cell with background and inset shadow itself
+   ('.table > :not(caption) > * > *' is more specific), and on the cell the
+   mark stayed invisible until 10/2026. */
+.wert-neu {
+  background: var(--bs-info-bg-subtle);
+  box-shadow: 0 0 0 0.15rem var(--bs-info-border-subtle);
+  border-radius: 0.25rem;
+}
+
+/* The chosen appearance, language and difference colour get a tick, the
+   others the same space, otherwise the row wobbles when switching. For the
+   appearance 'theme.js' sets it, for language and colours the template:
+   both are already fixed when the page is built. */
+[data-thema]::before,
+[data-sprache]::before,
+[data-farben]::before {
+  content: "  ";
+  white-space: pre;
+}
+
+[data-thema][aria-current="true"]::before,
+[data-sprache][aria-current="true"]::before,
+[data-farben][aria-current="true"]::before {
+  content: "✓ ";
+}
+
+/* What is no longer active stands quieter, but readable. Half opacity
+   ('opacity-50') pushed number and badge below 3:1, and the screen reader
+   sees no opacity. The colour of the secondary text holds above 4.5:1 in
+   both themes, and the note "inactive since …" carries the information anyway. */
+.ausgegraut,
+.ausgegraut a {
+  color: var(--bs-secondary-color);
+}
+
+/* The link buttons in clarification and lists stand small on grey ground.
+   The blue of the links does not reach 4.5:1 there, the emphasised colour does. */
+.btn-link {
+  --bs-btn-color: var(--bs-primary-text-emphasis);
+}
+
+/* Bootstrap's second link colour (#6c757d) stays below 4.5:1 on the ground
+   of cards and bars. The colour of the secondary text holds it in both
+   themes. '!important', because Bootstrap sets the class that way itself. */
+.link-secondary {
+  color: var(--bs-secondary-color) !important;
+}
+
+/* Links in table cells are one text line high, around 16 pixels. A tap
+   target should have 24 (WCAG 2.5.8). The padding top and bottom enlarges
+   the area without shifting the row: with inline elements the line height
+   stays as it is. */
+.table td a:not(.btn) {
+  padding-block: 0.25rem;
+}
+
+/* The last step of the breadcrumbs: Bootstrap's grey stays below 4.5:1 on
+   the ground of the header bar. */
+.breadcrumb-item.active {
+  color: var(--bs-secondary-color);
+}
+
+/* Messages lay themselves over the content instead of shifting it:
+   otherwise everything slides down one line after every button press,
+   and one clicks next to it. */
+.meldungen {
+  position: fixed;
+  top: calc(var(--nav-hoehe) + 0.5rem);
+  right: 1rem;
+  z-index: 1080;
+  width: min(30rem, calc(100vw - 2rem));
+}
+
+/* ---------------------------------------------------------------------------
+   Two columns between which rows migrate by click: splitting locations and
+   product families ('split.js'), choosing products of a family ('warenfamilie_form.js').
+   --------------------------------------------------------------------------- */
+
+/* An entry is a row, not a box. The box sits invisibly in it: a click on
+   the row hits the label and switches it, the keyboard still reaches it. */
+/* An entry below another one in a multi-select (product families): one
+   step in per level, so the tree is visible in the menu. */
+.wahl-ebene-1 {
+  margin-left: 1.25rem;
+}
+
+.wahl-ebene-2 {
+  margin-left: 2.5rem;
+}
+
+.wahl-ebene-3 {
+  margin-left: 3.75rem;
+}
+
+.wahl-ebene-4 {
+  margin-left: 5rem;
+}
+
+/* A family below another one in the family list: one step in per level,
+   with a branch mark in front of the name. */
+.baum-ebene-1 {
+  padding-left: 1.5rem;
+}
+
+.baum-ebene-2 {
+  padding-left: 3rem;
+}
+
+.baum-ebene-3 {
+  padding-left: 4.5rem;
+}
+
+.baum-ebene-4 {
+  padding-left: 6rem;
+}
+
+.baum-zweig::before {
+  content: "└ ";
+}
+
+.wahlzeile {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.375rem 0.75rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--bs-border-color-translucent);
+  /* Reference point for the hidden box. Without it its position counts from
+       the document, and the page becomes as long as the scrolled list, with
+       the products 43,000 pixels. */
+  position: relative;
+}
+
+.wahlzeile:last-child {
+  border-bottom: 0;
+}
+
+.wahlzeile:hover {
+  background: var(--bs-tertiary-bg);
+}
+
+/* The focus ring would otherwise sit on the invisible box. */
+.wahlzeile:focus-within {
+  outline: 2px solid var(--bs-primary-border-subtle);
+  outline-offset: -2px;
+}
+
+.wahlzeile input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Without JavaScript all rows stay on the left. Then only the colour shows
+   what is chosen. */
+[data-ortsliste="bleibt"] .wahlzeile:has(input:checked),
+[data-warenliste="frei"] .wahlzeile:has(input:checked) {
+  background: var(--bs-success-bg-subtle);
+}
+
+/* Where a click moves the row to. */
+[data-ortsliste] .wahlzeile::after {
+  margin-left: auto;
+  color: var(--bs-secondary-color);
+}
+
+[data-ortsliste="bleibt"] .wahlzeile::after {
+  content: "→";
+}
+
+[data-ortsliste="geht"] .wahlzeile::after {
+  content: "←";
+}
+
+/* With the products a click on the right means "out again". */
+[data-warenliste="gewaehlt"] .wahlzeile::after {
+  content: "×";
+  color: var(--bs-secondary-color);
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+[data-warenliste="gewaehlt"] .wahlzeile .ms-auto {
+  margin-left: auto;
+}
+
+/* Widths and heights as classes instead of a 'style' attribute. The
+   Content-Security-Policy no longer allows styles in the page, not even on
+   the individual element ('style-src-attr'): measured, not a single one of
+   these attributes came from a script, all stood in the templates. The
+   number in the name is the value in rem, a hyphen the decimal point
+   ('breite-2-5' = 2.5rem). A new width needs its class here. 'test_csp.py'
+   says if one is missing. */
+.breite-2-5 {
+  width: 2.5rem;
+}
+.breite-3 {
+  width: 3rem;
+}
+.breite-5 {
+  width: 5rem;
+}
+.breite-5-5 {
+  width: 5.5rem;
+}
+.breite-6 {
+  width: 6rem;
+}
+.breite-6-5 {
+  width: 6.5rem;
+}
+.breite-7 {
+  width: 7rem;
+}
+.breite-8 {
+  width: 8rem;
+}
+.breite-9 {
+  width: 9rem;
+}
+.breite-10 {
+  width: 10rem;
+}
+.breite-11 {
+  width: 11rem;
+}
+.breite-12 {
+  width: 12rem;
+}
+.breite-13 {
+  width: 13rem;
+}
+.breite-14 {
+  width: 14rem;
+}
+.breite-15 {
+  width: 15rem;
+}
+.breite-16 {
+  width: 16rem;
+}
+.breite-18 {
+  width: 18rem;
+}
+.breite-19 {
+  width: 19rem;
+}
+.breite-20 {
+  width: 20rem;
+}
+.breite-21-5 {
+  width: 21.5rem;
+}
+.breite-23 {
+  width: 23rem;
+}
+.breite-24 {
+  width: 24rem;
+}
+.breite-28 {
+  width: 28rem;
+}
+.breite-34 {
+  width: 34rem;
+}
+.breite-38 {
+  width: 38rem;
+}
+.max-hoehe-18 {
+  max-height: 18rem;
+}
+.max-breite-22 {
+  max-width: 22rem;
+}
+.max-breite-30 {
+  max-width: 30rem;
+}
+.max-breite-36 {
+  max-width: 36rem;
+}
+.max-breite-46 {
+  max-width: 46rem;
+}
+.max-breite-52 {
+  max-width: 52rem;
+}
+.max-breite-80 {
+  max-width: 80rem;
+}
+.min-breite-9 {
+  min-width: 9rem;
+}
+.min-breite-16 {
+  min-width: 16rem;
+}
+.min-breite-18 {
+  min-width: 18rem;
+}
+.min-breite-64 {
+  min-width: 64rem;
+}
+.min-breite-76 {
+  min-width: 76rem;
+}
+.min-breite-93 {
+  min-width: 93rem;
+}
+.min-breite-95 {
+  min-width: 95rem;
+}
+.min-breite-95-5 {
+  min-width: 95.5rem;
+}
+.min-breite-104 {
+  min-width: 104rem;
+}
+
+.tabelle-fest {
+  table-layout: fixed;
+}
+
+.greifbar {
+  cursor: grab;
+}
+
+/* While a request brings the list back new, no row can be dragged
+   ('sortable.js'). The pointer says so instead of grabbing in vain. */
+[aria-busy="true"] .greifbar {
+  cursor: progress;
+}
+
+/* The counting progress as the browser's own element, dressed like
+   Bootstrap's bar: its width would stand as a 'style' attribute in the page. */
+.fortschritt {
+  appearance: none;
+  height: 0.5rem;
+  min-width: 5rem;
+  border: 0;
+  border-radius: var(--bs-border-radius);
+  overflow: hidden;
+  background: var(--bs-secondary-bg);
+}
+
+.fortschritt::-webkit-progress-bar {
+  background: var(--bs-secondary-bg);
+}
+
+.fortschritt::-webkit-progress-value {
+  background: var(--bs-primary);
+}
+
+.fortschritt::-moz-progress-bar {
+  background: var(--bs-primary);
+}
+
+.fortschritt.fertig::-webkit-progress-value {
+  background: var(--bs-success);
+}
+
+.fortschritt.fertig::-moz-progress-bar {
+  background: var(--bs-success);
+}
+
+/* Bootstrap centres the line in a badge, not the letters. A word without
+   descenders ("Administrator", "Kino Nord") then sat about a pixel low,
+   because its small letters all end on the baseline. Moving a twentieth of
+   the font size from the top to the bottom evens that out. The height stays. */
+.badge {
+  padding-top: 0.3em;
+  padding-bottom: 0.4em;
+}
+
+/* The banner and the badge of the demo stock ('components/demo_band.html',
+   'components/demo_marke.html'). Own classes and no Bootstrap helpers,
+   because the same components serve the administration, and there is no
+   Bootstrap there. The counterparts are in 'admin_site.css', with the same tones. */
+/* Above everything and always visible: whoever works here should never
+   forget that the stock is invented. The value lies above 'sticky-top'
+   (1020) and below the help sidebar (1045). */
+.demo-band {
+  position: sticky;
+  top: 0;
+  z-index: 1025;
+  padding: 0.25rem 1rem;
+  background: var(--bs-warning-bg-subtle);
+  color: var(--bs-warning-text-emphasis);
+  border-bottom: 1px solid var(--bs-warning-border-subtle);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* Yellow stays yellow, in both themes: the badge sits on the bar and should
+   stand out there, not blend in. The text sits a little higher, as in '.badge'. */
+.demo-marke {
+  display: inline-block;
+  padding: 0.3em 0.65em 0.4em;
+  border-radius: 0.375rem;
+  background: #ffc107;
+  color: #000;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/*
+ * Bootstrap's outline buttons keep their light colours in the dark theme and
+ * read 3.3:1 there, the small grey ones on tinted surfaces 4.4:1 in the light
+ * theme (axe, 2026-10-09). Lighter in the dark, a little darker in the light:
+ * the hover state stays Bootstrap's.
+ */
+.btn-outline-secondary {
+  --bs-btn-color: #5c636a;
+  --bs-btn-border-color: #5c636a;
+}
+[data-bs-theme="dark"] .btn-outline-secondary {
+  --bs-btn-color: #adb5bd;
+  --bs-btn-border-color: #adb5bd;
+}
+[data-bs-theme="dark"] .btn-outline-danger {
+  --bs-btn-color: var(--bs-danger-text-emphasis);
+  --bs-btn-border-color: var(--bs-danger-text-emphasis);
+}
+[data-bs-theme="dark"] .btn-outline-primary {
+  --bs-btn-color: var(--bs-primary-text-emphasis);
+  --bs-btn-border-color: var(--bs-primary-text-emphasis);
+}

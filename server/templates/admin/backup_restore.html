@@ -1,0 +1,63 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{# The confirmation before restoring. Deliberately with a typed confirmation: #}
+{# a button alone would be too little for an action that discards everything  #}
+{# since that state.                                                          #}
+
+{% block content %}
+<div id="content-main">
+
+    {% if falsch_getippt %}
+    <p class="errornote">
+        {% translate "Nicht eingespielt: Im Feld muss" %} <code>{% translate "einspielen" %}</code> {% translate "stehen." %}
+    </p>
+    {% endif %}
+
+    <p>
+        {% translate "Eingespielt wird der Stand vom" %}
+        <strong>{% blocktranslate with zeit=stand.zeitpunkt|date:"SHORT_DATETIME_FORMAT" %}{{ zeit }} Uhr{% endblocktranslate %}</strong>
+        ({{ stand.groesse }}, <code>{{ stand.name }}</code>).
+    </p>
+
+    <ul>
+        <li>
+            {% translate "Alles, was seither entstanden ist, ist danach" %} <strong>{% translate "weg" %}</strong>
+            {% translate "- Inventuren, Artikel, Konten, Anmeldeversuche." %}
+        </li>
+        <li>
+            {% translate "Vorher wird der jetzige Stand gesichert. Wer sich vertut, spielt ihn genauso wieder ein." %}
+        </li>
+        <li>
+            {% translate "Danach ist jeder abgemeldet, du auch: auf der Website sofort, in der Zähl-App spätestens nach einer Stunde. Alle melden sich neu an. Was in einer Zähl-App noch nicht gesendet ist, bleibt dort und geht nach der Anmeldung raus." %}
+        </li>
+        <li>
+            {% translate "Konten, Passwörter und Passkeys sind danach die aus dem Stand. Wer seither ein Passwort geändert, einen Passkey entfernt oder ein Konto deaktiviert hat, tut das noch einmal." %}
+        </li>
+    </ul>
+
+    <form method="post" data-einmal="{% translate 'Wird eingespielt …' %}">
+        {% csrf_token %}
+        <fieldset class="module aligned">
+            <div class="form-row">
+                <label for="id_bestaetigung">
+                    {% translate "Zum Bestätigen" %} <code>{% translate "einspielen" %}</code> {% translate "eintippen:" %}
+                </label>
+                <input type="text" name="bestaetigung" id="id_bestaetigung"
+                    autocomplete="off" autofocus>
+            </div>
+        </fieldset>
+
+        <div class="submit-row">
+            <input type="submit" value="{% translate 'Stand einspielen' %}" class="default">
+            <a href="{% url 'admin:index' %}" class="closelink">{% translate "Abbrechen" %}</a>
+        </div>
+    </form>
+
+</div>
+{% endblock %}
+
+{% block extrabody %}
+{{ block.super }}
+{% include "components/script.html" with name="submit_once" %}
+{% endblock extrabody %}

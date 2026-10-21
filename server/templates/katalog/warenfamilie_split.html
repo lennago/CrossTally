@@ -1,0 +1,26 @@
+{% extends "components/split_page.html" %}
+{% load i18n %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'warenfamilie_list' %}">{% translate "Warenfamilien" %}</a></li>
+{% endblock pfad %}
+
+{% block einleitung %}
+{% blocktranslate with name=familie.anzeigename %}Neben {{ name }} entsteht eine zweite Familie. Ein Klick auf eine Ware schiebt sie auf die andere Seite.{% endblocktranslate %}
+{% endblock einleitung %}
+
+{% block zeile %}
+{{ eintrag.name }}
+<span class="badge rounded-pill bg-body-secondary text-body border ms-1">{{ eintrag.basiseinheit.kurz }}</span>
+{% endblock zeile %}
+
+{% block leer %}
+{% blocktranslate with name=familie.anzeigename %}{{ name }} hat noch keine Waren. Aufteilen lässt sie sich trotzdem, die neue Familie bleibt dann leer.{% endblocktranslate %}
+{% endblock leer %}
+
+{% block neu_titel %}{% translate "Neue Familie" %}{% endblock neu_titel %}
+
+{% block extra_scripts %}
+{% translate "Waren" as wort %}
+{% include "components/script.html" with name="split" wert=wort %}
+{% endblock extra_scripts %}

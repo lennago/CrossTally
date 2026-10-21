@@ -1,0 +1,42 @@
+{% load crispy_forms_tags %}
+{% load i18n %}
+{# Formset rows with plus and remove button. The page includes                                #}
+{# 'static/js/formset.js' once for that. Without JavaScript it stays with                     #}
+{# the one row the server delivers, and the formset's delete checkbox                         #}
+{# serves for removing.                                                                       #}
+{# 'einmalig' names a select field whose value may occur only once per                        #}
+{# formset. Entries already taken then vanish from the remaining rows.                        #}
+{# A form with 'auffaellig' stands out in the warning tones: its row asks something. What it  #}
+{# asks and why stands in the row's own fields, so the look is never the only sign.           #}
+{# Call: {% include "components/formset_rows.html" with formset=… knopf="…" einmalig="…" %}   #}
+<div data-formset data-prefix="{{ formset.prefix }}" data-einmalig="{{ einmalig|default:'' }}">
+    {{ formset.management_form }}
+
+    {% for fehler in formset.non_form_errors %}
+    <div class="alert alert-danger">{{ fehler }}</div>
+    {% endfor %}
+
+    <div data-formset-reihen>
+        {% for form in formset %}
+        <div class="border rounded p-3 mb-2 position-relative{% if form.auffaellig %} border-warning bg-warning-subtle{% endif %}" data-formset-reihe>
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
+                data-formset-minus aria-label="{% translate 'Zeile entfernen' %}" title="{% translate 'Zeile entfernen' %}" hidden>
+            </button>
+            {{ form|crispy }}
+        </div>
+        {% endfor %}
+    </div>
+
+    <template data-formset-vorlage>
+        <div class="border rounded p-3 mb-2 position-relative" data-formset-reihe>
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
+                data-formset-minus aria-label="{% translate 'Zeile entfernen' %}" title="{% translate 'Zeile entfernen' %}" hidden>
+            </button>
+            {{ formset.empty_form|crispy }}
+        </div>
+    </template>
+
+    <button type="button" class="btn btn-outline-secondary btn-sm mb-3" data-formset-plus>
+        {% translate "Weitere Zeile" as weitere %}+ {{ knopf|default:weitere }}
+    </button>
+</div>

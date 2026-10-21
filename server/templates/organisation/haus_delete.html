@@ -1,0 +1,25 @@
+{% extends "components/delete_page.html" %}
+{% load i18n %}
+
+{% block art %}{% translate "Haus löschen" %}{% endblock art %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'haus_list' %}">{% translate "Häuser" %}</a></li>
+{% endblock pfad %}
+
+{% block folgen %}
+<p class="mb-2">
+    {% translate "Mitgelöscht werden dabei:" %}
+</p>
+<ul class="mb-3">
+    <li>
+        {% blocktranslate with bereiche=haus.bereiche.all|length orte=haus.alle_orte.count %}{{ bereiche }} Bereich(e) mit {{ orte }} Ort(en) samt ihrer erwarteten Artikel{% endblocktranslate %}
+    </li>
+    <li>
+        {% blocktranslate with anzahl=haus.mitarbeitende.all|length %}die Haus-Zuordnung von {{ anzahl }} Benutzer(n){% endblocktranslate %}
+    </li>
+</ul>
+<p class="text-body-secondary small mb-0">
+    {% translate "Das Löschen kann nicht rückgängig gemacht werden." %}
+</p>
+{% endblock folgen %}

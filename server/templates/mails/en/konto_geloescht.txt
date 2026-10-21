@@ -1,0 +1,14 @@
+Your account at {{ anwendung }} is deleted
+
+Hello {{ vorname }},
+
+Your account at {{ anwendung }} is deleted. You can no longer sign in with it, not in the counting app either.
+
+{% if selbst %}
+Wasn't that you? Then let an administrator know.
+{% elif wer %}
+Deleted by {{ wer }}.
+If you did not expect this, talk to {{ wer }}.
+{% else %}
+If you did not expect this, talk to your manager.
+{% endif %}

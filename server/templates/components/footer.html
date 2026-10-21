@@ -1,0 +1,18 @@
+{% load i18n %}
+{# The footer on every page, on the login too. Whoever operates the            #}
+{# application is in the appearance in the administration, because the         #}
+{# published image knows no operator. Legal notice and privacy page appear     #}
+{# only where the administration has a text for them.                          #}
+<footer class="border-top py-3">
+    <div class="container d-flex flex-wrap justify-content-center column-gap-3 row-gap-1 small text-body-secondary">
+        {% if betreiber %}
+        <span>{{ betreiber }}{% if betreiber_kontakt %}, {{ betreiber_kontakt }}{% endif %}</span>
+        {% endif %}
+        {% if impressumseite %}
+        <a class="link-secondary" href="{% url 'impressum' %}">{% translate "Impressum" %}</a>
+        {% endif %}
+        {% if datenschutzseite %}
+        <a class="link-secondary" href="{% url 'datenschutz' %}">{% translate "Datenschutz" %}</a>
+        {% endif %}
+    </div>
+</footer>

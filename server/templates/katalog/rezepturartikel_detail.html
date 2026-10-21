@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ rezepturartikel.name }}{% endblock title %}
+
+{% block content %}
+<div class="container py-4 seite-mittel">
+
+    {% include "components/breadcrumbs.html" with aktuell=rezepturartikel.name %}
+
+    <div class="kopfleiste bg-body py-2 d-flex flex-wrap gap-2 justify-content-between align-items-start mb-3">
+        <div>
+            <h1 class="h3 mb-1">{{ rezepturartikel.name }}</h1>
+            <div class="text-body-secondary small">
+                {% translate "vorbereitete Ware" %} ·
+                {% if rezepturartikel.wird_gewogen %}
+                {% blocktranslate with einheit=rezepturartikel.basiseinheit.kurz %}wird in {{ einheit }} gewogen{% endblocktranslate %}
+                {% else %}
+                {% blocktranslate with einheit=rezepturartikel.basiseinheit.kurz %}wird in {{ einheit }} gezählt{% endblocktranslate %}
+                {% endif %}
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'rezepturartikel_edit' rezepturartikel.pk %}"
+                class="btn btn-sm btn-outline-secondary">{% translate "Bearbeiten" %}</a>
+            <a href="{% url 'rezepturartikel_delete' rezepturartikel.pk %}"
+                class="btn btn-sm btn-outline-danger">{% translate "Löschen" %}</a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-body-tertiary d-flex justify-content-between">
+            <span>
+    {% blocktranslate with name=rezepturartikel.basiseinheit.kurz %}Rezeptur je 1 {{ name }}{% endblocktranslate %}
+</span>
+            <a href="{% url 'rezepturartikel_edit' rezepturartikel.pk %}"
+                class="small link-secondary">{% translate "ändern" %}</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">{% translate "Ware" %}</th>
+                        <th scope="col" class="text-center">{% translate "Menge" %}</th>
+                        <th scope="col">{% translate "Geführt in" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for komponente in rezepturartikel.komponenten.all %}
+                    <tr>
+                        <td>
+                            <a href="{{ komponente.ware.get_absolute_url }}?von={{ herkunft|urlencode }}"
+                                class="link-body-emphasis link-offset-2 text-decoration-none">
+                                {{ komponente.ware.name }}
+                            </a>
+                        </td>
+                        <td class="text-center font-monospace text-body-secondary">
+                            {{ komponente.menge_in_basiseinheit|floatformat:"-6" }}
+                            {% if rezepturartikel.anteilig %}%{% else %}{{ komponente.ware.basiseinheit.kurz }}{% endif %}
+                        </td>
+                        <td>
+                            {% for hausartikel in komponente.ware.hausartikel.all %}
+                            {% if hausartikel.aktiv %}
+                            <a href="{{ hausartikel.get_absolute_url }}?von={{ herkunft|urlencode }}"
+                                class="badge rounded-pill text-bg-secondary text-decoration-none me-1">
+                                {{ hausartikel.haus.name }}
+                            </a>
+                            {% endif %}
+                            {% empty %}
+                            <span
+                                class="badge rounded-pill text-bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                {% translate "in keinem Haus" %}
+                            </span>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-body-secondary py-5">
+                            {% translate "Ohne Komponenten lässt sich dieser Artikel nirgends zählen." %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if rezepturartikel.wird_gewogen %}
+    <div class="card mb-4">
+        <div class="card-header bg-body-tertiary">{% translate "Behälter" %}</div>
+        <div class="card-body">
+            <ul class="list-inline mb-0">
+                {% for eintrag in behaelter %}
+                <li class="list-inline-item">
+                    <span class="badge bg-body-secondary text-body border">
+                        {{ eintrag.anzeigename }}
+                        <span class="font-monospace text-body-secondary ms-1">
+                            {{ eintrag.tara|floatformat:"-3" }} g
+                        </span>
+                    </span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-body-tertiary">{% translate "Auflösbar in" %}</div>
+                <ul class="list-group list-group-flush">
+                    {% for haus, stufe in haeuser %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="{{ haus.get_absolute_url }}"
+                            class="link-body-emphasis link-offset-2 text-decoration-none">
+                            {{ haus.name }}
+                        </a>
+                        {% if stufe == "ja" %}
+                        <span class="badge text-bg-success-subtle text-success-emphasis border border-success-subtle">
+                            {% translate "ja" %}
+                        </span>
+                        {% elif stufe == "inaktiv" %}
+                        <span class="badge text-bg-warning-subtle text-warning-emphasis border border-warning-subtle">{% translate "Zutat inaktiv" %}</span>
+                        {% else %}
+                        <span class="badge bg-body-secondary text-body border">{% translate "Komponente fehlt" %}</span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div class="card-body border-top">
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100" data-liste>
+                <div class="card-header bg-body-tertiary">{% translate "Kommt vor an" %}</div>
+                {# The same expectation as in the selection tab of the counting      #}
+                {# list, only switched from the article page. Across all houses:     #}
+                {# a recipe article belongs to none.                                 #}
+                <ul class="list-group list-group-flush">
+                    {% for haus, stufe, bereiche in ortswahl %}
+                    <li class="list-group-item bg-body-secondary-subtle py-1 d-flex
+                        justify-content-between align-items-center">
+                        <a href="{{ haus.get_absolute_url }}"
+                            class="small link-body-emphasis text-decoration-none">
+                            {{ haus.name }}
+                        </a>
+                        {% if stufe == "fehlt" %}
+                        <span class="badge bg-body-secondary text-body border">{% translate "Komponente fehlt" %}</span>
+                        {% elif stufe == "inaktiv" %}
+                        <span class="badge text-bg-warning-subtle text-warning-emphasis border border-warning-subtle">{% translate "Zutat inaktiv" %}</span>
+                        {% endif %}
+                    </li>
+
+                    {% for bereich, orte in bereiche %}
+                    <li class="list-group-item bg-body-tertiary py-1 ps-4">
+                        <span class="small text-body-secondary">{{ bereich.name }}</span>
+                    </li>
+                    {% for ort, erwartung in orte %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center gap-2 ps-5">
+                        <a href="{{ ort.get_absolute_url }}"
+                            class="link-body-emphasis link-offset-2 text-decoration-none">
+                            {{ ort.name }}
+                        </a>
+                        <span class="d-flex align-items-center gap-2">
+                            {% if erwartung %}
+                            <span class="text-body-secondary small font-monospace">
+    {% blocktranslate with sortierung=erwartung.sortierung %}Pos. {{ sortierung }}{% endblocktranslate %}
+</span>
+                            {% endif %}
+                            {# Without a recipe only removable, because adding would not be #}
+                            {# allowed by 'Erwartung.clean()' anyway.                       #}
+                            {% if stufe != "fehlt" or erwartung %}
+                            <form method="post" class="d-inline" data-sofort
+                                action="{% url 'erwartung_umschalten' ort.pk %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="weiter"
+                                    value="{{ request.get_full_path }}">
+                                <input type="hidden" name="artikel"
+                                    value="{{ rezepturartikel.pk }}">
+                                {# The button says what it wants: a stale click changes nothing. #}
+                                <button type="submit" name="aktion"
+                                    value="{% if erwartung %}entfernen{% else %}aufnehmen{% endif %}"
+                                    data-fokus="ort-{{ ort.pk }}"
+                                    class="btn btn-sm {% if erwartung %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                                    {% if erwartung %}{% translate "Entfernen" %}{% else %}{% translate "Hinzufügen" %}{% endif %}
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="text-body-secondary small">—</span>
+                            {% endif %}
+                        </span>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-body-secondary small ps-5">
+                        {% translate "Noch kein Ort in diesem Bereich." %}
+                    </li>
+                    {% endfor %}
+                    {% empty %}
+                    <li class="list-group-item text-body-secondary small ps-4">
+    {% blocktranslate with name=haus.name %}{{ name }} hat noch keine Bereiche.{% endblocktranslate %}
+</li>
+                    {% endfor %}
+                    {% empty %}
+                    <li class="list-group-item text-body-secondary">{% translate "Noch keine Häuser angelegt." %}</li>
+                    {% endfor %}
+                </ul>
+                <div class="card-body border-top">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock content %}
+

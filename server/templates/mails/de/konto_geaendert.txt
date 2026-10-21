@@ -1,0 +1,16 @@
+Dein Konto bei {{ anwendung }} wurde geändert
+
+Hallo {{ vorname }},
+
+an deinem Konto bei {{ anwendung }} hat sich etwas geändert.
+
+{{ aenderungen }}
+
+{% if selbst %}
+Warst du das nicht? Dann ändere dein Passwort und gib einem Administrator Bescheid.
+{% elif wer %}
+Geändert von {{ wer }}.
+Wenn du das nicht erwartet hast, sprich mit {{ wer }}.
+{% else %}
+Wenn du das nicht erwartet hast, sprich mit deiner Führungskraft.
+{% endif %}

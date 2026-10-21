@@ -1,0 +1,61 @@
+{% load i18n %}
+{# Switch the inventory type directly in the row.                                        #}
+{#                                                                                       #}
+{# A button with the current type, a menu with all of them: with three or more types     #}
+{# a group of buttons with full names would not fit into a column. The current type is   #}
+{# disabled in the menu, a click on it would change nothing.                             #}
+{#                                                                                       #}
+{# Call: {% include "components/inventurart_menu.html" with ziel=... arten=... aktuell=... #}
+{#          gemischt=... titel=... rueckfrage="..." weitere=... %}.                      #}
+{# 'ziel' is the finished address, 'arten' all types (once from the view, not per row),  #}
+{# 'aktuell' the current type or nothing. 'gemischt' says the articles are in several    #}
+{# types. Neither means no visible article at all (in "Not countable", or new): then a   #}
+{# dash, not "mixed", which the filter "Mixed" would not find. 'rueckfrage' puts a       #}
+{# confirmation before it: a type for the product acts in every house that carries it.  #}
+{# 'weitere' (only for a house article) is how many further articles the product has.   #}
+{# Then the menu asks, as the form does, whether the type is for this article or for    #}
+{# the whole product: two blocks of the same types, each its own form.                  #}
+{% with knopf_id=ziel|slugify %}
+<div class="dropdown d-inline-block mw-100">
+    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle text-truncate mw-100"
+        data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false"
+        id="art-{{ knopf_id }}"
+        title="{% if titel %}{% blocktranslate %}Inventurart für {{ titel }}{% endblocktranslate %}{% else %}{% translate 'Inventurart' %}{% endif %}">
+        {% if aktuell %}{{ aktuell.name }}{% elif gemischt %}{% translate "gemischt" %}{% else %}–{% endif %}
+    </button>
+    <div class="dropdown-menu shadow" aria-labelledby="art-{{ knopf_id }}">
+        {% if weitere %}
+        <h6 class="dropdown-header">{% translate "Nur dieser Artikel" %}</h6>
+        {% endif %}
+        <form method="post" action="{{ ziel }}" data-sofort>
+            {% csrf_token %}
+            <input type="hidden" name="weiter" value="{{ request.get_full_path }}">
+            {% if weitere %}<input type="hidden" name="geltung" value="artikel">{% endif %}
+            {% for art in arten %}
+            <button type="submit" class="dropdown-item" name="inventurart" value="{{ art.pk }}"
+                {% if rueckfrage and not weitere %}data-rueckfrage="{{ rueckfrage }}"{% endif %}
+                {% if art.pk == aktuell.pk %}disabled aria-current="true"{% endif %}>
+                {{ art.name }}
+            </button>
+            {% endfor %}
+        </form>
+        {% if weitere %}
+        <div class="dropdown-divider"></div>
+        <h6 class="dropdown-header">
+            {% blocktranslate count anzahl=weitere %}Mit dem anderen Artikel der Ware{% plural %}Mit den {{ anzahl }} anderen Artikeln der Ware{% endblocktranslate %}
+        </h6>
+        <form method="post" action="{{ ziel }}" data-sofort>
+            {% csrf_token %}
+            <input type="hidden" name="weiter" value="{{ request.get_full_path }}">
+            <input type="hidden" name="geltung" value="ware">
+            {% for art in arten %}
+            <button type="submit" class="dropdown-item" name="inventurart" value="{{ art.pk }}"
+                {% if rueckfrage %}data-rueckfrage="{{ rueckfrage }}"{% endif %}>
+                {{ art.name }}
+            </button>
+            {% endfor %}
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endwith %}

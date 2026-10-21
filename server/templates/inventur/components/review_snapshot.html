@@ -1,0 +1,37 @@
+{% load i18n %}
+{# The snapshot behind the review list: every row at the state the page was  #}
+{# built, only what 'refresh.js' compares and reinserts. That is the values  #}
+{# ('data-wert') and the class of the row. Until 10/2026 it was the whole    #}
+{# table once more, and a page with 300 rows weighed 1.5 MB.                 #}
+{#                                                                           #}
+{# The spans here read exactly like those in 'review_rows.html': the script  #}
+{# copies their content into the table after a filter replaced the list.    #}
+{# 'test_der_schnappschuss_gleicht_der_tabelle' holds the two together.     #}
+{% with von_hand=inventur.differenz_von_hand %}
+{% for zeile in zeilen %}
+<div data-zeile="{{ zeile.hausartikel.pk }}"{% if zeile.auffaellig %} class="tabellenzeile-auffaellig"{% endif %}>
+    <span data-wert="stand-{{ zeile.hausartikel.pk }}">
+        {% if not zeile.gezaehlt %}
+        <span class="badge bg-body-secondary text-body border"
+            title="{% translate 'Es gibt Zählpositionen, aber es ist noch nichts eingetragen' %}">
+            {% translate "noch nicht gezählt" %}
+        </span>
+        {% endif %}
+    </span>
+    <span data-wert="ist-{{ zeile.hausartikel.pk }}">{{ zeile.ist_text }}
+        <span class="text-body-secondary small fw-normal">{{ zeile.einheit.kurz }}</span></span>
+    {% if not von_hand %}
+    <span data-wert="soll-{{ zeile.hausartikel.pk }}">{% if zeile.sollbestand is None %}{% translate "&mdash;" %}{% else %}{{ zeile.soll_text }}{% endif %}</span>
+    <span data-wert="differenz-{{ zeile.hausartikel.pk }}">
+        {% if zeile.differenz is None %}
+        <span class="text-body-secondary fw-normal" title="{% translate 'Für diesen Artikel kam kein Soll herein' %}">
+            {% translate "&mdash;" %}
+        </span>
+        {% else %}
+        <span class="{{ zeile.differenz_klasse }}">{{ zeile.differenz_text }}</span>
+        {% endif %}
+    </span>
+    {% endif %}
+</div>
+{% endfor %}
+{% endwith %}

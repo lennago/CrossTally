@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ ware.name }}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    {% include "components/breadcrumbs.html" with aktuell=ware.name %}
+
+    <div class="kopfleiste bg-body py-2 d-flex flex-wrap gap-2 justify-content-between align-items-start mb-3">
+        <div>
+            <h1 class="h3 mb-1">
+                {{ ware.name }}
+                {% with status=ware.warenstatus %}
+                {% if status != "AKTIV" %}
+                <span class="badge bg-body-secondary text-body border align-middle">{{ ware.warenstatus_anzeige|lower }}</span>
+                {% endif %}
+                {% endwith %}
+            </h1>
+            <div class="text-body-secondary small">
+                {% blocktranslate with einheit=ware.basiseinheit.kurz %}geführt in {{ einheit }}{% endblocktranslate %}
+                {# The type hangs on the articles. Where they differ, each type #}
+                {# with its houses.                                             #}
+                {% with arten=ware.arten_der_artikel %}
+                {% for art, haeuser in arten %}
+                · {{ art.name }}{% if arten|length > 1 %} <span class="text-body-secondary">({% for haus in haeuser %}{{ haus.name }}{% if not forloop.last %}, {% endif %}{% endfor %})</span>{% endif %}
+                {% endfor %}
+                {% endwith %}
+                {# What the evaluations are grouped by belongs in the header row.   #}
+                {% if ware.warenfamilie %}
+                · <a href="{{ ware.warenfamilie.get_absolute_url }}"
+                    class="link-body-emphasis">{{ ware.warenfamilie.anzeigename }}</a>
+                {% else %}
+                · <span class="badge bg-body-secondary text-body border">{% translate "ohne Warenfamilie" %}</span>
+                {% endif %}
+                {% if ware.abwiegbar %}
+                · <span class="badge bg-body-secondary text-body border">{% translate "wird abgewogen" %}</span>
+                {% endif %}
+                {# What one unit is in the other dimensions: for the scale and for   #}
+                {# the family's sum.                                                 #}
+                {% for umrechnung in ware.umrechnungen.all %}
+                · <span class="font-monospace">{{ umrechnung.anzeigetext }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            {% if ware.hausartikel.all %}
+            {# For all articles of the product at once, in every house. #}
+            {% url 'ware_inventurart' ware.pk as art_ziel %}
+            {% include "components/inventurart_menu.html" with ziel=art_ziel arten=inventurarten aktuell=ware.inventurart gemischt=ware.arten_gemischt titel=ware.name rueckfrage=ware.art_rueckfrage %}
+            {% endif %}
+            {% include "katalog/components/sammelstatus_buttons.html" with satz=ware art="ware" %}
+            <a href="{% url 'ware_edit' ware.pk %}"
+                class="btn btn-outline-secondary btn-sm">{% translate "Bearbeiten" %}</a>
+            <a href="{% url 'ware_merge' ware.pk %}"
+                class="btn btn-outline-secondary btn-sm">{% translate "Zusammenführen" %}</a>
+            <a href="{% url 'ware_aufteilen' ware.pk %}"
+                class="btn btn-outline-secondary btn-sm">{% translate "Aufteilen" %}</a>
+            <a href="{% url 'ware_delete' ware.pk %}"
+                class="btn btn-outline-danger btn-sm">{% translate "Löschen" %}</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-header bg-body-tertiary">{% translate "Hausartikel der Häuser" %}</div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">{% translate "Haus" %}</th>
+                                <th scope="col">{% translate "Nr." %}</th>
+                                <th scope="col">{% translate "Bezeichnung im Haus" %}</th>
+                                <th scope="col">{% translate "Warengruppe" %}</th>
+                                <th scope="col">{% translate "Inventurart" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for artikel in ware.hausartikel.all %}
+                            <tr {% if not artikel.aktiv %}class="ausgegraut"{% endif %}>
+                                <td>
+                                    <a href="{{ artikel.haus.get_absolute_url }}"
+                                        class="link-secondary link-offset-2 text-decoration-none">
+                                        {{ artikel.haus.name }}
+                                    </a>
+                                </td>
+                                <td class="font-monospace text-body-secondary">
+                                    {{ artikel.artikelnummer|default:"–" }}
+                                </td>
+                                <td>
+                                    <a href="{{ artikel.get_absolute_url }}?von={{ herkunft|urlencode }}"
+                                        class="link-body-emphasis link-offset-2 text-decoration-none">
+                                        {{ artikel.name }}
+                                    </a>
+                                    {% if not artikel.aktiv %}
+                                    <span class="badge bg-body-secondary text-body border ms-1">
+                                        {% blocktranslate with status=artikel.get_status_display|lower datum=artikel.gueltig_bis|date:"SHORT_DATE_FORMAT" %}{{ status }} seit {{ datum }}{% endblocktranslate %}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ artikel.warengruppe.get_absolute_url }}?von={{ herkunft|urlencode }}"
+                                        class="link-secondary link-offset-2 text-decoration-none">
+                                        {{ artikel.warengruppe.anzeigename }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% url 'hausartikel_inventurart' artikel.pk as art_ziel %}
+                                    {% include "components/inventurart_menu.html" with ziel=art_ziel arten=inventurarten aktuell=artikel.inventurart titel=artikel.name weitere=artikel.weitere_artikel %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-body-secondary py-5">
+                                    {% translate "Kein Haus führt diese Ware. Hausartikel werden aus der Detailseite eines Hauses heraus angelegt." %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-body border-top">
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card mb-4">
+                <div class="card-header bg-body-tertiary d-flex justify-content-between">
+                    <span>{% translate "Gebinde" %}</span>
+                    <a href="{% url 'ware_edit' ware.pk %}#gebinde"
+                        class="small link-secondary">{% translate "ändern" %}</a>
+                </div>
+
+                {% include "katalog/components/gebinde_list.html" with ware=ware %}
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-body-tertiary">{% translate "Steckt in Rezepturartikeln" %}</div>
+                <ul class="list-group list-group-flush">
+                    {% for komponente in ware.verwendet_in.all %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="{{ komponente.rezepturartikel.get_absolute_url }}?von={{ herkunft|urlencode }}"
+                            class="link-body-emphasis link-offset-2 text-decoration-none">
+                            {{ komponente.rezepturartikel.name }}
+                        </a>
+                        <span class="text-body-secondary small font-monospace">
+                            {# A weighed recipe carries shares in percent, as on its own page. #}
+                            {% if komponente.rezepturartikel.anteilig %}
+                            {{ komponente.menge_in_basiseinheit|floatformat:"-6" }} %
+                            {% else %}
+                            {{ komponente.menge_in_basiseinheit|floatformat:"-6" }}
+                            {{ ware.basiseinheit.kurz }}
+                            {% blocktranslate with einheit=komponente.rezepturartikel.basiseinheit.kurz %}je {{ einheit }}{% endblocktranslate %}
+                            {% endif %}
+                        </span>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-body-secondary">
+                        {% translate "Diese Ware ist in keiner Rezeptur." %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% include "components/sortable_script.html" %}
+{% endblock extra_scripts %}

@@ -1,0 +1,30 @@
+{% load i18n %}
+{# Switch weighing directly in the row. Acts on the product.                     #}
+{#                                                                               #}
+{# Two buttons instead of a toggle: that way the applicable state stands         #}
+{# there without having to be inferred from the button's label. The set one      #}
+{# is filled and disabled.                                                       #}
+{#                                                                               #}
+{# Possible in every unit: the scale delivers grams, the product's conversion    #}
+{# factor does the rest.                                                         #}
+{#                                                                               #}
+{# Call: {% include "components/weighing_buttons.html" with ware=... %}          #}
+<form method="post" action="{% url 'ware_abwiegen' ware.pk %}" class="d-inline"
+    data-sofort>
+    {% csrf_token %}
+    <input type="hidden" name="weiter" value="{{ request.get_full_path }}">
+    <div class="btn-group btn-group-sm" role="group"
+        aria-label="{% blocktranslate with name=ware.name %}Abwiegen für {{ name }}{% endblocktranslate %}">
+        <button type="submit" name="abwiegbar" value="ja" title="{% translate 'Wird lose gewogen' %}"
+            class="btn {% if ware.abwiegbar %}btn-secondary{% else %}btn-outline-secondary{% endif %}"
+            {% if ware.abwiegbar %}disabled aria-pressed="true"{% endif %}>
+            {% translate "Ja" %}
+        </button>
+        <button type="submit" name="abwiegbar" value="nein" title="{% translate 'Nur in Gebinden gezählt' %}"
+            class="btn {% if not ware.abwiegbar %}btn-secondary{% else %}btn-outline-secondary{% endif %}"
+            {% if not ware.abwiegbar %}disabled aria-pressed="true"{% endif %}
+            {% if ware.abwiegbar and ware.behaelter.all %}data-rueckfrage="{% blocktranslate with name=ware.name %}Abwiegen für „{{ name }}“ abschalten? Die zugeordneten Behälter entfallen damit.{% endblocktranslate %}"{% endif %}>
+            {% translate "Nein" %}
+        </button>
+    </div>
+</form>

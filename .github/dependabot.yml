@@ -1,0 +1,88 @@
+# Keeps third-party versions current, one pull request per ecosystem per week.
+#
+# Small bumps are grouped per ecosystem, so that twenty separate pull requests
+# are not waiting on Monday. A big jump stays on its own, because it wants to
+# be read.
+#
+# The titles follow the Conventional Commits, so they pass the title check.
+# What runs in operation is 'fix(deps): …': the Python packages, the images
+# and the app's 'dependencies'. release-please makes a patch version of it, a
+# security update included. Until 10/2026 every title was 'chore', and an
+# update reached a release only with the next change of our own. Tools for
+# development ('chore(deps-dev): …') and the actions ('chore(deps): …') make
+# no version.
+#
+# That is why everything whose code lands in the app stands under the app's
+# 'dependencies', even where it only runs while building: Svelte, and the PWA
+# plugin, which brings Workbox into the service worker. In the lock this also
+# marks their build chains (Babel, Rollup) as not dev. What is really shipped
+# only the build knows (see 'app/bin/audit.mjs').
+version: 2
+
+updates:
+  # The actions in '.github/workflows'. They are pinned to commits, and
+  # Dependabot bumps commit and version comment together.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: uv
+    directory: /server
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: fix
+      prefix-development: chore
+      include: scope
+    groups:
+      python:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /app
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: fix
+      prefix-development: chore
+      include: scope
+    groups:
+      npm:
+        update-types: [minor, patch]
+
+  # The base images in the 'Dockerfile'.
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: fix
+      include: scope
+
+  # Database and proxy in 'compose.yaml'.
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: fix
+      include: scope
+    # A new major version of PostgreSQL does not read the data folder of the
+    # old one, and the container would no longer start. That switch
+    # comes on purpose, with a dump, a restore and 'feat!:'. Minor versions
+    # keep coming.
+    ignore:
+      - dependency-name: postgres
+        update-types: ["version-update:semver-major"]

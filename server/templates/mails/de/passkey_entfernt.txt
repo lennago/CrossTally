@@ -1,0 +1,20 @@
+Passkey von deinem Konto bei {{ anwendung }} entfernt
+
+Hallo {{ vorname }},
+
+der Passkey „{{ passkey }}“ ist von deinem Konto bei {{ anwendung }} entfernt. Mit ihm meldet sich niemand mehr an.
+
+{% if selbst %}
+Auf deinen anderen Geräten bist du abgemeldet, auf der Website sofort, in der Zähl-App spätestens nach einer Stunde. Wo du ihn entfernt hast, bleibst du angemeldet.
+
+Warst du das nicht? Dann ändere dein Passwort und gib einem Administrator Bescheid.
+{% elif wer %}
+Auf allen Geräten bist du abgemeldet, auf der Website sofort, in der Zähl-App spätestens nach einer Stunde.
+
+Entfernt von {{ wer }}.
+Wenn du das nicht erwartet hast, sprich mit {{ wer }}.
+{% else %}
+Auf allen Geräten bist du abgemeldet, auf der Website sofort, in der Zähl-App spätestens nach einer Stunde.
+
+Wenn du das nicht erwartet hast, sprich mit deiner Führungskraft.
+{% endif %}

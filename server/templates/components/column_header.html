@@ -1,0 +1,18 @@
+{% load i18n %}
+{# A sortable column header. One click sorts ascending, a second descending        #}
+{# (see 'django_project/columns.py').                                              #}
+{#                                                                                 #}
+{#   {% include "components/column_header.html" with kopf=spalten.name %}          #}
+{#                                                                                 #}
+{# 'spalten' is 'Spaltensortierung.kopf()'. Optional 'klasse' (say                 #}
+{# "text-end"), 'breite' (say "8rem") and 'aus': then only the title stands        #}
+{# there, in the grouped view the grouping sorts, not the column.                  #}
+{# The arrow is in every header, only invisible in the unsorted ones: otherwise    #}
+{# the column would grow with the sorting and push the table back and forth.       #}
+{# 'querystring' keeps the active filters and drops the page number: after a       #}
+{# new sorting page seven would be a completely different one.                     #}
+<th scope="col"{% if not aus %} aria-sort="{{ kopf.aria_sort }}"{% endif %}{% if klasse or breite %} class="{{ klasse }}{% if breite %} breite-{{ breite|cut:"rem" }}{% endif %}"{% endif %}>
+    {% if aus %}{{ kopf.titel }}{% else %}<a href="{% querystring sortierung=kopf.naechster page=None %}"
+        class="link-body-emphasis text-decoration-none text-nowrap"
+        title="{% blocktranslate with titel=kopf.titel %}Nach „{{ titel }}“ sortieren{% endblocktranslate %}">{{ kopf.titel }}<span aria-hidden="true" class="small{% if not kopf.aktiv %} invisible{% endif %}">&nbsp;{% if kopf.absteigend %}&#9660;{% else %}&#9650;{% endif %}</span></a>{% endif %}
+</th>

@@ -1,0 +1,68 @@
+{% load i18n %}
+{# The filter card of a list: search field, select lists, multi-selects.         #}
+{#                                                                               #}
+{#   {% url 'behaelter_list' as zurueck %}                                       #}
+{#   {% include "components/list_filter.html" with zuruecksetzen=zurueck %}      #}
+{#                                                                               #}
+{# Expects 'filterform' ('ListenFilterForm'). What the form does not have        #}
+{# (search field, sorting, multi-selects) is left out. Plus as needed:           #}
+{#   breite:       columns per select list in the 12-column grid, default 3      #}
+{#   reiter:       rides along as a hidden field (counting list)                 #}
+{#   zusatz:       template for a further filter field in the row, ideally a     #}
+{#                 partial of the page itself ("seite.html#haus_filter")         #}
+{#   nachsatz:     likewise, stands behind the buttons                           #}
+{# The filter takes effect at once via 'live_filter.js'. "Apply" remains the     #}
+{# way without JavaScript. The form itself is never replaced in the process.     #}
+{# That is why "Reset filter" stands in its own place for replacing.             #}
+<form method="get" class="card card-body bg-body-tertiary mb-3" data-filter>
+    {% if reiter %}<input type="hidden" name="reiter" value="{{ reiter }}">{% endif %}
+    {# The sorting of the column headers rides along, otherwise it would drop    #}
+    {# out on the next filtering, which builds the address from this form.       #}
+    {# Only where it rides along hidden: the inventory list carries 'sortierung' #}
+    {# as a visible select among the others. There it would stand twice.         #}
+    {% if filterform.sortierung.is_hidden %}{{ filterform.sortierung }}{% endif %}
+    <div class="row g-2 align-items-end">
+        {% if filterform.q %}
+        <div class="col-12 col-lg-4">
+            <label class="form-label small mb-1" for="{{ filterform.q.id_for_label }}">
+                {{ filterform.q.label }}
+            </label>
+            {{ filterform.q }}
+        </div>
+        {% endif %}
+        {% for feld in filterform.auswahlfelder %}
+        <div class="col-6 col-lg-{{ breite|default:3 }}">
+            <label class="form-label small mb-1" for="{{ feld.id_for_label }}">
+                {{ feld.label }}
+            </label>
+            {{ feld }}
+        </div>
+        {% endfor %}
+        {# Multi-selects only take effect with "Apply". Every single tick         #}
+        {# would otherwise trigger a search of its own.                           #}
+        {% for wahl in filterform.mehrfachwahlen %}
+        <div class="col-6 col-lg-{{ breite|default:3 }}">
+            {% include "components/multi_select.html" with wahl=wahl titel=wahl.titel %}
+        </div>
+        {% endfor %}
+        {% if zusatz %}{% include zusatz %}{% endif %}
+        <div class="col-auto d-flex gap-2 align-items-center">
+            <button class="btn btn-primary btn-sm" type="submit" data-anwenden>{% translate "Anwenden" %}</button>
+            <span data-ersetzen="filter-zuruecksetzen">
+                {% if filterform.ist_eingeschraenkt %}
+                <a href="{{ zuruecksetzen }}" class="btn btn-outline-secondary btn-sm">
+                    {% translate "Filter zurücksetzen" %}
+                </a>
+                {% endif %}
+            </span>
+            {% if nachsatz %}{% include nachsatz %}{% endif %}
+        </div>
+    </div>
+    {% if filterform.errors %}
+    <div class="alert alert-warning mt-3 mb-0 py-2 small">
+        {% for feld, fehler in filterform.errors.items %}
+        <div>{{ fehler|join:" " }} {% translate "Dieser Filter wurde übergangen." %}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</form>

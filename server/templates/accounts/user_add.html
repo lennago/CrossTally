@@ -1,0 +1,17 @@
+{% extends "components/form_page.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Neuer Benutzer" %}{% endblock title %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'user_list' %}">{% translate "Benutzer" %}</a></li>
+{% endblock pfad %}
+
+{% block neu %}{% translate "Neuer Benutzer" %}{% endblock neu %}
+
+{% block abbrechen_url %}{% url 'user_list' %}{% endblock abbrechen_url %}
+
+{% block extra_scripts %}
+{% include "components/script.html" with name="role_choice" %}
+{% include "components/script.html" with name="password_choice" %}
+{% endblock extra_scripts %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{# The answer to a second restore while the first is still running, mostly #}
+{# a double click. Like 'backup_done.html' without bar: in a moment nobody #}
+{# is signed in any more.                                                  #}
+
+{% block title %}{% translate "Stand wird eingespielt" %}{% endblock title %}
+
+{% block content %}
+<div class="container py-5 max-breite-36">
+
+    <div class="card">
+        <div class="card-body p-4">
+
+            <h2 class="h4 mb-3">{% translate "Stand wird schon eingespielt" %}</h2>
+
+            <p class="mb-4">
+                {% translate "Der Stand vom" %}
+                <strong>{% blocktranslate with zeit=stand.zeitpunkt|date:"SHORT_DATETIME_FORMAT" %}{{ zeit }} Uhr{% endblocktranslate %}</strong>
+                {% translate "wird gerade eingespielt. Das Formular kam ein zweites Mal an. Ein zweites Einspielen gibt es nicht. Nach wenigen Sekunden ist es fertig. Danach ist niemand mehr angemeldet." %}
+            </p>
+
+            <a href="{% url 'login' %}" class="btn btn-success">{% translate "Zur Anmeldung" %}</a>
+
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

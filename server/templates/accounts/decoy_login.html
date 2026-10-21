@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{# The decoy under '/admin/'. It shows the same form as the real login, in    #}
+{# the source too, see 'accounts/honeypot.py'.                                 #}
+
+{% block title %}{% translate "Anmelden" %}{% endblock title %}
+
+{% block content %}
+{# The same hidden notice as the real page ('login_notice.js'): the two have #}
+{# to match byte for byte, see 'test_attrappe_sieht_aus_wie_die_echte_anmeldung'. #}
+<div class="container pt-3 max-breite-36">
+    <div class="alert alert-warning" role="alert" data-abgemeldet hidden>
+        {% translate "Die Anmeldung war abgelaufen. Eingaben, die noch nicht gespeichert waren, sind verloren." %}
+    </div>
+</div>
+{% include "components/login_card.html" %}
+{% endblock content %}
+
+{% block extra_scripts %}
+{% include "components/passkey_script.html" %}
+{% include "components/script.html" with name="login_notice" %}
+{% endblock extra_scripts %}

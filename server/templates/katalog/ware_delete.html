@@ -1,0 +1,32 @@
+{% extends "components/delete_page.html" %}
+{% load i18n %}
+
+{% block art %}{% translate "Ware löschen" %}{% endblock art %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'ware_list' %}">{% translate "Waren" context "Liste aller Waren" %}</a></li>
+{% endblock pfad %}
+
+{% block folgen %}
+
+{% if object.hausartikel.all or object.verwendet_in.all %}
+<p class="mb-2">{% translate "Das wird abgelehnt, denn daran hängen noch:" %}</p>
+<ul class="mb-3">
+    <li>
+    {% blocktranslate with hausartikel=object.hausartikel.all|length %}{{ hausartikel }} Hausartikel in den Häusern{% endblocktranslate %}
+</li>
+    <li>
+    {% blocktranslate with verwendet_in=object.verwendet_in.all|length %}{{ verwendet_in }} Rezepturkomponente(n){% endblocktranslate %}
+</li>
+</ul>
+<p class="text-body-secondary small mb-0">
+    {% translate "Geht es um eine Dublette aus dem Import, ist" %}
+    <a href="{% url 'ware_merge' object.pk %}">{% translate "Zusammenführen" %}</a>
+    {% translate "der richtige Weg, denn dabei bleibt alles erhalten." %}
+</p>
+{% else %}
+<p class="mb-0">
+    {% blocktranslate with gebinde=object.gebinde.all|length %}Die {{ gebinde }} Gebinde werden mitgelöscht. Kein Haus führt diese Ware, es geht also nichts verloren.{% endblocktranslate %}
+</p>
+{% endif %}
+{% endblock folgen %}

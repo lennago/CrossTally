@@ -1,0 +1,14 @@
+Password sign-in at {{ anwendung }} switched off
+
+Hello {{ vorname }},
+
+Signing in with a password was switched off for your account at {{ anwendung }} in the administration. This signed you out on all devices.
+
+{% if selbst %}
+Wasn't that you? Then let an administrator know.
+{% elif wer %}
+Switched off by {{ wer }}.
+If you did not expect this, talk to {{ wer }}.
+{% else %}
+If you did not expect this, talk to your manager.
+{% endif %}

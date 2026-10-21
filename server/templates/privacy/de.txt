@@ -1,0 +1,51 @@
+Diese Anwendung ist ein Werkzeug für die Inventur und steht nicht öffentlich im Netz. Ein Konto bekommt nur, wer im Betrieb zählt oder die Inventuren führt. Hier steht, was dabei über dich gespeichert wird und was nicht.
+
+## Wozu es die Anwendung gibt
+
+Sie hält fest, welche Ware zum Stichtag im Haus ist. Das ist eine Aufgabe des Betriebs, und dein Konto ist nötig, damit du daran mitarbeiten kannst. Rechtsgrundlage ist das Arbeitsverhältnis selbst.
+
+## Was über dich gespeichert wird
+
+- **Dein Konto:** Benutzername, Vor- und Nachname, E-Mail-Adresse, deine Rolle, die Häuser, in denen du üblicherweise zählst, deine Sprache, deine Wahl zwischen heller und dunkler Darstellung, die Farben der Differenz, wann das Konto angelegt wurde und der Zeitpunkt deiner letzten Anmeldung, auf der Website oder in der Zähl-App.
+- **Dein Passwort niemals im Klartext.** Gespeichert wird nur ein Prüfwert daraus, aus dem sich das Passwort nicht zurückrechnen lässt. Niemand kann es auslesen, auch die Verwaltung nicht. Wer seines vergisst, bekommt ein neues gesetzt, statt das alte genannt zu bekommen.
+- **Deine Passkeys:** je Gerät der öffentliche Teil des Schlüssels, seine Kennung, der Name, den du ihm gibst, und wann er angelegt und zuletzt benutzt wurde. Der geheime Teil bleibt auf deinem Gerät.
+- **Die Anmeldung der Zähl-App:** je Gerät ein Anmeldetoken mit deinem Konto und dem Zeitpunkt, an dem es ausgegeben wurde. Bei jeder Erneuerung kommt ein neues dazu, etwa stündlich, solange die App benutzt wird. Jedes gilt zwei Wochen.
+- **Fehlgeschlagene Anmeldungen:** Benutzername, Adresse im Netz, Browserkennung, aufgerufene Adresse und Zeitpunkt. Nach fünf Fehlversuchen ist der Benutzername von dieser Adresse aus eine halbe Stunde gesperrt. Eine gelungene Anmeldung setzt den Zähler zurück. Das hält jemanden auf, der Passwörter durchprobiert. Ebenso jeder Anmeldeversuch unter „/admin/“, einer Adresse, hinter der nichts liegt.
+- **Anfragen „Passwort vergessen?“:** die eingegebene E-Mail-Adresse, Adresse im Netz und Zeitpunkt. Mehr als fünf Anfragen je Stunde und Adresse gehen ins Leere. Das hält jemanden auf, der eine Adresse mit Mails flutet oder herausfinden will, welche Adressen ein Konto haben.
+- **Wer zu einer Inventur gehört:** An jeder Inventur steht, wer darin zählen darf, solange sie läuft.
+- **Änderungen in der Verwaltung:** Wer dort einen Datensatz anlegt, ändert oder löscht, steht mit Namen und Zeitpunkt im Protokoll. Dazu steht dort der Name des Datensatzes, bei einem Konto also der Name der Person.
+- **Mails an dich:** Hat der Betrieb einen Mailserver eingerichtet, bekommst du eine Mail, wenn dein Konto geändert, deaktiviert oder gelöscht wird, dein Passwort geändert oder neu gesetzt, ein Passkey angelegt oder entfernt oder deine Adresse geändert wird. Sie nennt, was sich geändert hat und, je nach Einstellung, wer es war. Mails gehen über den Mailserver des Betriebs an deine Adresse, beim Wechsel der Adresse an die alte und die neue. Bis du die neue bestätigst, steht sie neben der alten an deinem Konto.
+- **Das Protokoll des Webservers:** jede Anfrage, unter anderem mit Adresse im Netz, aufgerufener Seite samt Abfrage, Browserkennung und Zeit.
+- **Backups:** verschlüsselte Abzüge der Datenbank. Ein Backup hält den Stand seines Tages fest, auch dein Konto und deine Passkeys.
+
+## Was nicht gespeichert wird
+
+- **Die Zählungen tragen keinen Namen.** An einer Zählposition steht, was gezählt wurde und wann. Nicht, von wem. Es gibt keine Auswertung, wer wie schnell oder wie viel gezählt hat.
+- **Kein Protokoll der Anmeldungen.** Am Konto steht nur der Zeitpunkt der jeweils letzten, an jedem Passkey der seiner letzten Benutzung. Was die Anmeldetoken der Zähl-App und der Webserver nebenbei festhalten, steht oben.
+- **Keine Analyse, keine Werbung, kein Tracking.** Es gibt weder Zählpixel noch Statistikdienste noch Profile.
+- **Nichts geht an fremde Server.** Die Seite lädt alles von sich selbst. Schriften, Skripte und Bilder liegen mit im Haus.
+- **Keine Weitergabe.** Außer den Mails an deine eigene Adresse verlassen die Daten den Betrieb nicht.
+
+## Was auf deinem Gerät liegt
+
+Es gibt keine Abfrage nach Cookies, weil es nichts zu fragen gibt. Gespeichert wird nur, was die Anwendung zum Arbeiten braucht:
+
+- Ein **Sitzungs-Cookie**, damit du angemeldet bleibst, und ein zweites, das Formulare gegen fremde Seiten absichert. Ohne Anmeldung merkt sich ein drittes die gewählte Sprache, bis du den Browser schließt.
+- Deine **Ansicht**: die Darstellung, aufgeklappte Gruppen, Filter und Sortierung. Damit eine Liste wieder so aussieht, wie du sie verlassen hast.
+- In der **Zähl-App** deine Anmeldung, die Angaben deines Kontos und die Zählliste, dazu deine Eingaben, bis sie beim Server sind. Nur so kannst du im Kühlhaus ohne Empfang weiterzählen. Beim Abmelden wird die Ablage geleert.
+
+## Wie lange
+
+- **Dein Konto** besteht, solange du es brauchst. Wer den Betrieb verlässt, dessen Konto wird gelöscht. Es hängt nichts daran, das erhalten bleiben müsste, und ein Konto ist in einer Minute wieder angelegt.
+- **Die Zähldaten** bleiben, denn die Inventur ist ein Beleg. Sie sagen nichts über dich aus.
+- **Wer an einer Inventur zählen durfte**, wird bei ihrem Abschluss gelöscht. Danach sagt die Inventur nicht mehr, wer dabei war.
+- **Fehlversuche** werden gelöscht, wenn die halbe Stunde der Sperre um ist, spätestens bei der nächsten täglichen Bereinigung. Dieselbe Bereinigung räumt abgelaufene Sitzungen und abgelaufene Anmeldetoken der Zähl-App weg.
+- **Anfragen „Passwort vergessen?“** und die Versuche unter „/admin/“ werden nach 30 Tagen gelöscht.
+- **Eine neue Adresse, die auf ihre Bestätigung wartet,** wird nach drei Tagen bei der nächsten täglichen Bereinigung gelöscht. Früher geht sie mit ihrer Bestätigung, mit einem neuen Passwort, wenn ein Passkey entfernt wird und wenn das Konto deaktiviert wird.
+- **Das Protokoll der Verwaltung** wird nach einem Jahr gelöscht.
+- **Das Protokoll des Webservers** ist nach Größe begrenzt. Je nach Betrieb reicht es einige Tage oder Wochen zurück.
+- **Backups:** Auf dem Rechner bleiben die sieben jüngsten. Was in einem Backup steht, auch ein inzwischen gelöschtes Konto, geht erst mit ihm.
+
+## Deine Rechte
+
+Du kannst Auskunft darüber verlangen, was über dich gespeichert ist, und Falsches berichtigen oder löschen lassen. Außerdem kannst du dich bei der Datenschutzaufsicht deines Bundeslandes beschweren.

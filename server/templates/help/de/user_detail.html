@@ -1,0 +1,24 @@
+<h3>Das Konto</h3>
+<p>
+    Benutzername, Name, E-Mail-Adresse, Häuser, wann das Konto angelegt wurde und wann sich
+    die Person zuletzt angemeldet hat, auf der Website oder in der Zähl-App.{% if mail_moeglich %} Was sich hier ändert, erfährt die
+    Person per E-Mail.{% endif %}
+</p>
+<h3>Die Knöpfe</h3>
+<p>
+    <strong>Bearbeiten</strong> öffnet das Formular für Benutzername, Name, Rolle, Häuser und
+    Aktiv, für Administratoren auch die E-Mail-Adresse.
+    <strong>Löschen</strong> entfernt das Konto. Am Konto hängen keine Zähldaten. Es
+    verschwinden nur die Zuordnungen zu Häusern und Inventuren und die Passkeys. Wer den
+    Betrieb verlässt, wird gelöscht, nicht auf inaktiv gesetzt.{% if mail_moeglich %} <strong>Einladung erneut
+    senden</strong> steht bei einem Konto, das noch auf sein Passwort wartet: ein neuer Link,
+    etwa wenn der alte abgelaufen ist.{% endif %}
+</p>
+<h3>Passwort und Adresse</h3>
+<p>
+    Das Passwort ändert jede Person selbst, über das Kontomenü oben rechts, in der Zähl-App
+    oder über die Sperrseite der Website. Die E-Mail-Adresse ebenso, oder ein Administrator
+    ändert sie.{% if mail_moeglich %} Eine neue Adresse gilt erst, wenn die Person den Link
+    aus der Mail bestätigt hat.{% endif %} Vergisst jemand sein Passwort, setzt ein
+    Administrator in der Verwaltung ein neues.
+</p>

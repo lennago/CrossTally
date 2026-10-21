@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Benutzer" %}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="kopfleiste bg-body d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3 py-2">
+        <h1 class="h3 mb-0">{% translate "Benutzer" %}</h1>
+        <a href="{% url 'user_add' %}" class="btn btn-success btn-sm">{% translate "Neuer Benutzer" %}</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    {% include "components/column_header.html" with kopf=spalten.name %}
+                    {% include "components/column_header.html" with kopf=spalten.benutzername %}
+                    {% include "components/column_header.html" with kopf=spalten.email %}
+                    {% include "components/column_header.html" with kopf=spalten.rolle %}
+                    <th scope="col">{% translate "Häuser" %}</th>
+                    {% include "components/column_header.html" with kopf=spalten.login %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for benutzer in object_list %}
+                <tr>
+                    <td>
+                        <a href="{{ benutzer.get_absolute_url }}"
+                            class="link-body-emphasis link-offset-2 text-decoration-none">
+                            {{ benutzer }}
+                        </a>
+                        {% if benutzer.ist_eingeladen %}
+                        <span class="badge bg-body-secondary text-body border ms-1">{% translate "eingeladen" %}</span>
+                        {% elif not benutzer.is_active %}
+                        <span class="badge bg-body-secondary text-body border ms-1">{% translate "deaktiviert" %}</span>
+                        {% endif %}
+                    </td>
+                    <td class="font-monospace text-body-secondary">{{ benutzer.username }}</td>
+                    <td class="text-body-secondary">{{ benutzer.email }}</td>
+                    <td>
+                        {% if benutzer.is_superuser %}
+                        <span class="badge rounded-pill text-bg-primary">{% translate "Administrator" %}</span>
+                        {% elif benutzer.is_staff %}
+                        <span class="badge rounded-pill text-bg-secondary">{% translate "Führungskraft" %}</span>
+                        {% else %}
+                        <span class="badge rounded-pill bg-body-secondary text-body border">{% translate "Zähler" context "Rolle" %}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if benutzer.gilt_fuer_alle_haeuser %}
+                        <span class="badge rounded-pill bg-body-secondary text-body border">{% translate "alle Häuser" %}</span>
+                        {% else %}
+                        {% for haus in benutzer.haeuser.all %}
+                        <span class="badge rounded-pill bg-body-secondary text-body border">{{ haus.name }}</span>
+                        {% empty %}
+                        <span class="text-body-secondary">–</span>
+                        {% endfor %}
+                        {% endif %}
+                    </td>
+
+                    <td class="text-body-secondary small">
+                        {% translate "nie" as nie %}{{ benutzer.last_login|date:"SHORT_DATETIME_FORMAT"|default:nie }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-body-secondary py-5">
+                        {% translate "Noch keine Benutzer angelegt." %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock content %}

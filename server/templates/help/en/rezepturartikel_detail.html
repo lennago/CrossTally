@@ -1,0 +1,22 @@
+{# Only for what goes on the scale. #}
+{% if rezepturartikel.wird_gewogen %}
+<h3>Weighing</h3>
+<p>
+    Weighing is gross in grams. The tare of the chosen container is deducted. The net
+    quantity is then spread over the recipe onto the products involved.
+</p>
+{% endif %}
+<h3>Resolvable</h3>
+<p>
+    Resolvable means: every component has a carried article at this site. If an ingredient
+    is inactive there, the prepared item stands like an inactive article: it can be put into
+    the count list and added in the app, but gets no line of its own. If an ingredient is
+    missing or discontinued, the item is not on offer there.
+</p>
+<h3>Occurs at</h3>
+<p>
+    Where a component is missing, the item cannot be resolved and therefore cannot be
+    entered either. A location already entered can still be removed. The order per location
+    is kept in its count list. A prepared item has no packs: it is counted in its own unit,
+    one line per location.
+</p>

@@ -1,0 +1,17 @@
+{% load i18n %}
+{# Breadcrumb bar. 'pfad' comes from 'navigation.PfadMixin' and knows the way   #}
+{# someone came here by. 'aktuell' is the page itself.                          #}
+<nav aria-label="{% translate 'Navigationspfad' %}">
+    <ol class="breadcrumb small">
+        {% for station in pfad %}
+        <li class="breadcrumb-item">
+            {% if station.url %}
+            <a href="{{ station.url }}">{{ station.titel }}</a>
+            {% else %}
+            {{ station.titel }}
+            {% endif %}
+        </li>
+        {% endfor %}
+        <li class="breadcrumb-item active" aria-current="page">{{ aktuell }}</li>
+    </ol>
+</nav>

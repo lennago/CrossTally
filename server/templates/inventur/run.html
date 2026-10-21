@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{# The "Total" tab of a run: the houses side by side, during the count as a     #}
+{# review view, afterwards as the day's evaluation. Computed in                 #}
+{# 'evaluation.familien_eines_laufs'.                                           #}
+
+{% block title %}{{ lauf }}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'inventur_list' %}">{% translate "Inventuren" %}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ lauf }}</li>
+        </ol>
+    </nav>
+
+    {% include "inventur/components/run_tabs.html" with aktiv=None %}
+
+    <div class="kopfleiste bg-body py-2 d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+        <div>
+            <h1 class="h3 mb-0">{{ lauf }}</h1>
+            <div class="text-body-secondary small mt-1">
+                {% blocktranslate with anzahl=lauf.inventuren|length %}{{ anzahl }} Häuser{% endblocktranslate %} &middot;
+                {% if lauf.offene %}{% blocktranslate with anzahl=lauf.offene|length %}{{ anzahl }} noch offen{% endblocktranslate %}{% else %}{% translate "alle abgeschlossen" %}{% endif %}
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            {% if lauf.kann_abschliessen %}
+            <form method="post" action="{% url 'inventur_lauf_abschluss' lauf.stichtag|date:'Y-m-d' %}">
+                {% csrf_token %}
+                {# The count state per house the numbers below belong to, and the  #}
+                {# remarks' state. Whatever arrived since stops the closing        #}
+                {# ('views.lauf_fortsetzen').                                      #}
+                {% for nummer, zaehlstand, bemerkungsstand in gesehen %}
+                <input type="hidden" name="zaehlstand_{{ nummer }}" value="{{ zaehlstand }}">
+                <input type="hidden" name="bemerkungsstand_{{ nummer }}" value="{{ bemerkungsstand }}">
+                {% endfor %}
+                <button class="btn btn-success" type="submit"
+                    data-rueckfrage="{% blocktranslate with haeuser=lauf.offene_haeuser %}Alle offenen Inventuren dieses Laufs abschließen ({{ haeuser }})? Wo es Fragen zu den Stammdaten gibt, kommen sie Haus für Haus. Das Einfrieren lässt sich nicht rückgängig machen.{% endblocktranslate %}">
+                    {% translate "Alle abschließen" %}
+                </button>
+            </form>
+            {% elif not lauf.offene %}
+            <a href="{% url 'inventur_lauf_pdf' lauf.stichtag|date:'Y-m-d' %}"
+                class="btn btn-success" target="_blank">{% translate "PDF über alle Häuser" %}</a>
+            {% endif %}
+            {% if lauf.offene %}
+            <a href="{% url 'inventur_lauf_delete' lauf.stichtag|date:'Y-m-d' %}"
+                class="btn btn-outline-danger">{% translate "Offene löschen" %}</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if lauf.offene and lauf.in_vorbereitung %}
+    <div class="alert alert-light border py-2 small">
+        {% translate "Gemeinsam abgeschlossen wird erst, wenn in jedem Haus gezählt wird. Noch in der Vorbereitung:" %}
+        {% for inventur in lauf.in_vorbereitung %}
+        <a href="{{ inventur.get_absolute_url }}" class="link-body-emphasis">{{ inventur.haus.name }}</a>{% if forloop.last %}.{% else %}, {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="table-responsive mb-4">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th scope="col">{% translate "Haus" %}</th>
+                    <th class="breite-10" scope="col">{% translate "Status" %}</th>
+                    <th class="breite-18" scope="col">{% translate "Fortschritt" %}</th>
+                    <th scope="col" class="text-end"><span class="visually-hidden">{% translate "Aktionen" %}</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inventur in lauf.inventuren %}
+                <tr>
+                    <td>
+                        <a href="{{ inventur.get_absolute_url }}"
+                            class="link-body-emphasis link-offset-2 text-decoration-none">
+                            {{ inventur.haus.name }}
+                        </a>
+                    </td>
+                    <td>{% include "inventur/components/status_badge.html" %}</td>
+                    <td>{% include "inventur/components/progress.html" %}</td>
+                    <td class="text-end">
+                        {% if inventur.status == "ZAEHLUNG" %}
+                        <a href="{% url 'inventur_pruefen' inventur.pk %}"
+                            class="btn btn-outline-secondary btn-sm">{% translate "Prüfen" %}</a>
+                        {% elif inventur.status == "ABGESCHLOSSEN" %}
+                        <a href="{% url 'inventur_pdf' inventur.pk %}"
+                            class="btn btn-outline-secondary btn-sm" target="_blank">{% translate "PDF" %}</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="h5 mb-1">
+        {% translate "Differenzen je Ware" %}
+        <span class="text-body-secondary small fw-normal ms-2">
+            {% blocktranslate count anzahl=anzahl_waren %}{{ anzahl }} Ware{% plural %}{{ anzahl }} Waren{% endblocktranslate %}{% if anzahl_gegenlaeufig %}{% blocktranslate %}, davon {{ anzahl_gegenlaeufig }} gegenläufig{% endblocktranslate %}{% endif %}
+        </span>
+    </h2>
+    <p class="text-body-secondary small">
+        {% if lauf.offene %}
+        {% blocktranslate with zeitpunkt=stand|date:"H:i" %}Stand {{ zeitpunkt }}. Offene Häuser zählen mit ihrem jetzigen Stand, neu laden holt nach, was die Zähl-App inzwischen geschickt hat.{% endblocktranslate %}
+        {% else %}
+        {% translate "Der eingefrorene Stand aller Häuser." %}
+        {% endif %}
+        {% translate "Gegenläufig heißt: einem Haus fehlt, was ein anderes zu viel hat. Das ist meist eine Warenbewegung." %}
+    </p>
+
+    {% if bloecke %}{% include "components/expand_buttons.html" %}{% endif %}
+    {# By family the blocks nest ('run_block.html' includes itself). #}
+    {% for block in bloecke %}
+    {% include "inventur/components/run_block.html" %}
+    {% empty %}
+    <p class="text-body-secondary">
+        {% translate "Noch ist in keinem Haus etwas gezählt, und kein Sollbestand ist eingelesen." %}
+    </p>
+    {% endfor %}
+
+</div>
+{% endblock content %}

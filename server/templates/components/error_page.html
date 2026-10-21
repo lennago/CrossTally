@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{# The frame of the error pages '400.html' to '500.html'. A page fills       #}
+{# 'fehlercode', 'ueberschrift' and 'erklaerung'. 'weiter' leads managers to  #}
+{# the inventories and everyone else to the login, a page may replace it.     #}
+
+{% block content %}
+<div class="container py-5 max-breite-36">
+
+    <div class="card">
+        <div class="card-body p-4">
+
+            <p class="text-body-secondary small mb-1">{% block fehlercode %}{% endblock fehlercode %}</p>
+            <h2 class="h4 mb-3">{% block ueberschrift %}{% endblock ueberschrift %}</h2>
+
+            <p class="mb-4">
+                {% block erklaerung %}{% endblock erklaerung %}
+            </p>
+
+            {% block weiter %}
+            {% if user.is_staff %}
+            <a href="{% url 'inventur_list' %}" class="btn btn-success">{% translate "Zu den Inventuren" %}</a>
+            {% else %}
+            <a href="{% url 'login' %}" class="btn btn-success">{% translate "Zur Anmeldung" %}</a>
+            {% endif %}
+            {% endblock weiter %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

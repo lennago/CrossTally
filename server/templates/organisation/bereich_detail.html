@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ bereich.name }} - {{ bereich.haus.name }}{% endblock title %}
+
+{% block content %}
+<div class="container py-4 seite-mittel">
+
+    {% include "components/breadcrumbs.html" with aktuell=bereich.name %}
+
+    <div class="kopfleiste bg-body py-2 d-flex flex-wrap gap-2 justify-content-between align-items-start mb-3">
+        <div>
+            <h1 class="h3 mb-1">{{ bereich.name }}</h1>
+            <div class="text-body-secondary small">
+                {{ bereich.haus.name }} · {% blocktranslate with anzahl=bereich.orte.all|length %}{{ anzahl }} Orte{% endblocktranslate %}
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'bereich_edit' bereich.pk %}"
+                class="btn btn-sm btn-outline-secondary">{% translate "Umbenennen" %}</a>
+            <a href="{% url 'bereich_delete' bereich.pk %}"
+                class="btn btn-sm btn-outline-danger">{% translate "Löschen" %}</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-header bg-body-tertiary">{% translate "Orte" %}</div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">{% translate "Ort" %}</th>
+                                <th scope="col" class="text-center">{% translate "Erwartete Artikel" %}</th>
+                                <th class="breite-8" scope="col"><span class="visually-hidden">{% translate "Aktionen" %}</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ort in bereich.orte.all %}
+                            <tr>
+                                <td>
+                                    <a href="{{ ort.get_absolute_url }}?von={{ herkunft|urlencode }}"
+                                        class="link-body-emphasis link-offset-2 text-decoration-none">
+                                        {{ ort.name }}
+                                    </a>
+                                </td>
+                                <td class="text-center text-body-secondary font-monospace">
+                                    {{ ort.anzahl_erwartungen }}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'zaehlliste' ort.pk %}"
+                                        class="btn btn-outline-secondary btn-sm">{% translate "Zählliste" %}</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-body-secondary py-5">
+                                    {% translate "Noch kein Ort in diesem Bereich." %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card">
+                <div class="card-header bg-body-tertiary">{% translate "Neuer Ort" %}</div>
+                <div class="card-body">
+                    <form method="post" novalidate data-sofort>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <button class="btn btn-success" type="submit">{% translate "Ort anlegen" %}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock content %}

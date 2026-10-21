@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Häuser" %}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="kopfleiste bg-body d-flex flex-wrap gap-2 justify-content-between align-items-center mb-1 py-2">
+        <div class="d-flex align-items-center gap-3">
+            <h1 class="h3 mb-0">{% translate "Häuser" %}</h1>
+            <span class="text-body-secondary small">{% blocktranslate with anzahl=haeuser|length %}{{ anzahl }} Häuser{% endblocktranslate %}</span>
+        </div>
+        <a href="{% url 'haus_add' %}" class="btn btn-success btn-sm">{% translate "Neues Haus" %}</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    {% include "components/column_header.html" with kopf=spalten.name %}
+                    {% include "components/column_header.html" with kopf=spalten.artikel klasse="text-center" %}
+                    {% include "components/column_header.html" with kopf=spalten.aktiv klasse="text-center" %}
+                    <th scope="col">{% translate "aktiv je Inventurart" %}</th>
+                    {% include "components/column_header.html" with kopf=spalten.inaktiv klasse="text-center" %}
+                    {% include "components/column_header.html" with kopf=spalten.eingestellt klasse="text-center" %}
+                    {% include "components/column_header.html" with kopf=spalten.orte klasse="text-center" %}
+                    <th scope="col">{% translate "Bereiche und ihre Orte" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for haus in haeuser %}
+                <tr>
+                    <td>
+                        <a href="{{ haus.get_absolute_url }}"
+                            class="link-body-emphasis link-offset-2 text-decoration-none">
+                            {{ haus.name }}
+                        </a>
+                    </td>
+
+                    <td class="text-center text-body-secondary font-monospace">
+                        {{ haus.anzahl_artikel }}
+                    </td>
+
+                    <td class="text-center font-monospace">{{ haus.anzahl_aktiv }}</td>
+
+                    {# The working set per tab: active, by inventory type. #}
+                    <td class="small">
+                        {% for art, anzahl in haus.arten_zahlen %}
+                        <span class="text-nowrap">{{ art.name }} <span class="font-monospace">{{ anzahl }}</span></span>{% if not forloop.last %}<br>{% endif %}
+                        {% endfor %}
+                    </td>
+
+                    <td class="text-center text-body-secondary font-monospace">
+                        {{ haus.anzahl_inaktiv }}
+                    </td>
+
+                    {# Discontinued is over: the records only stand for old       #}
+                    {# results any more, but occupy neither number nor product.   #}
+                    <td class="text-center text-body-secondary font-monospace">
+                        {{ haus.anzahl_eingestellt }}
+                    </td>
+
+                    <td class="text-center text-body-secondary font-monospace">
+                        {{ haus.anzahl_orte }}
+                    </td>
+
+                    <td>
+                        {% for bereich in haus.bereiche.all %}
+                        <div class="mb-1">
+                            <a href="{{ bereich.get_absolute_url }}"
+                                class="badge rounded-pill text-bg-secondary text-decoration-none me-1">
+                                {{ bereich.name }}
+                            </a>
+                            {% for ort in bereich.orte.all %}
+                            <a href="{{ ort.get_absolute_url }}"
+                                class="badge rounded-pill bg-body-secondary text-body border text-body text-decoration-none me-1">
+                                {{ ort.name }}
+                                <span class="text-body-secondary">· {{ ort.anzahl_erwartungen }}</span>
+                            </a>
+                            {% empty %}
+                            <span class="text-body-secondary small">{% translate "noch keine Orte" %}</span>
+                            {% endfor %}
+                        </div>
+                        {% empty %}
+                        <span
+                            class="badge rounded-pill text-bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                            {% translate "noch keine Bereiche" %}
+                        </span>
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center text-body-secondary py-5">
+                        {% translate "Noch keine Häuser angelegt." %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+</div>
+{% endblock content %}

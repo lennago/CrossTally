@@ -1,0 +1,31 @@
+{# The containers only show for a product that is weighed. #}
+{% if hausartikel.ware.abwiegbar %}
+<h3>Behälter beim Wiegen</h3>
+<p>
+    Die Zuordnung gehört der Ware und gilt damit in jedem Haus. Hier
+    steht sie, weil beim Pflegen eines Hauses auffällt, worin gewogen
+    wird. „Ohne Behälter“ (Waage genullt) steht beim Zählen ohnehin
+    immer zur Wahl. Vorbelegt ist nichts: die Zählenden wählen den Behälter in
+    jeder Wiegezeile selbst, denn eine geratene Tara fällt beim Zählen
+    niemandem auf.
+</p>
+{% endif %}
+<h3>Gebinde</h3>
+<p>
+    Die Gebinde gehören der Ware, auch ihre Reihenfolge. Sie lässt sich hier ändern: am
+    Griff ziehen oder mit den Pfeilen schieben. Die Pfeile speichern sofort, nach dem Ziehen
+    speichert „Reihenfolge speichern“. So stehen die Gebinde danach beim Zählen,
+    an jedem Ort und <strong>in jedem Haus</strong>, das die Ware führt. Ein inaktives
+    Gebinde steht beim Zählen nicht mehr zur Wahl und bekommt in neuen Inventuren keine
+    Zeile, auch wo eine Zählliste es vorgibt. Neue Gebinde entstehen unter
+    „Bearbeiten“, Mengen und Namen ändern sich auf der Seite der Ware.
+</p>
+<h3>Kommt vor an</h3>
+<p>
+    Wo der Artikel vorkommt, bestimmt die Zählliste des Orts. Die
+    Reihenfolge und die Gebinde je Ort stehen dort. „Hinzufügen“ hakt
+    dort alle aktiven Gebinde an. „Entfernen“ nimmt ihn nur aus der
+    Zählliste, der Artikel selbst bleibt.
+</p>
+{% include "help/de/shared/artikelstatus.html" %}
+{% include "help/de/shared/inventurart.html" %}

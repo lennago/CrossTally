@@ -1,0 +1,21 @@
+{% load i18n static %}
+{# The product's form: shows containers only with the tick and the conversion  #}
+{# field of the product's own dimension not at all ('static/js/ware_form.js'). #}
+{#                                                                             #}
+{# The labels of the conversion fields hang on the chosen unit ("g je l") and  #}
+{# therefore stand here, where gettext works. '{referenz}' and '{einheit}'     #}
+{# are filled by the script.                                                   #}
+{# Against a higher dimension the factor is entered the other way round:    #}
+{# "kg je Stk.", "g je Portion", "g je l".                                  #}
+{#                                                                             #}
+{# 'praefix' names the form's prefix where the product's fields stand inside   #}
+{# another form, as on the page of a house article.                            #}
+<script src="{% static 'js/ware_form.js' %}"
+    {% if praefix %}data-praefix="{{ praefix }}"{% endif %}
+    data-muster="{% translate '{referenz} je {einheit}' %}"
+    data-kehrwert-muster="{% translate '{einheit} je {referenz}' %}"
+    data-masse="{% translate 'g' context 'Basiseinheit' %}"
+    data-volumen="{% translate 'ml' context 'Basiseinheit' %}"
+    data-stueck="{% translate 'Stk.' context 'Basiseinheit' %}"
+    data-liter="{% translate 'l' context 'Basiseinheit' %}"
+    data-portion="{% translate 'Portion' context 'Basiseinheit' %}"></script>

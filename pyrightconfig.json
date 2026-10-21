@@ -1,0 +1,4 @@
+{
+  "extends": "./server/pyproject.toml",
+  "executionEnvironments": [{ "root": "server" }]
+}

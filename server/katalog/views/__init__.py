@@ -1,0 +1,150 @@
+"""The views of the catalog, spread over modules by subject.
+
+'katalog/urls.py' fetches them from here. Nothing changes there when a
+view switches modules.
+"""
+
+from .base import SammelstatusView
+from .behaelter import (
+    BehaelterCreateView,
+    BehaelterDeleteView,
+    BehaelterListView,
+    BehaelterUpdateView,
+)
+from .hausartikel import (
+    HausartikelCreateView,
+    HausartikelDeleteView,
+    HausartikelDetailView,
+    HausartikelInventurartView,
+    HausartikelListView,
+    HausartikelStatusView,
+    HausartikelUpdateView,
+    NeueGebindeMixin,
+)
+from .imports import HausartikelImportView
+from .inventurart import (
+    InventurartCreateView,
+    InventurartDeleteView,
+    InventurartListView,
+    InventurartUpdateView,
+    InventurartVerschiebenView,
+)
+from .rezepturartikel import (
+    RezepturartikelCreateView,
+    RezepturartikelDeleteView,
+    RezepturartikelDetailView,
+    RezepturartikelListView,
+    RezepturartikelUpdateView,
+)
+from .sorting import SCHRITTE, SPRUENGE, SortierenView, gewuenschte_reihenfolge, ist_verschiebung
+from .split_merge import AufteilenView, ZusammenfuehrenView
+from .ware import (
+    GebindeSortierenView,
+    GebindeUmschaltenView,
+    HausartikelZusammenfuehrenView,
+    WareAbwiegenView,
+    WareAufteilenView,
+    WareBehaelterView,
+    WareCreateView,
+    WareDeleteView,
+    WareDetailView,
+    WareInventurartView,
+    WareListView,
+    WareStatusView,
+    WareUpdateView,
+    WareZusammenfuehrenView,
+)
+from .warenfamilie import (
+    WarenfamilieAufteilenView,
+    WarenfamilieCreateView,
+    WarenfamilieDeleteView,
+    WarenfamilieDetailView,
+    WarenfamilieFormMixin,
+    WarenfamilieListView,
+    WarenfamilieUpdateView,
+    WarenfamilieZusammenfuehrenView,
+)
+from .warengruppe import (
+    WarengruppeCreateView,
+    WarengruppeDeleteView,
+    WarengruppeDetailView,
+    WarengruppeInventurartView,
+    WarengruppeListView,
+    WarengruppeStatusView,
+    WarengruppeUpdateView,
+)
+from .zaehlliste import (
+    ErwartungUmschaltenView,
+    OrtAufteilenView,
+    OrtKopierenView,
+    OrtZusammenfuehrenView,
+    ZaehllisteView,
+)
+
+__all__ = [
+    "AufteilenView",
+    "ZusammenfuehrenView",
+    "BehaelterCreateView",
+    "BehaelterDeleteView",
+    "BehaelterListView",
+    "BehaelterUpdateView",
+    "ErwartungUmschaltenView",
+    "GebindeSortierenView",
+    "GebindeUmschaltenView",
+    "HausartikelCreateView",
+    "HausartikelDeleteView",
+    "HausartikelDetailView",
+    "HausartikelInventurartView",
+    "HausartikelImportView",
+    "HausartikelListView",
+    "HausartikelStatusView",
+    "HausartikelUpdateView",
+    "HausartikelZusammenfuehrenView",
+    "InventurartCreateView",
+    "InventurartDeleteView",
+    "InventurartListView",
+    "InventurartUpdateView",
+    "InventurartVerschiebenView",
+    "NeueGebindeMixin",
+    "OrtAufteilenView",
+    "OrtKopierenView",
+    "OrtZusammenfuehrenView",
+    "SCHRITTE",
+    "SPRUENGE",
+    "WareAbwiegenView",
+    "WareAufteilenView",
+    "WareBehaelterView",
+    "WareCreateView",
+    "WareDeleteView",
+    "WareDetailView",
+    "WareListView",
+    "WareStatusView",
+    "WareInventurartView",
+    "WareUpdateView",
+    "WareZusammenfuehrenView",
+    "SammelstatusView",
+    "SortierenView",
+    "WarenfamilieAufteilenView",
+    "WarenfamilieCreateView",
+    "WarenfamilieDeleteView",
+    "WarenfamilieDetailView",
+    "WarenfamilieFormMixin",
+    "WarenfamilieListView",
+    "WarenfamilieUpdateView",
+    "WarenfamilieZusammenfuehrenView",
+    "WarengruppeCreateView",
+    "WarengruppeDeleteView",
+    "WarengruppeInventurartView",
+    "WarengruppeDetailView",
+    "WarengruppeListView",
+    "WarengruppeStatusView",
+    "WarengruppeUpdateView",
+    "RezepturartikelCreateView",
+    "RezepturartikelDeleteView",
+    "RezepturartikelDetailView",
+    "RezepturartikelListView",
+    "RezepturartikelUpdateView",
+    "ZaehllisteView",
+    "gewuenschte_reihenfolge",
+    "ist_verschiebung",
+]

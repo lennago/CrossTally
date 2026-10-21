@@ -1,0 +1,58 @@
+{% extends "components/merge_page.html" %}
+{% load i18n %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'haus_list' %}">{% translate "Häuser" %}</a></li>
+<li class="breadcrumb-item">
+    <a href="{{ ort.haus.get_absolute_url }}">{{ ort.haus.name }}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{{ ort.bereich.get_absolute_url }}">{{ ort.bereich.name }}</a>
+</li>
+{% endblock pfad %}
+
+{% block ueberschrift %}{% blocktranslate with name=ort.name %}Einen Ort in {{ name }} aufgehen lassen{% endblocktranslate %}{% endblock ueberschrift %}
+
+{% block einleitung %}
+{% blocktranslate with name=ort.name %}{{ name }} bleibt, der gewählte Ort verschwindet. Seine Artikel kommen hinten an die Zählliste.{% endblocktranslate %}
+{% endblock einleitung %}
+
+{% block wahl_leer %}{% translate "Ort wählen" %}{% endblock wahl_leer %}
+
+{% block keine_weitere %}{% blocktranslate with bereich=ort.bereich.name %}Im Bereich {{ bereich }} gibt es keinen weiteren Ort.{% endblocktranslate %}{% endblock keine_weitere %}
+
+{% block bleibt_anzahl %}{% blocktranslate with anzahl=bleibende|length %}{{ anzahl }} Artikel{% endblocktranslate %}{% endblock bleibt_anzahl %}
+
+{% block bleibt_liste %}
+{% for erwartung in bleibende %}
+<li class="list-group-item small">{{ erwartung.artikel.warenname }}</li>
+{% empty %}
+<li class="list-group-item small text-body-secondary">{% translate "Bisher leer." %}</li>
+{% endfor %}
+{% endblock bleibt_liste %}
+
+{% block kommt_anzahl %}{% blocktranslate %}{{ anzahl_neu }} neu{% endblocktranslate %}{% endblock kommt_anzahl %}
+
+{% block kommt_liste %}
+{% for zeile in vorschau %}
+<li class="list-group-item small d-flex justify-content-between gap-2">
+    <span>{{ zeile.erwartung.artikel.warenname }}</span>
+    {% if zeile.ist_neu %}
+    <span class="badge rounded-pill text-bg-success">{% translate "kommt hinten dazu" %}</span>
+    {% elif zeile.neue_gebinde %}
+    <span class="badge rounded-pill bg-body-secondary text-body border">
+        {% translate "schon da, dazu:" %}
+        {% for vorgabe in zeile.neue_gebinde %}{{ vorgabe.gebinde.anzeigename }}{% if not forloop.last %}, {% endif %}{% endfor %}
+    </span>
+    {% else %}
+    <span class="badge rounded-pill bg-body-secondary text-body border">{% translate "schon da" %}</span>
+    {% endif %}
+</li>
+{% empty %}
+<li class="list-group-item small text-body-secondary">
+    {% translate "Dort wird nichts erwartet. Es verschwindet nur der Ort." %}
+</li>
+{% endfor %}
+{% endblock kommt_liste %}
+
+{% block unwiderruflich %}{% translate "Der Ort lässt sich danach nicht wiederherstellen." %}{% endblock unwiderruflich %}

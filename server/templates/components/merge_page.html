@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load i18n %}
+{# Skeleton for "Merge": a second location, a second family is absorbed into      #}
+{# 'satz'. Two steps: the choice via GET (it is in the address, the preview       #}
+{# can be reloaded), then confirming via POST. The choice stands in the form      #}
+{# that merges, and 'gezeigt' names the row of the preview. The server merges     #}
+{# only where both agree ('VorschauView').                                        #}
+{#                                                                                #}
+{#   pfad, ueberschrift, einleitung                                               #}
+{#   wahl_leer:       empty option of the select ("Choose location")              #}
+{#   keine_weitere:   if nothing is up for choice                                 #}
+{#   bleibt_anzahl, bleibt_liste:  the left card, what 'satz' already has         #}
+{#   kommt_anzahl, kommt_liste:    the right card, what comes in from 'quelle'    #}
+{#   zusatz:          further inputs before the name (missing factors)            #}
+{#   unwiderruflich:  last sentence of the confirmation                           #}
+
+{% block title %}{% blocktranslate with name=satz.name %}{{ name }} zusammenführen{% endblocktranslate %}{% endblock title %}
+
+{% block content %}
+<div class="container py-4 seite-breit">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            {% block pfad %}{% endblock pfad %}
+            <li class="breadcrumb-item">
+                <a href="{{ satz.get_absolute_url }}">{{ satz.anzeigename }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{% translate "Zusammenführen" %}</li>
+        </ol>
+    </nav>
+
+    <div class="kopfleiste bg-body py-2 mb-1">
+        <h1 class="h3 mb-0">{% block ueberschrift %}{% endblock ueberschrift %}</h1>
+    </div>
+    <p class="text-body-secondary small mb-3">{% block einleitung %}{% endblock einleitung %}</p>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="card card-body bg-body-tertiary mb-3">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label small mb-1" for="{{ form.quelle.id_for_label }}">
+                        {{ form.quelle.label }}
+                    </label>
+                    <select name="quelle" id="{{ form.quelle.id_for_label }}" data-vorschau-wahl
+                        class="form-select form-select-sm{% if form.quelle.errors %} is-invalid{% endif %}">
+                        <option value="">{% block wahl_leer %}{% translate "Wählen" %}{% endblock wahl_leer %}</option>
+                        {% for kandidat in form.fields.quelle.queryset %}
+                        <option value="{{ kandidat.pk }}"{% if quelle.pk == kandidat.pk or form.quelle.value|stringformat:"s" == kandidat.pk|stringformat:"s" %} selected{% endif %}>
+                            {{ kandidat.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {# Only without a preview: then nothing else could send the choice. #}
+                {% if not quelle %}
+                <div class="col-md-auto">
+                    <button class="btn btn-primary btn-sm" type="submit" data-vorschau-knopf>{% translate "Vorschau" %}</button>
+                </div>
+                {% endif %}
+            </div>
+            {% for fehler in form.quelle.errors %}
+            <div class="alert alert-warning mt-3 mb-0 py-2 small">{{ fehler }}</div>
+            {% endfor %}
+            {% if not form.fields.quelle.queryset %}
+            <p class="text-body-secondary small mt-3 mb-0">{% block keine_weitere %}{% endblock keine_weitere %}</p>
+            {% endif %}
+        </div>
+
+        <div data-vorschau>
+        {% if quelle %}
+        <input type="hidden" name="gezeigt" value="{{ quelle.pk }}">
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-body-tertiary d-flex justify-content-between">
+                        <span>
+    {% blocktranslate with name=satz.name %}{{ name }} (bleibt){% endblocktranslate %}
+</span>
+                        <span class="text-body-secondary small">{% block bleibt_anzahl %}{% endblock bleibt_anzahl %}</span>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        {% block bleibt_liste %}{% endblock bleibt_liste %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-body-tertiary d-flex justify-content-between">
+                        <span>
+    {% blocktranslate with name=quelle.name %}{{ name }} (geht auf){% endblocktranslate %}
+</span>
+                        <span class="text-body-secondary small">{% block kommt_anzahl %}{% endblock kommt_anzahl %}</span>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        {% block kommt_liste %}{% endblock kommt_liste %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        {% block zusatz %}{% endblock zusatz %}
+
+        <div class="card card-body mb-3">
+            <label class="form-label" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+            <input type="text" name="name" id="{{ form.name.id_for_label }}" maxlength="100"
+                class="form-control{% if form.name.errors %} is-invalid{% endif %}" data-mitnehmen
+                value="{{ form.name.value|default_if_none:satz.name }}">
+            {% for fehler in form.name.errors %}
+            <div class="invalid-feedback d-block">{{ fehler }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="fussleiste d-flex flex-wrap gap-2 bg-body border-top py-3">
+            <button class="btn btn-danger" type="submit"
+                data-rueckfrage="{% blocktranslate with quelle=quelle.anzeigename ziel=satz.anzeigename %}„{{ quelle }}“ in „{{ ziel }}“ aufgehen lassen?{% endblocktranslate %} {% block unwiderruflich %}{% endblock unwiderruflich %}">
+                {% translate "Zusammenführen" %}
+            </button>
+            <a href="{{ satz.get_absolute_url }}" class="btn btn-outline-secondary">{% translate "Abbrechen" %}</a>
+        </div>
+        {% endif %}
+        </div>
+    </form>
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% include "components/script.html" with name="live_preview" %}
+{% endblock extra_scripts %}

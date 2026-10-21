@@ -1,0 +1,106 @@
+{% extends "components/form_page.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% translate "Neue Inventur" %}{% endblock title %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'inventur_list' %}">{% translate "Inventuren" %}</a></li>
+{% endblock pfad %}
+
+{% block neu %}{% translate "Neue Inventur" %}{% endblock neu %}
+
+{% block unterzeile %}
+<div class="text-body-secondary small">{% translate "Je gewähltem Haus entsteht eine eigene Inventur." %}</div>
+{% endblock unterzeile %}
+
+{% block felder %}
+{# First the types, then the houses: which houses can be chosen depends on the    #}
+{# types. The script greys out a house without an article of them, and "All"     #}
+{# ticks every box of its group that is available. Without the script both       #}
+{# "All" stay hidden, and the server rejects a house without articles.           #}
+{# CheckboxSelectMultiple passes the widget attributes on to the enclosing       #}
+{# element too. Rendered one by one, Bootstrap therefore draws no empty box.     #}
+<fieldset class="mb-3">
+    <legend class="form-label mb-1">{{ form.inventurarten.label }}</legend>
+    <div class="form-check" data-alle-zeile hidden>
+        <input class="form-check-input" type="checkbox" id="alle-arten" data-alle="inventurarten">
+        <label class="form-check-label fw-semibold" for="alle-arten">{% translate "Alle" %}</label>
+    </div>
+    {% for eintrag in form.inventurarten %}
+    <div class="form-check">
+        {{ eintrag.tag }}
+        <label class="form-check-label" for="{{ eintrag.id_for_label }}">{{ eintrag.choice_label }}</label>
+    </div>
+    {% endfor %}
+    {% if form.inventurarten.help_text %}
+    <div class="form-text">{{ form.inventurarten.help_text }}</div>
+    {% endif %}
+    {% for fehler in form.inventurarten.errors %}
+    <div class="invalid-feedback d-block">{{ fehler }}</div>
+    {% endfor %}
+</fieldset>
+
+{{ form.stichtag|as_crispy_field }}
+
+<fieldset class="mb-3">
+    <legend class="form-label mb-1">{{ form.haeuser.label }}</legend>
+    <div class="form-check" data-alle-zeile hidden>
+        <input class="form-check-input" type="checkbox" id="alle-haeuser" data-alle="haeuser">
+        <label class="form-check-label fw-semibold" for="alle-haeuser">{% translate "Alle" %}</label>
+    </div>
+    {% for eintrag in form.haeuser %}
+    <div class="form-check">
+        {{ eintrag.tag }}
+        <label class="form-check-label" for="{{ eintrag.id_for_label }}">{{ eintrag.choice_label }}</label>
+        <span class="small text-body-secondary ms-1" data-ohne-art hidden>{% translate "führt keinen Artikel der gewählten Arten" %}</span>
+    </div>
+    {% endfor %}
+    {% if form.haeuser.help_text %}
+    <div class="form-text">{{ form.haeuser.help_text }}</div>
+    {% endif %}
+    {% for fehler in form.haeuser.errors %}
+    <div class="invalid-feedback d-block">{{ fehler }}</div>
+    {% endfor %}
+</fieldset>
+
+{# The list only counts with the box. The script hides it while the box is   #}
+{# empty. Without the script it stays visible, and the server ignores it.     #}
+{{ form.zaehlende_fuer_alle|as_crispy_field }}
+<fieldset class="mb-3" data-zaehlende-wahl>
+    <legend class="form-label mb-1">{{ form.zaehlende.label }}</legend>
+    {% for titel, eintraege, leertext in form.zaehlende_gruppen %}
+    <div class="card mb-2">
+        <div class="card-header bg-body-tertiary d-flex justify-content-between">
+            <span>{{ titel }}</span>
+            <span class="text-body-secondary small">{{ eintraege|length }}</span>
+        </div>
+        <div class="card-body">
+            {% for eintrag, haeuser in eintraege %}
+            <div class="form-check">
+                {{ eintrag.tag }}
+                <label class="form-check-label" for="{{ eintrag.id_for_label }}">{{ eintrag.choice_label }}</label>
+                {% if haeuser %}<span class="small text-body-secondary ms-1">{{ haeuser }}</span>{% endif %}
+            </div>
+            {% empty %}
+            <p class="text-body-secondary small mb-0">{{ leertext }}</p>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    <div class="form-text">{{ form.zaehlende.help_text }}</div>
+    {% for fehler in form.zaehlende.errors %}
+    <div class="invalid-feedback d-block">{{ fehler }}</div>
+    {% endfor %}
+</fieldset>
+
+{% for fehler in form.non_field_errors %}
+<div class="alert alert-danger py-2">{{ fehler }}</div>
+{% endfor %}
+{% endblock felder %}
+
+{% block abbrechen_url %}{% url 'inventur_list' %}{% endblock abbrechen_url %}
+
+{% block extra_scripts %}
+{% include "components/script.html" with name="inventory_add" %}
+{% endblock extra_scripts %}

@@ -1,0 +1,18 @@
+{% extends "components/form_page.html" %}
+{% load i18n %}
+
+{% block title %}{% if haus %}{% blocktranslate with name=haus.name %}{{ name }} bearbeiten{% endblocktranslate %}{% else %}{% translate "Neues Haus" %}{% endif %}{% endblock title %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'haus_list' %}">{% translate "Häuser" %}</a></li>
+{% endblock pfad %}
+
+{% block neu %}{% translate "Neues Haus" %}{% endblock neu %}
+
+{% block kopf_knoepfe %}
+{% if haus %}
+<a href="{% url 'haus_delete' haus.pk %}" class="btn btn-outline-danger btn-sm">{% translate "Löschen" %}</a>
+{% endif %}
+{% endblock kopf_knoepfe %}
+
+{% block abbrechen_url %}{% if haus %}{{ haus.get_absolute_url }}{% else %}{% url 'haus_list' %}{% endif %}{% endblock abbrechen_url %}

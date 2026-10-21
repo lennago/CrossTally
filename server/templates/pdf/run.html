@@ -1,0 +1,40 @@
+{% extends "pdf/base.html" %}
+{% load i18n %}
+
+{# The sheet over all houses of a run. In front the families alone, one row    #}
+{# each, then from a new page on every product. The columns per house are      #}
+{# narrow: with four houses that is eight columns on a portrait page.          #}
+
+{% block titel %}{{ lauf }}{% endblock titel %}
+{% block fusszeile %}{{ lauf }} · {% blocktranslate count anzahl=lauf.inventuren|length %}{{ anzahl }} Haus{% plural %}{{ anzahl }} Häuser{% endblocktranslate %}{% endblock fusszeile %}
+
+{% block inhalt %}
+<div class="kopf">
+    <h1>{{ lauf }}</h1>
+    <div class="zeile">
+        {% for inventur in lauf.inventuren %}
+        {{ inventur.haus.name }}{% if not forloop.last %} &middot; {% endif %}
+        {% endfor %}
+        &middot; {% blocktranslate count anzahl=anzahl_waren %}{{ anzahl }} Ware{% plural %}{{ anzahl }} Waren{% endblocktranslate %}
+    </div>
+</div>
+
+{% if bloecke %}
+<h2 class="abschnitt">{% translate "Differenzen je Warenfamilie" %}</h2>
+<p class="erklaerung leise">
+    {% translate "Je Familie die Summe der Differenzen über alles, was darunter steht, in ihrer Leiteinheit. Die Waren dazu stehen auf der genannten Seite." %}
+</p>
+{% include "pdf/components/run_overview.html" %}
+
+<h2 class="abschnitt neue-seite">{% translate "Differenzen je Ware" %}</h2>
+<p class="erklaerung leise">
+    {% translate "Ergebnis und Soll über alle Häuser, daneben die Differenz je Haus und rechts die Differenz über alle Häuser." %}
+</p>
+{# By family the blocks nest ('run_block.html' includes itself). #}
+{% for block in bloecke %}
+{% include "pdf/components/run_block.html" %}
+{% endfor %}
+{% else %}
+<p class="leise">{% translate "In diesem Lauf gibt es keine eingefrorenen Ergebnisse." %}</p>
+{% endif %}
+{% endblock inhalt %}

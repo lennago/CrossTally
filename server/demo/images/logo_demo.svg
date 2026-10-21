@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img"
+     aria-label="Demo">
+    <title>Demo</title>
+    <!--
+        The logo of the demo: the same tally as the placeholder in
+        'static/logo.svg', only in other colours. In the demo it shows what an
+        uploaded logo of one's own looks like. 'logo_demo.png' is derived from
+        it, and that is the file the demo uploads.
+
+        Teal with a light stroke, while the placeholder is blue: that way one
+        sees at a glance that this is not the shipped logo.
+
+        Pure geometry, no font and no third-party template, so nobody else
+        holds rights to it.
+    -->
+    <rect width="512" height="512" rx="112" fill="#0f766e" />
+    <g fill="none" stroke="#fef3c7" stroke-width="34" stroke-linecap="round">
+        <path d="M168 184v144" />
+        <path d="M224 184v144" />
+        <path d="M280 184v144" />
+        <path d="M336 184v144" />
+        <path d="M134 330 378 192" />
+    </g>
+</svg>

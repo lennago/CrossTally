@@ -1,0 +1,18 @@
+{% load i18n %}
+{# The language choice for pages without bar: login, "Forgot password",        #}
+{# lockout page. The same form as in the account menu ('language_menu.html'),  #}
+{# only as a row of buttons. Without account the session remembers the choice  #}
+{# ('SprachwahlView'), after signing in the account applies.                   #}
+{% get_current_language as aktuell %}
+<div class="container-fluid d-flex justify-content-end gap-1 py-2">
+    {% for kuerzel, name in sprachen %}
+    <form method="post" action="{% url 'sprachwahl' %}">
+        {% csrf_token %}
+        <input type="hidden" name="sprache" value="{{ kuerzel }}">
+        <input type="hidden" name="weiter" value="{{ request.get_full_path }}">
+        <button type="submit" lang="{{ kuerzel }}" data-sprache="{{ kuerzel }}"
+            class="btn btn-sm btn-link link-secondary text-decoration-none{% if kuerzel == aktuell %} fw-semibold{% endif %}"
+            aria-current="{% if kuerzel == aktuell %}true{% else %}false{% endif %}">{{ name }}</button>
+    </form>
+    {% endfor %}
+</div>

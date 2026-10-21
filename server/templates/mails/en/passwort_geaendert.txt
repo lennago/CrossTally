@@ -1,0 +1,7 @@
+Your password at {{ anwendung }} was changed
+
+Hello {{ vorname }},
+
+The password of your account at {{ anwendung }} was changed {{ wo }}.
+
+Wasn't that you? Then set a new password via “Forgot your password?” on the sign-in page and let an administrator know.

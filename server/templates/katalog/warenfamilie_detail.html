@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ familie.anzeigename }}{% endblock title %}
+
+{% block content %}
+<div class="container py-4 max-breite-52">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item">
+                <a href="{% url 'warenfamilie_list' %}">{% translate "Warenfamilien" %}</a>
+            </li>
+            {# The families above, so the place in the tree is visible. #}
+            {% for oben in familie.vorfahren reversed %}
+            <li class="breadcrumb-item"><a href="{{ oben.get_absolute_url }}">{{ oben.anzeigename }}</a></li>
+            {% endfor %}
+            <li class="breadcrumb-item active" aria-current="page">{{ familie.anzeigename }}</li>
+        </ol>
+    </nav>
+
+    <div class="kopfleiste bg-body py-2 d-flex flex-wrap gap-2 justify-content-between align-items-start mb-3">
+        <div>
+            <h1 class="h3 mb-1">{{ familie.anzeigename }}</h1>
+            {# "Not countable" sums nothing. Its explanation stands below.      #}
+            {% if not familie.sammelt_ignorierte %}
+            <p class="text-body-secondary small mb-0">
+                {% if familie.leiteinheit %}
+                {% blocktranslate with einheit=familie.leiteinheit.kurz %}Summe in <strong>{{ einheit }}</strong>{% endblocktranslate %}
+                {% else %}
+                {% translate "Einheit noch offen: die erste Ware bestimmt sie" %}
+                {% endif %}
+                {% if familie.anzeigebeschreibung %}&middot; {{ familie.anzeigebeschreibung }}{% endif %}
+            </p>
+            {% endif %}
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'warenfamilie_edit' familie.pk %}" class="btn btn-outline-secondary">
+                {% translate "Bearbeiten" %}
+            </a>
+            {# "Not countable" can be neither split nor merged, and nothing stands #}
+            {# below it: whoever moves in or out of it changes their status in     #}
+            {# every house.                                                        #}
+            {% if not familie.sammelt_ignorierte %}
+            <a href="{% url 'warenfamilie_add' %}?unter={{ familie.pk }}" class="btn btn-outline-success">
+                {% translate "Neue Unterfamilie" %}
+            </a>
+            <a href="{% url 'warenfamilie_aufteilen' familie.pk %}" class="btn btn-outline-secondary">
+                {% translate "Aufteilen" %}
+            </a>
+            <a href="{% url 'warenfamilie_zusammenfuehren' familie.pk %}" class="btn btn-outline-secondary">
+                {% translate "Zusammenführen" %}
+            </a>
+            <a href="{% url 'warenfamilie_delete' familie.pk %}" class="btn btn-outline-danger">
+                {% translate "Löschen" %}
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if familie.sammelt_ignorierte %}
+    <p class="text-body-secondary small">
+        {% translate "Was die Warenwirtschaft als Artikel führt, ohne dass es eine Ware ist: Pfand, Gutscheine, Rabatte." %}
+    </p>
+    {% endif %}
+
+    {# Every product converts into the lead unit for itself. One that cannot   #}
+    {# keeps the sum apart, so it is named here with the way to fix it.        #}
+    {% if ohne_faktor %}
+    <div class="alert alert-warning py-2">
+        {% translate "Diese Waren führen keine Umrechnung in die Leiteinheit. Bis dahin steht die Summe getrennt je Dimension:" %}
+        {% for ware in ohne_faktor %}
+        <a href="{% url 'ware_edit' ware.pk %}" class="alert-link">{{ ware.name }}</a>{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {# The families below: their products are summed here too. #}
+    {% if unterfamilien %}
+    <div class="card mb-3">
+        <div class="card-header bg-body-tertiary d-flex justify-content-between">
+            <span>{% translate "Unterfamilien" %}</span>
+            <span class="text-body-secondary small">
+                {% blocktranslate count anzahl=anzahl_darunter %}{{ anzahl }} Ware insgesamt{% plural %}{{ anzahl }} Waren insgesamt{% endblocktranslate %}
+            </span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <tbody>
+                    {% for unter in unterfamilien %}
+                    <tr>
+                        <td>
+                            <a href="{{ unter.get_absolute_url }}"
+                                class="link-body-emphasis link-offset-2 text-decoration-none">
+                                {{ unter.anzeigename }}
+                            </a>
+                        </td>
+                        <td class="text-end text-body-secondary small breite-8">
+                            {% if unter.leiteinheit %}{{ unter.leiteinheit.kurz }}{% endif %}
+                        </td>
+                        <td class="text-end text-body-secondary small breite-8">
+                            {% blocktranslate with anzahl=unter.warenzahl %}{{ anzahl }} Waren{% endblocktranslate %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card" data-liste>
+        <div class="card-header bg-body-tertiary d-flex justify-content-between">
+            <span>{% translate "Waren" %}</span>
+            <span class="text-body-secondary small">{{ waren|length }}</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <tbody>
+                    {% for ware in waren %}
+                    <tr>
+                        <td>
+                            <a href="{{ ware.get_absolute_url }}"
+                                class="link-body-emphasis link-offset-2 text-decoration-none">
+                                {{ ware.name }}
+                            </a>
+                        </td>
+                        <td class="text-end text-body-secondary small breite-8">
+                            {{ ware.basiseinheit.kurz }}
+                        </td>
+                        {% if familie.sammelt_ignorierte %}
+                        <td class="text-end breite-11">
+                            {% include "katalog/components/sammelstatus_buttons.html" with satz=ware art="ware" %}
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td class="text-body-secondary">
+                            {% if unterfamilien %}{% translate "Keine Ware direkt hier. Die Waren stehen in den Unterfamilien." %}{% else %}{% translate "Noch keine Ware zugeordnet. Das geschieht unter „Bearbeiten“ oder an der Ware." %}{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock content %}
+

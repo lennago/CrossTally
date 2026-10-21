@@ -1,0 +1,25 @@
+{% load mengen %}
+{# One family in the overview, then every family below it, nested like the     #}
+{# blocks: the lines on the left come from 'familie' ('pdf/base.html'), and a  #}
+{# family at the top is a band. The last column names the page of its block    #}
+{# further back. WeasyPrint fills it in from the link ('target-counter').      #}
+{# A long sum may break, as in the blocks ('umbrechbar' in 'pdf/base.html'),  #}
+{# one of several parts between them ('teile_zusammenhalten').                #}
+<div class="familie{% if not block.tiefe %} oberste{% endif %}">
+    <table>
+        {% include "pdf/components/run_overview_columns.html" %}
+        <tbody>
+            <tr{% if not block.tiefe %} class="band"{% endif %}>
+                <td><a href="#{{ block.kennung }}">{{ block.name }}</a></td>
+                {% for summe in block.haus_summen %}
+                <td class="zahl {{ summe.klasse }}{% if summe.text|length > 11 %} umbrechbar{% endif %}">{{ summe.text|teile_zusammenhalten|default:"-" }}</td>
+                {% endfor %}
+                <td class="zahl gesamt {{ block.differenz_klasse }}{% if block.differenz_gesamt|length > 11 %} umbrechbar{% endif %}">{{ block.differenz_gesamt|teile_zusammenhalten|default:"-" }}</td>
+                <td class="zahl leise seite"><a href="#{{ block.kennung }}"></a></td>
+            </tr>
+        </tbody>
+    </table>
+    {% for unter in block.unterbloecke %}
+    {% include "pdf/components/run_overview_row.html" with block=unter %}
+    {% endfor %}
+</div>

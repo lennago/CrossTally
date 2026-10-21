@@ -1,0 +1,14 @@
+Dein Konto bei {{ anwendung }} ist gelöscht
+
+Hallo {{ vorname }},
+
+dein Konto bei {{ anwendung }} ist gelöscht. Anmelden geht damit nicht mehr, auch nicht in der Zähl-App.
+
+{% if selbst %}
+Warst du das nicht? Dann gib einem Administrator Bescheid.
+{% elif wer %}
+Gelöscht von {{ wer }}.
+Wenn du das nicht erwartet hast, sprich mit {{ wer }}.
+{% else %}
+Wenn du das nicht erwartet hast, sprich mit deiner Führungskraft.
+{% endif %}

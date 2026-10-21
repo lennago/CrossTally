@@ -1,0 +1,108 @@
+# Operation: database, application, proxy.
+#
+# Development does not need this. There it stays with uv, SQLite and
+# 'runserver' (see README.md). This is about the machine the counting runs on.
+# The details are in DEPLOYMENT.md.
+
+# Every service writes to standard output, and Docker keeps that without a
+# limit by default. gunicorn writes a line per request and the counting app asks
+# every few seconds: over months that is gigabytes on a small machine, with
+# addresses and paths in it. Five files of 20 MB per service are enough to read
+# back a few days (2026-10-09).
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "5"
+
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-crosstally}
+      POSTGRES_USER: ${POSTGRES_USER:-crosstally}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is missing in the .env}
+    volumes:
+      # A mount on the whole directory, not on 'data' below it. That is how the
+      # image wants it since Postgres 18, otherwise it refuses to start (it
+      # could not upgrade across the mount point boundary).
+      - db_data:/var/lib/postgresql
+    healthcheck:
+      # Without this the application starts before the database accepts requests.
+      # Over TCP, the way 'web' connects. On the first start the image sets up
+      # the database with a temporary server that listens on the socket only.
+      # Through the socket that one already counted as ready. 'web' then found
+      # nothing on port 5432, and a restore after 'up --wait db' could end up in
+      # the temporary server, which stops shortly after (until 10/2026).
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U ${POSTGRES_USER:-crosstally} -d ${POSTGRES_DB:-crosstally}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      # Failed checks during the first minute do not count. A first setup on a
+      # slow disk may take longer than five checks, and over TCP that would read
+      # as broken, so 'web' would not start at all. A check that passes counts
+      # at once: a normal start is not delayed.
+      start_period: 60s
+
+  web:
+    build:
+      context: .
+      # Only when building here ('docker compose up --build'), and only for a
+      # name of your own: empty, the build takes the state of the checkout
+      # ('bin/version.sh'). The published image gets it from 'image.yml'.
+      args:
+        APP_VERSION: ${APP_VERSION:-}
+    image: ghcr.io/lennago/crosstally:${VERSION:-latest}
+    restart: unless-stopped
+    logging: *logging
+    env_file: .env
+    environment:
+      # The database is on the same network. The service name is its host name.
+      # The values go one by one, the password comes from the '.env' as it is
+      # ('settings.py'). Put into an address, a password with "/" or "#" broke
+      # it (until 10/2026).
+      POSTGRES_HOST: db
+      POSTGRES_DB: ${POSTGRES_DB:-crosstally}
+      POSTGRES_USER: ${POSTGRES_USER:-crosstally}
+      # Only for an image from before 10/2026, which knows nothing else (a way
+      # back to an older version). A newer one takes the values above.
+      DATABASE_URL: postgres://${POSTGRES_USER:-crosstally}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-crosstally}
+      # The backup buttons of the administration write here.
+      BACKUP_DIR: /backups
+    volumes:
+      # The snapshots from the administration. 'bin/backup.sh' writes its dumps
+      # into the same folder, from the machine itself. The container runs as
+      # uid 1000, the folder has to belong to it (see DEPLOYMENT.md).
+      - ./backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    logging: *logging
+    ports:
+      # On which address of the machine Caddy listens. Empty means on all of
+      # them, as '80:80' would. With a proxy in front on the same machine it is
+      # 127.0.0.1: then nobody gets to Caddy past that proxy. The long form
+      # ('host_ip') does not accept an empty value, hence the short one.
+      - "${LISTEN_ADDRESS:-}:80:80"
+      - "${LISTEN_ADDRESS:-}:443:443"
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+      # Empty means nobody. Only a proxy in front of Caddy belongs here.
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
+volumes:
+  db_data:
+  caddy_data:
+  caddy_config:

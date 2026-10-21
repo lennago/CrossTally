@@ -1,0 +1,57 @@
+# The only service listening to the outside. It handles TLS and nothing else.
+# The app's files and '/static/' are served by Django itself (WhiteNoise).
+#
+# SITE_ADDRESS decides how:
+#   :80                    behind something that already handles TLS ('tailscale serve')
+#   crosstally.example.de  your own domain, Caddy fetches the certificate itself
+{
+	servers {
+		# Whose 'X-Forwarded-*' headers Caddy believes. Without an entry
+		# nobody's: Caddy replaces 'X-Forwarded-For' with the caller's
+		# address and 'X-Forwarded-Proto' with what it sees itself. The
+		# lockout after too many failed attempts counts on that.
+		#
+		# If something in front still handles TLS ('tailscale serve'), an
+		# unencrypted connection arrives here, marked as having been
+		# encrypted originally. Caddy keeps that mark only from an address
+		# named here. Otherwise Django considers the connection insecure and
+		# redirects to https endlessly.
+		#
+		# Name the proxy in front and nothing else (TRUSTED_PROXIES). Whoever
+		# is trusted picks their own address and gets past the lockout. Until
+		# 09/2026 all private networks were trusted by default, and with them
+		# everyone in the local network.
+		#
+		# The list cannot tell the proxy from someone else arriving from the
+		# same address. That is what 'LISTEN_ADDRESS' in 'compose.yaml' is
+		# for: Caddy then listens only where the proxy reaches it.
+		trusted_proxies static {$TRUSTED_PROXIES}
+	}
+}
+
+{$SITE_ADDRESS::80} {
+	encode zstd gzip
+
+	# The whole body has an upper bound here, file parts included. Django's
+	# own limits ('DATA_UPLOAD_*') leave a file part of a multipart body
+	# unbounded, written to a temporary file. Without this bound four
+	# anonymous POSTs with bodies of several GB filled the disk, which the
+	# database shares, and held every worker until the timeout.
+	#
+	# The largest legitimate upload is a file of 'MAX_UPLOAD_MB' (10 MB), as
+	# the import and the target stock accept. 12 MB leaves room for the
+	# multipart wrapping around it. Whoever raises 'MAX_UPLOAD_MB' raises this
+	# with it. A body over the bound gets 413 before it is read.
+	request_body {
+		max_size 12MB
+	}
+
+	# Caddy sets X-Forwarded-Proto itself. Django listens to it when
+	# BEHIND_TLS_PROXY is set and considers the connection secure.
+	reverse_proxy web:8000
+
+	log {
+		output stdout
+		format console
+	}
+}

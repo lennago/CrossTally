@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% blocktranslate with name=haus.name %}Import für {{ name }}{% endblocktranslate %}{% endblock title %}
+
+{% block content %}
+<div class="container py-4 seite-schmal">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'haus_list' %}">{% translate "Häuser" %}</a></li>
+            <li class="breadcrumb-item">
+                <a href="{{ haus.get_absolute_url }}">{{ haus.name }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{% translate "Import" %}</li>
+        </ol>
+    </nav>
+
+    <div class="kopfleiste bg-body py-2 mb-1">
+        <h1 class="h3 mb-0">{% translate "Artikelbestandsliste einlesen" %}</h1>
+    </div>
+    <p class="text-body-secondary small mb-3">
+        {% translate "Die Datei gehört zu" %} <strong>{{ haus.name }}</strong>{% translate ". Für ein anderes Haus den Import auf dessen Seite starten, denn die Zeilen werden diesem Haus zugeschrieben." %}
+    </p>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {{ form|crispy }}
+        <div class="fussleiste d-flex flex-wrap gap-2 mt-3 bg-body border-top py-3">
+            <button class="btn btn-success" type="submit">{% translate "Einlesen" %}</button>
+            <a href="{{ haus.get_absolute_url }}" class="btn btn-outline-secondary">{% translate "Abbrechen" %}</a>
+        </div>
+    </form>
+
+    <div class="card mt-4">
+        <div class="card-header bg-body-tertiary">{% translate "Was der Import macht" %}</div>
+        <div class="card-body">
+            <p class="small">
+                {% translate "Die Datei wird nur gelesen: du siehst zuerst," %} <strong>{% translate "was angelegt würde" %}</strong>{% translate ", und kannst Ware, Inventurart und Gebinde anpassen, bevor irgendetwas in die Datenbank geht. Artikelnummer, Bezeichnung, Warengruppe und Einheit stehen fest, denn sie kommen aus der Datei." %}
+            </p>
+            <ul class="mb-0 small">
+                <li>{% translate "Fehlende" %} <strong>{% translate "Warengruppen" context "im Satz" %}</strong> {% translate "entstehen beim Übernehmen von selbst. Sie sind im Plan nicht bearbeitbar." %}</li>
+                <li>{% translate "Für jede unbekannte Bezeichnung entsteht eine" %} <strong>{% translate "Ware" context "im Satz" %}</strong>
+                    {% translate "samt ihrer Gebinde. Heißt dieselbe Ware in einem anderen Haus anders, lassen sich die beiden hinterher zusammenführen." %}</li>
+                <li>{% translate "Darunter entsteht je Zeile ein" %} <strong>{% translate "Hausartikel" context "Einzahl im Satz" %}</strong>
+    {% blocktranslate with name=haus.name %}für {{ name }} mit Nummer, Bezeichnung und Warengruppe aus der Datei.{% endblocktranslate %}
+</li>
+                <li>{% translate "Steht bei einem Artikel durchweg keine Anzahl je Gebinde, führt das Haus die Ware nicht wirklich: er steht im Plan unter" %}
+                    <strong>{% translate "eingestellt" %}</strong> {% translate "und lässt sich von dort hochstufen." %}</li>
+                <li>{% translate "Was aktiv angelegt würde, lässt sich auf inaktiv oder eingestellt zurückstellen oder" %} <strong>{% translate "nicht zählbar" %}</strong> {% translate "setzen: dann kommt seine Ware in die Warenfamilie „Nicht zählbar“ und wird bei jedem weiteren Import still übergangen. Gehört die erkannte Ware schon dorthin, ist das vorgeschlagen." %}</li>
+                <li>{% translate "Bei" %} <strong>{% translate "bekannten Artikeln" %}</strong> {% translate "wird nichts angetastet, solange du es nicht sagst: je Zeile stehen „Lassen“, „Ändern“ beziehungsweise „Umbenennen“ und „Ersetzen“ zur Wahl. Abweichungen zur Datei stehen als Hinweis dabei." %}</li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

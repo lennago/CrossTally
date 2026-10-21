@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load i18n %}
+{# After the form: the mail is out, or the address applies already. Where to #}
+{# go on depends on the role: counters came from the app.                     #}
+
+{% block title %}{% translate "E-Mail-Adresse ändern" %}{% endblock title %}
+
+{% block content %}
+<div class="container py-5 max-breite-30">
+
+    <div class="card">
+        <div class="card-body p-4">
+
+            {% if bestaetigung %}
+            <h1 class="h4 mb-2">{% translate "Mail unterwegs" %}</h1>
+            <p class="mb-3">
+                {% blocktranslate %}An <strong>{{ email }}</strong> ist eine Mail mit einem Link unterwegs. Erst wenn du ihn bestätigt hast, gilt die neue Adresse. Bis dahin bleibt die bisherige.{% endblocktranslate %}
+                {% blocktranslate count tage=tage %}Der Link gilt einen Tag.{% plural %}Der Link gilt {{ tage }} Tage.{% endblocktranslate %}
+            </p>
+            {% else %}
+            <h1 class="h4 mb-2">{% translate "Adresse geändert" %}</h1>
+            <p class="mb-3">
+                {% blocktranslate %}Deine Adresse ist jetzt <strong>{{ email }}</strong>.{% endblocktranslate %}
+            </p>
+            {% endif %}
+
+            <div class="d-flex flex-wrap gap-2">
+                {% if user.is_staff %}
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary">{% translate "Zur Startseite" %}</a>
+                {% else %}
+                <a href="{% url 'pwa' %}" class="btn btn-success">{% translate "Zur Zähl-App" %}</a>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

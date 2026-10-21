@@ -1,0 +1,27 @@
+{% extends "components/delete_page.html" %}
+{% load i18n %}
+
+{% block art %}{% translate "Ort löschen" %}{% endblock art %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'haus_list' %}">{% translate "Häuser" %}</a></li>
+<li class="breadcrumb-item">
+    <a href="{{ ort.haus.get_absolute_url }}">{{ ort.haus.name }}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{{ ort.bereich.get_absolute_url }}">{{ ort.bereich.name }}</a>
+</li>
+{% endblock pfad %}
+
+{% block frage %}
+{% blocktranslate with name=ort.name haus=ort.haus.name %}Soll <strong>{{ name }}</strong> in {{ haus }} wirklich gelöscht werden?{% endblocktranslate %}
+{% endblock frage %}
+
+{% block folgen %}
+<p class="mb-0">
+    {% blocktranslate with anzahl=ort.erwartungen.all|length %}Damit entfallen auch {{ anzahl }} erwartete Artikel samt ihrer Gebinde-Vorgaben.{% endblocktranslate %}
+</p>
+<p class="text-body-secondary small mt-3 mb-0">
+    {% translate "Das Löschen kann nicht rückgängig gemacht werden." %}
+</p>
+{% endblock folgen %}

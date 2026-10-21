@@ -1,0 +1,127 @@
+{% load i18n %}
+{# The table of the product list, flat or as one group among many.               #}
+{#                                                                               #}
+{# Expects 'zeilen', 'gegliedert', 'spalten' (the headers) and 'filterform'.     #}
+{# Grouped, the product family column is left out. It then stands in the         #}
+{# header of the collapsible.                                                    #}
+{#                                                                               #}
+{# The widths are fixed ('table-layout: fixed'), in both views: otherwise        #}
+{# every column would follow the longest entry of the page, and the table        #}
+{# would jump with every sorting. What is too long is cut off and stands in      #}
+{# the tooltip. The minimum width leaves the packs, the column without a width  #}
+{# of its own, about 11 rem: at 84.5 rem, the sum of the fixed columns, nothing   #}
+{# remained for them on a laptop, and the badges lay over "Carried in".          #}
+<div class="table-responsive">
+    <table class="table table-hover align-middle{% if gegliedert %} mb-0{% endif %} tabelle-fest min-breite-95-5">
+        <colgroup>
+            <col class="breite-15">
+            <col class="breite-5-5">
+            {% if not gegliedert %}<col class="breite-10">{% endif %}
+            <col class="breite-10">
+            <col class="breite-7">
+            <col>
+            <col class="breite-14">
+            <col class="breite-23">
+        </colgroup>
+        <thead>
+            <tr>
+                {% include "components/column_header.html" with kopf=spalten.name aus=gegliedert %}
+                {% include "components/column_header.html" with kopf=spalten.einheit aus=gegliedert klasse="text-end" %}
+                {% if not gegliedert %}
+                {% include "components/column_header.html" with kopf=spalten.familie %}
+                {% endif %}
+                {% include "components/column_header.html" with kopf=spalten.art aus=gegliedert %}
+                {% include "components/column_header.html" with kopf=spalten.abwiegen aus=gegliedert %}
+                <th scope="col">{% translate "Gebinde" %}</th>
+                <th scope="col">{% translate "Geführt in" %}</th>
+                <th scope="col"><span class="visually-hidden">{% translate "Aktionen" %}</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for artikel in zeilen %}
+            {% with status=artikel.warenstatus %}
+            <tr>
+                <td class="text-truncate" title="{{ artikel.name }}">
+                    <a href="{{ artikel.get_absolute_url }}"
+                        class="link-body-emphasis link-offset-2 text-decoration-none">
+                        {{ artikel.name }}
+                    </a>
+                    {% if status != "AKTIV" %}
+                    <span class="d-block">
+                        <span class="badge bg-body-secondary text-body border">{{ artikel.warenstatus_anzeige|lower }}</span>
+                    </span>
+                    {% endif %}
+                </td>
+
+                <td class="text-end text-body-secondary">{{ artikel.basiseinheit.kurz }}</td>
+
+                {% if not gegliedert %}
+                <td class="small text-truncate" title="{{ artikel.warenfamilie.anzeigename|default:'' }}">
+                    {% if artikel.warenfamilie %}
+                    <a href="{{ artikel.warenfamilie.get_absolute_url }}"
+                        class="link-body-emphasis link-offset-2 text-decoration-none">
+                        {{ artikel.warenfamilie.anzeigename }}
+                    </a>
+                    {% else %}
+                    <span class="text-body-secondary">{% translate "&mdash;" %}</span>
+                    {% endif %}
+                </td>
+                {% endif %}
+
+                <td>
+                    {% url 'ware_inventurart' artikel.pk as art_ziel %}
+                    {% include "components/inventurart_menu.html" with ziel=art_ziel arten=inventurarten aktuell=artikel.inventurart gemischt=artikel.arten_gemischt titel=artikel.name rueckfrage=artikel.art_rueckfrage %}
+                </td>
+
+                <td>
+                    {% include "components/weighing_buttons.html" with ware=artikel %}
+                </td>
+
+                <td>
+                    {% for gebinde in artikel.gebinde.all %}
+                    <span class="badge rounded-pill bg-body-secondary text-body border text-body me-1
+                        {% if not gebinde.aktiv %}ausgegraut{% endif %}">
+                        {{ gebinde.anzeigename }}
+                    </span>
+                    {% empty %}
+                    <span class="text-body-secondary small">{% translate "keine" %}</span>
+                    {% endfor %}
+                </td>
+
+                {# Active ones full, inactive ones pale. Discontinued ones do not stand here. #}
+                <td>
+                    {% for hausartikel in artikel.hausartikel.all %}
+                    {% if hausartikel.status == "AKTIV" or hausartikel.status == "INAKTIV" %}
+                    <a href="{{ hausartikel.get_absolute_url }}?von=ware:{{ artikel.pk }}"
+                        class="badge rounded-pill text-decoration-none me-1 {% if hausartikel.aktiv %}text-bg-secondary{% else %}bg-body-secondary text-body border{% endif %}"
+                        title="{{ hausartikel.haus.name }} {{ hausartikel.artikelnummer }}{% if not hausartikel.aktiv %} {% translate "(inaktiv)" %}{% endif %}">
+                        {{ hausartikel.haus.name }}
+                    </a>
+                    {% endif %}
+                    {% endfor %}
+                    {% if status == "EINGESTELLT" %}
+                    <span class="text-body-secondary small">{% translate "nirgends mehr" %}</span>
+                    {% elif not artikel.hausartikel.all %}
+                    <span class="text-body-secondary small">{% translate "in keinem Haus" %}</span>
+                    {% endif %}
+                </td>
+
+                <td class="text-end text-nowrap">
+                    {% include "katalog/components/sammelstatus_buttons.html" with satz=artikel art="ware" %}
+                </td>
+            </tr>
+            {% endwith %}
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center text-body-secondary py-5">
+                    {% if filterform.ist_eingeschraenkt %}
+                    {% translate "Keine Ware passt zu diesen Filtern." %}
+                    {% else %}
+                    {% translate "Noch keine Waren angelegt." %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

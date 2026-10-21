@@ -1,0 +1,15 @@
+{# A select field as a row of small buttons instead of a menu: quicker to         #}
+{# operate where the same choice is pending in every row.                         #}
+{# Call: {% include "components/button_group.html" with feld=zeile.vorgehen %}    #}
+{# A multiple choice (checkboxes) stands in the primary colour and a ticked       #}
+{# entry carries a check mark ('site.css'): with several entries side by side     #}
+{# the grey fill alone did not say whether one was chosen or only hovered.        #}
+<div class="btn-group btn-group-sm w-100" role="group" aria-label="{{ feld.label }}">
+    {% for eintrag in feld %}
+    {{ eintrag.tag }}
+    <label class="btn {% if feld.field.widget.input_type == 'checkbox' %}btn-outline-primary{% else %}btn-outline-secondary{% endif %}" for="{{ eintrag.id_for_label }}">
+        {{ eintrag.choice_label }}
+    </label>
+    {% endfor %}
+</div>
+{{ feld.errors }}

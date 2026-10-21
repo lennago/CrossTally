@@ -1,0 +1,66 @@
+{% extends "pdf/base.html" %}
+{% load i18n %}
+
+{# The sheet of a closed inventory: by product group and article number, as   #}
+{# the inventory management system lists its articles. Whoever transfers the  #}
+{# numbers finds every row where that system shows it. No sums: a group mixes #}
+{# units. The report over inventories groups by family instead.               #}
+
+{% block titel %}{{ inventur }}{% endblock titel %}
+{% block fusszeile %}{{ inventur.haus.name }} · {{ inventur.stichtag|date:"SHORT_DATE_FORMAT" }}{% endblock fusszeile %}
+
+{% block inhalt %}
+<div class="kopf">
+    <h1>
+    {% blocktranslate with name=inventur.haus.name arten=inventur.arten_anzeige %}{{ name }} &middot; {{ arten }}{% endblocktranslate %}
+</h1>
+    <div class="zeile">
+        {% blocktranslate with stichtag=inventur.stichtag|date:"SHORT_DATE_FORMAT" %}Stichtag {{ stichtag }}{% endblocktranslate %} &middot;
+        {% blocktranslate with zeitpunkt=inventur.abgeschlossen_am|date:"SHORT_DATETIME_FORMAT" %}abgeschlossen am {{ zeitpunkt }}{% endblocktranslate %} &middot;
+        {% blocktranslate count anzahl=anzahl_waren %}{{ anzahl }} Ware{% plural %}{{ anzahl }} Waren{% endblocktranslate %}
+    </div>
+</div>
+
+{% for block in bloecke %}
+<h2>{{ block.name }}</h2>
+<table>
+    <thead>
+        <tr>
+            <th style="width: 18mm;">{% translate "Nummer" %}</th>
+            <th>{% translate "Ware" %}</th>
+            <th class="zahl" style="width: 24mm;">{% translate "Ergebnis" %}</th>
+            <th class="zahl" style="width: 24mm;">{% translate "Soll" %}</th>
+            <th class="zahl" style="width: 24mm;">{% translate "Differenz" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for zeile in block.zeilen %}
+        <tr>
+            <td class="nummer">{{ zeile.nummer|default:"–" }}</td>
+            <td>
+                {{ zeile.ware.name }}
+                {% if zeile.name_im_haus %}
+                <span class="leise">{{ zeile.name_im_haus }}</span>
+                {% endif %}
+                {% if zeile.vermerk %}
+                <span class="leise">({{ zeile.vermerk }})</span>
+                {% endif %}
+                {# The note from the check list, below the name: whoever transfers #}
+                {# the numbers reads why one of them looks the way it does.         #}
+                {% if zeile.notiz %}
+                <div class="notiz">{{ zeile.notiz|linebreaksbr }}</div>
+                {% endif %}
+            </td>
+            <td class="zahl">{{ zeile.ist_text }}</td>
+            <td class="zahl">{{ zeile.soll_text }}</td>
+            <td class="zahl {{ zeile.differenz_klasse }}">
+                {{ zeile.differenz_text }}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% empty %}
+<p class="leise">{% translate "Für diese Inventur wurden keine Ergebnisse eingefroren." %}</p>
+{% endfor %}
+{% endblock inhalt %}

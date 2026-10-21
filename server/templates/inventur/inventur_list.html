@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Inventuren" %}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="kopfleiste bg-body d-flex flex-wrap gap-2 justify-content-between align-items-center mb-1 py-2">
+        <div class="d-flex align-items-center gap-3">
+            <h1 class="h3 mb-0">{% translate "Inventuren" %}</h1>
+            <span class="text-body-secondary small" data-ersetzen="anzahl">
+                {% blocktranslate count anzahl=page_obj.paginator.count %}{{ anzahl }} Inventur{% plural %}{{ anzahl }} Inventuren{% endblocktranslate %}
+                {% if filterform.ist_eingeschraenkt %}{% translate "gefunden" %}{% endif %}
+            </span>
+        </div>
+        <a href="{% url 'inventur_add' %}" class="btn btn-success btn-sm">{% translate "Neue Inventur" %}</a>
+    </div>
+
+    {% url 'inventur_list' as zurueck %}
+    {% include "components/list_filter.html" with zuruecksetzen=zurueck %}
+
+    <div data-liste>
+    {% include "components/pagination.html" with stelle="oben" %}
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th scope="col">{% translate "Haus" %}</th>
+                    <th class="breite-10" scope="col">{% translate "Status" %}</th>
+                    <th class="breite-18" scope="col">{% translate "Fortschritt" %}</th>
+                    <th scope="col" class="text-end">{% translate "Angelegt" %}</th>
+                </tr>
+            </thead>
+
+            {# One table body per run, like house → area → location on the house page. #}
+            {% for lauf in laeufe %}
+            <tbody class="border-top">
+                {# The header row leads into the run. Even if the filter shows only one #}
+                {# house: the others exist nonetheless. If the run has only one house,  #}
+                {# its page redirects to that inventory.                                #}
+                <tr class="tabellenzeile-ruhig position-relative">
+                    <th colspan="4" class="fw-semibold">
+                        <a href="{{ lauf.url }}"
+                            class="stretched-link link-body-emphasis link-offset-2 text-decoration-none">
+                            {{ lauf.stichtag|date:"SHORT_DATE_FORMAT" }} &middot; {{ lauf.arten }}
+                        </a>
+                        {% if lauf.inventuren|length > 1 %}
+                        <span class="text-body-secondary fw-normal small">
+    {% blocktranslate with inventuren=lauf.inventuren|length %}&mdash; {{ inventuren }} Häuser in einem Lauf{% endblocktranslate %}
+</span>
+                        {% endif %}
+                    </th>
+                </tr>
+                {% for inventur in lauf.inventuren %}
+                {# The whole row leads to the inventory: 'stretched-link' lays the link    #}
+                {# over the row, 'position-relative' limits it to the row.                 #}
+                <tr class="position-relative">
+                    <td>
+                        <a href="{{ inventur.get_absolute_url }}"
+                            class="stretched-link link-body-emphasis link-offset-2 text-decoration-none">
+                            {{ inventur.haus.name }}
+                        </a>
+                    </td>
+                    <td>{% include "inventur/components/status_badge.html" %}</td>
+                    <td>{% include "inventur/components/progress.html" %}</td>
+                    <td class="text-end text-body-secondary small">
+                        {{ inventur.erstellt_am|date:"SHORT_DATE_FORMAT" }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            {% empty %}
+            <tbody>
+                <tr>
+                    <td colspan="4" class="text-center text-body-secondary py-5">
+                        {% if filterform.ist_eingeschraenkt %}
+                        {% translate "Keine Inventur passt zu diesen Filtern." %}
+                        {% else %}
+                        {% translate "Noch keine Inventur angelegt. Eine neue entsteht für einen Stichtag, eine oder mehrere Inventurarten und ein oder mehrere Häuser." %}
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+            {% endfor %}
+        </table>
+    </div>
+
+    {% include "components/pagination.html" with stelle="unten" %}
+    </div>
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% include "components/script.html" with name="live_filter" %}
+{% endblock extra_scripts %}

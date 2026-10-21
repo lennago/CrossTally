@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load i18n %}
+{# Skeleton of all delete pages: breadcrumbs, confirmation, what goes along, two buttons. #}
+{#                                                                                        #}
+{# The page itself fills only what distinguishes it:                                      #}
+{#   art:      "Delete container", the whole heading. Whole, because the                  #}
+{#             word order turns when translating.                                         #}
+{#   pfad:     the breadcrumbs before the record itself                                   #}
+{#   frage:    if "Really delete <name>?" is not enough                                   #}
+{#   folgen:   what goes along or why it is refused                                       #}
+{#   felder:   fields the deletion needs, say where what hangs on the record goes         #}
+{#   knopf:    if the delete button can be disabled                                       #}
+{# 'object' comes from the 'DeleteView'. Back leads to its page.                          #}
+
+{% block title %}{% firstof object.anzeigename object.name object %} {% translate "löschen" %}{% endblock title %}
+
+{% block content %}
+<div class="container py-4 seite-schmal">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            {% block pfad %}{% endblock pfad %}
+            <li class="breadcrumb-item">
+                <a href="{{ object.get_absolute_url }}">{% firstof object.anzeigename object.name object %}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{% translate "Löschen" %}</li>
+        </ol>
+    </nav>
+
+    <div class="kopfleiste bg-body py-2 mb-3">
+        <h1 class="h3 mb-0">{% block art %}{% endblock art %}</h1>
+    </div>
+
+    <div class="card border-danger-subtle">
+        <div class="card-body">
+            <p>
+                {% block frage %}
+                {% firstof object.anzeigename object.name object as bezeichnung %}
+                {% blocktranslate %}Soll <strong>{{ bezeichnung }}</strong> wirklich gelöscht werden?{% endblocktranslate %}
+                {% endblock frage %}
+            </p>
+            {% block folgen %}
+            <p class="text-body-secondary small mb-0">
+                {% translate "Das Löschen kann nicht rückgängig gemacht werden." %}
+            </p>
+            {% endblock folgen %}
+        </div>
+    </div>
+
+    <form method="post" class="mt-3">
+        {% csrf_token %}
+        {% block felder %}{% endblock felder %}
+        <div class="fussleiste d-flex flex-wrap gap-2 bg-body border-top py-3">
+            {% block knopf %}
+            <button class="btn btn-danger" type="submit">{% translate "Endgültig löschen" %}</button>
+            {% endblock knopf %}
+            <a href="{{ object.get_absolute_url }}" class="btn btn-outline-secondary">{% translate "Abbrechen" %}</a>
+        </div>
+    </form>
+
+</div>
+{% endblock content %}

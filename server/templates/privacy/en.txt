@@ -1,0 +1,51 @@
+This application is a tool for the inventory and is not publicly available on the internet. Only those who count in the business or run the inventories get an account. Here you can read what is stored about you in the process and what is not.
+
+## Why the application exists
+
+It records which goods are on site on the cut-off date. That is a task of the business, and your account is needed so that you can take part in it. The legal basis is the employment relationship itself.
+
+## What is stored about you
+
+- **Your account:** username, first and last name, e-mail address, your role, the sites where you usually count, your language, your choice between light and dark appearance, the colours of the difference, when the account was created and the time you last signed in, on the website or in the counting app.
+- **Your password never in plain text.** Only a check value is stored, and the password cannot be recomputed from it. Nobody can read it out, not even the administration. Whoever forgets theirs gets a new one set instead of being told the old one.
+- **Your passkeys:** per device the public part of the key, its id, the name you give it, and when it was created and last used. The secret part stays on your device.
+- **The sign-in of the counting app:** per device a sign-in token with your account and the time it was issued. Every renewal adds a new one, about every hour while the app is in use. Each one lasts two weeks.
+- **Failed sign-ins:** username, network address, browser id, requested address and time. After five failed attempts the username is locked from that address for half an hour. A successful sign-in resets the counter. That stops anyone trying out passwords. Likewise every sign-in attempt under “/admin/”, an address behind which there is nothing.
+- **“Forgot your password?” requests:** the e-mail address entered, network address and time. More than five requests per hour and address go nowhere. That stops anyone flooding an address with mails or probing which addresses have an account.
+- **Who belongs to an inventory:** every inventory records who may count in it, as long as it runs.
+- **Changes in the administration:** whoever creates, changes or deletes a record there appears in the log with name and time. The name of the record is in it too, for an account that is the person's name.
+- **Mails to you:** if the business has set up a mail server, you get a mail when your account is changed, deactivated or deleted, your password is changed or set, a passkey is created or removed, or your address is changed. It names what changed and, depending on the setting, who did it. Mails leave through the mail server of the business to your address, and when the address changes to the old and the new one. Until you confirm the new one, it is kept next to the old one on your account.
+- **The log of the web server:** every request, among other things with network address, requested page including its query, browser id and time.
+- **Backups:** encrypted copies of the database. A backup holds the state of its day, your account and your passkeys included.
+
+## What is not stored
+
+- **Counts carry no name.** A count line records what was counted and when. Not by whom. There is no report on who counted how fast or how much.
+- **No log of sign-ins.** The account only keeps the time of the most recent one, every passkey the time it was last used. What the sign-in tokens of the counting app and the web server record along the way is listed above.
+- **No analytics, no advertising, no tracking.** There are no tracking pixels, no statistics services and no profiles.
+- **Nothing goes to outside servers.** The site loads everything from itself. Fonts, scripts and images are held in house.
+- **No sharing.** Apart from the mails to your own address, the data do not leave the business.
+
+## What is kept on your device
+
+There is no cookie banner, because there is nothing to ask. Only what the application needs in order to work is stored:
+
+- A **session cookie**, so that you stay signed in, and a second one that protects forms against outside sites. Without signing in, a third one remembers the language you chose until you close the browser.
+- Your **view**: appearance, expanded groups, filters and sorting. So that a list looks the way you left it.
+- In the **counting app** your sign-in, the details of your account and the count list, along with your entries until they have reached the server. Only this way can you keep counting in the cold store without reception. Signing out clears the storage.
+
+## For how long
+
+- **Your account** exists for as long as you need it. Whoever leaves the business has their account deleted. Nothing hangs on it that would have to be kept, and an account is created again in a minute.
+- **The count data** remain, because the inventory is a record. They say nothing about you.
+- **Who was allowed to count in an inventory** is deleted when it is closed. Afterwards the inventory no longer says who took part.
+- **Failed attempts** are deleted once the half hour of the lock is over, at the latest at the next daily clean-up. The same clean-up removes expired sessions and expired sign-in tokens of the counting app.
+- **“Forgot your password?” requests** and the attempts under “/admin/” are deleted after 30 days.
+- **A new address waiting for its confirmation** is deleted after three days, at the next daily clean-up. It goes earlier once it is confirmed, with a new password, when a passkey is removed and when the account is deactivated.
+- **The log of the administration** is deleted after one year.
+- **The log of the web server** is limited by size. Depending on the operation it reaches back a few days or weeks.
+- **Backups:** the seven most recent stay on the machine. Whatever a backup holds, an account deleted since included, goes only with the backup.
+
+## Your rights
+
+You can request information about what is stored about you and have anything wrong corrected or deleted. You can also complain to the data protection authority of your federal state.

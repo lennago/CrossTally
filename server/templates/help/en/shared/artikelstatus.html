@@ -1,0 +1,27 @@
+{# The four article statuses: included wherever the status buttons are. #}
+<h3>Status</h3>
+<ul>
+    <li><strong>Active</strong>: carried and counted.</li>
+    <li><strong>Inactive</strong>: not in the range right now, but it will return (seasonal
+        goods). The article keeps its number, its product and its place in the count lists.
+        A new inventory creates no line for it. In the counting app it can still be added,
+        provided the inventory counts its inventory type.</li>
+    <li><strong>Discontinued</strong>: over. Delisted, or the number was reassigned in
+        the merchandise management system. Number and product become free at the site, and the article drops out of
+        every count list. Old inventory results still point to it. Delisted goods sometimes
+        still stand on the shelf. That is why the counting app still offers it at the very
+        end, as long as number and product are free at the site and the inventory counts its
+        inventory type. Activated again, it gets its places in the count lists back at their
+        old position, as far as location and packs still exist. An older record that did not
+        yet remember its places when it was discontinued comes back without them. The
+        article's page says which applies.</li>
+    <li><strong>Not countable</strong>: never was a product, such as deposits, vouchers or
+        discounts. The product moves into the family “Not countable”, disappears
+        <em>at every site</em> from lists, counts and reports, and is silently skipped on
+        import. Whoever puts a product there by mistake and takes it out again gets the old
+        statuses back at every site. The product returns to its old family, and the articles
+        get their places in the count lists back at their old position, as far as family,
+        location and packs still exist. Older records that did not yet remember family and
+        places come back without them.</li>
+</ul>
+<p>By default the lists show what is <em>carried</em>: active and inactive.</p>

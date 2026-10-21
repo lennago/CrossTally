@@ -1,0 +1,135 @@
+{% load i18n %}
+{# The table of the house article list, flat or as one group among many.         #}
+{#                                                                               #}
+{# Expects 'zeilen', 'gegliedert', 'spalten' (the headers), 'haus' and           #}
+{# 'filterform'. Grouped, the column grouped by is left out: product group       #}
+{# or product family ('ohne_spalte'). It then stands in the header of the        #}
+{# collapsible.                                                                  #}
+{#                                                                               #}
+{# The widths are fixed, in both views: otherwise every column would follow      #}
+{# the longest entry of the page, and the table would jump with every            #}
+{# sorting. Grouped, the groups would not stay flush. What is too long is        #}
+{# cut off and stands in the tooltip.                                            #}
+<div class="table-responsive">
+    <table class="table table-hover align-middle tabelle-fest {% if ohne_spalte == "warengruppe" %}min-breite-93{% elif ohne_spalte == "familie" %}min-breite-95{% else %}min-breite-104{% endif %}{% if gegliedert %} mb-0{% endif %}">
+        {# Every column with a fixed width, the designation too: a free column     #}
+        {# would only get what is left in a narrow window, if need be nothing.     #}
+        {# The minimum width is the sum. Below it the table scrolls sideways.      #}
+        <colgroup>
+            <col class="breite-6-5">
+            <col class="breite-14">
+            {% if ohne_spalte != "warengruppe" %}<col class="breite-11">{% endif %}
+            <col class="breite-12">
+            {% if ohne_spalte != "familie" %}<col class="breite-9">{% endif %}
+            <col class="breite-6">
+            <col class="breite-10">
+            <col class="breite-7">
+            <col class="breite-7">
+            <col class="breite-21-5">
+        </colgroup>
+        <thead>
+            <tr>
+                {% include "components/column_header.html" with kopf=spalten.nummer aus=gegliedert %}
+                {% include "components/column_header.html" with kopf=spalten.name aus=gegliedert %}
+                {% if ohne_spalte != "warengruppe" %}
+                {% include "components/column_header.html" with kopf=spalten.warengruppe aus=gegliedert %}
+                {% endif %}
+                {% include "components/column_header.html" with kopf=spalten.ware aus=gegliedert %}
+                {% if ohne_spalte != "familie" %}
+                {% include "components/column_header.html" with kopf=spalten.familie aus=gegliedert %}
+                {% endif %}
+                {% include "components/column_header.html" with kopf=spalten.einheit aus=gegliedert klasse="text-end" %}
+                {% include "components/column_header.html" with kopf=spalten.art aus=gegliedert %}
+                {% include "components/column_header.html" with kopf=spalten.abwiegen aus=gegliedert %}
+                {% include "components/column_header.html" with kopf=spalten.geaendert aus=gegliedert klasse="text-end" %}
+                <th scope="col"><span class="visually-hidden">{% translate "Aktionen" %}</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for artikel in zeilen %}
+            <tr {% if not artikel.aktiv %}class="ausgegraut"{% endif %}>
+                <td class="font-monospace text-body-secondary">{{ artikel.artikelnummer|default:"–" }}</td>
+
+                <td class="text-truncate" title="{{ artikel.name }}">
+                    <a href="{{ artikel.get_absolute_url }}?von=haus_artikel:{{ haus.pk }}"
+                        class="link-body-emphasis link-offset-2 text-decoration-none">
+                        {% include "katalog/components/artikel_name.html" %}
+                    </a>
+                    {% if not artikel.aktiv %}
+                    <span class="d-block">
+                        <span class="badge bg-body-secondary text-body border">
+                            {% blocktranslate with status=artikel.get_status_display|lower datum=artikel.gueltig_bis|date:"SHORT_DATE_FORMAT" %}{{ status }} seit {{ datum }}{% endblocktranslate %}
+                        </span>
+                    </span>
+                    {% endif %}
+                </td>
+
+                {% if ohne_spalte != "warengruppe" %}
+                <td class="text-truncate" title="{{ artikel.warengruppe.anzeigename }}">
+                    <a href="{{ artikel.warengruppe.get_absolute_url }}"
+                        class="link-secondary link-offset-2 text-decoration-none">
+                        {{ artikel.warengruppe.anzeigename }}
+                    </a>
+                </td>
+                {% endif %}
+
+                <td class="text-truncate" title="{{ artikel.ware.name }}">
+                    <a href="{{ artikel.ware.get_absolute_url }}"
+                        class="link-secondary link-offset-2 text-decoration-none">
+                        {{ artikel.ware.name }}
+                    </a>
+                </td>
+
+                {# The family belongs to the product. It thus applies in every house. #}
+                {% if ohne_spalte != "familie" %}
+                {% with familie=artikel.ware.warenfamilie %}
+                <td class="text-truncate"{% if familie %} title="{{ familie.anzeigename }}"{% endif %}>
+                    {% if familie %}
+                    <a href="{{ familie.get_absolute_url }}"
+                        class="link-secondary link-offset-2 text-decoration-none">
+                        {{ familie.anzeigename }}
+                    </a>
+                    {% else %}
+                    <span class="text-body-secondary">{% translate "&ndash;" %}</span>
+                    {% endif %}
+                </td>
+                {% endwith %}
+                {% endif %}
+
+                <td class="text-end text-body-secondary">
+                    {{ artikel.basiseinheit.kurz }}
+                </td>
+
+                {# The type hangs on the house article. Where the product has      #}
+                {# further articles, the menu asks whether it applies to them too. #}
+                <td>
+                    {% url 'hausartikel_inventurart' artikel.pk as art_ziel %}
+                    {% include "components/inventurart_menu.html" with ziel=art_ziel arten=inventurarten aktuell=artikel.inventurart titel=artikel.name weitere=artikel.weitere_artikel %}
+                </td>
+
+                <td>
+                    {% include "components/weighing_buttons.html" with ware=artikel.ware %}
+                </td>
+
+                <td class="text-end text-body-secondary small">
+                    {{ artikel.geaendert_am|date:"SHORT_DATE_FORMAT" }}
+                </td>
+
+                <td class="text-end text-nowrap">
+                    {% include "katalog/components/status_buttons.html" %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10" class="text-center text-body-secondary py-5">
+                    {% if filterform.ist_eingeschraenkt %}
+                    {% translate "Kein Artikel passt zu diesen Filtern." %}
+                    {% else %}
+                    {% blocktranslate with name=haus.name %}{{ name }} führt noch keine Hausartikel. Entweder einzeln anlegen oder den Artikelstamm einlesen.{% endblocktranslate %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

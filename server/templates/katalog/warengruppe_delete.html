@@ -1,0 +1,20 @@
+{% extends "components/delete_page.html" %}
+{% load i18n %}
+
+{% block art %}{% translate "Warengruppe löschen" %}{% endblock art %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'warengruppe_list' %}">{% translate "Warengruppen" %}</a></li>
+{% endblock pfad %}
+
+{% block folgen %}
+{% if object.hausartikel.all %}
+<p class="mb-0">
+    {% blocktranslate with hausartikel=object.hausartikel.all|length %}In dieser Gruppe liegen noch {{ hausartikel }} Hausartikel. Das Löschen wird deshalb abgelehnt. Ordne die Artikel erst einer anderen Gruppe zu, in ihrem Formular oder beim nächsten Import über „Ändern“.{% endblocktranslate %}
+</p>
+{% else %}
+<p class="text-body-secondary small mb-0">
+    {% translate "Die Gruppe ist leer und kann gefahrlos entfernt werden." %}
+</p>
+{% endif %}
+{% endblock folgen %}

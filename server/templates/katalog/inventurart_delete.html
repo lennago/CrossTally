@@ -1,0 +1,28 @@
+{% extends "components/delete_page.html" %}
+{% load i18n crispy_forms_tags %}
+
+{% block art %}{% translate "Inventurart löschen" %}{% endblock art %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'inventurart_list' %}">{% translate "Inventurarten" %}</a></li>
+{% endblock pfad %}
+
+{% block folgen %}
+{% if hindernis %}
+<p class="mb-0">{{ hindernis }}</p>
+{% else %}
+<p class="text-body-secondary small mb-0">
+    {% blocktranslate count anzahl=anzahl_artikel %}Ein Artikel zählt in dieser Art. Er braucht eine andere.{% plural %}{{ anzahl }} Artikel zählen in dieser Art. Sie brauchen eine andere.{% endblocktranslate %}
+</p>
+{% endif %}
+{% endblock folgen %}
+
+{% block felder %}
+{% if not hindernis %}
+<div class="mb-3">{{ form.nachfolger|as_crispy_field }}</div>
+{% endif %}
+{% endblock felder %}
+
+{% block knopf %}
+<button class="btn btn-danger" type="submit" {% if hindernis %}disabled{% endif %}>{% translate "Endgültig löschen" %}</button>
+{% endblock knopf %}

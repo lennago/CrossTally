@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+{% load i18n mengen %}
+
+{% block title %}{% blocktranslate with name=ort.name %}Zählliste {{ name }}{% endblocktranslate %}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    {% translate "Zählliste" as aktuell %}
+    {% include "components/breadcrumbs.html" with aktuell=aktuell %}
+
+    <div class="kopfleiste bg-body py-2 d-flex flex-wrap gap-2 justify-content-between align-items-start mb-3">
+        <div>
+            <h1 class="h3 mb-1">
+    {% blocktranslate with name=ort.name %}Zählliste {{ name }}{% endblocktranslate %}
+</h1>
+            <div class="text-body-secondary small">
+                {{ ort.haus.name }} · {{ ort.bereich.name }}
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            {# Fetches the list anew without throwing away what is typed in it:   #}
+            {# a pack created in another tab appears in its row, the ticks stay  #}
+            {# ('soft_reload.js'). Without script the button does nothing.       #}
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-neu-laden hidden
+                title="{% translate 'Neue Gebinde und Änderungen vom Server holen. Was hier eingetragen ist, bleibt.' %}">
+                {% translate "Aktualisieren" %}
+            </button>
+            <a href="{% url 'ort_edit' ort.pk %}" class="btn btn-outline-secondary btn-sm">
+                {% translate "Ort bearbeiten" %}
+            </a>
+        </div>
+    </div>
+
+    {# Two real addresses instead of collapsible panes: the selection tab       #}
+    {# brings filters and paging, and those belong in the address.              #}
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+            <a class="nav-link {% if reiter == 'liste' %}active{% endif %}"
+                href="{% url 'zaehlliste' ort.pk %}">
+                {% translate "Zählliste" %}
+                <span class="badge bg-body-secondary text-body border ms-1" data-ersetzen="anzahl">{{ anzahl_erwartet }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            {# With unsaved ticks the script saves first and then goes there   #}
+            {# ('zaehlliste.js', 'data-vorher-speichern'). Without script the   #}
+            {# tab opens as it is, and what was typed is gone.                  #}
+            <a class="nav-link {% if reiter == 'auswahl' %}active{% endif %}"
+                href="{% url 'zaehlliste' ort.pk %}?reiter=auswahl" data-vorher-speichern>
+                {% translate "Artikel auswählen" %}
+            </a>
+        </li>
+    </ul>
+
+    {% if reiter == "auswahl" %}
+    {% include "katalog/zaehlliste_selection.html" %}
+    {% else %}
+    {# The row buttons (arrows, ✕) send in the background and get the list back  #}
+    {# ('instant_actions.js'). "Save" leaves the page and says so.               #}
+    <div data-liste>
+    <form method="post" novalidate data-sofort>
+        {% csrf_token %}
+        {{ formset.management_form }}
+        {# Where "Save" leads. Empty: to the location. The script fills in the #}
+        {# other tab when it saves before switching.                            #}
+        <input type="hidden" name="weiter" value="">
+
+        {% for fehler in formset.non_form_errors %}
+        <div class="alert alert-danger">{{ fehler }}</div>
+        {% endfor %}
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th class="breite-3" scope="col">
+                            <span class="visually-hidden">{% translate "Ziehen" %}</span>
+                        </th>
+                        <th scope="col">{% translate "Artikel" %}</th>
+                        <th class="breite-24" scope="col">
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                <span>{% translate "Gebinde und Standardmenge" %}</span>
+                                {# One menu for all rows: every pack, only the loose single    #}
+                                {# unit, or the scale, each to tick or to untick. The script  #}
+                                {# ('zaehlliste.js') disables what would change nothing and  #}
+                                {# shows the menu only where there is something to tick.     #}
+                                {# Without script it stays hidden, and the ticks work as     #}
+                                {# before. Unticking packs empties their quantities. The     #}
+                                {# question for that is only asked where some stand.         #}
+                                <div class="dropdown" data-alle-menue hidden>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary fw-normal dropdown-toggle"
+                                        data-bs-toggle="dropdown" aria-expanded="false">{% translate "Alle Zeilen" %}</button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><button type="button" class="dropdown-item" data-alle="gebinde" data-richtung="an">{% translate "Alle Gebinde anwählen" %}</button></li>
+                                        <li><button type="button" class="dropdown-item" data-alle="gebinde" data-richtung="ab"
+                                            data-frage="{% translate 'Alle Gebinde abwählen? Die eingetragenen Standardmengen gehen dabei verloren.' %}">{% translate "Alle Gebinde abwählen" %}</button></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><button type="button" class="dropdown-item" data-alle="einzeln" data-richtung="an">{% translate "Überall „Einzeln“ anwählen" %}</button></li>
+                                        <li><button type="button" class="dropdown-item" data-alle="einzeln" data-richtung="ab"
+                                            data-frage="{% translate 'Überall „Einzeln“ abwählen? Die dort eingetragenen Standardmengen gehen verloren.' %}">{% translate "Überall „Einzeln“ abwählen" %}</button></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><button type="button" class="dropdown-item" data-alle="wiegen" data-richtung="an">{% translate "Überall Wiegen anwählen" %}</button></li>
+                                        <li><button type="button" class="dropdown-item" data-alle="wiegen" data-richtung="ab">{% translate "Überall Wiegen abwählen" %}</button></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </th>
+                        <th class="breite-13" scope="col"><span class="visually-hidden">{% translate "Aktionen" %}</span></th>
+                    </tr>
+                </thead>
+                {# One section per inventory type, each sortable on its own: a row   #}
+                {# cannot be dragged into another type, that is the article's.       #}
+                {# 'reihenfolge' rides along per row as a hidden field: after        #}
+                {# dragging, the row order is in the DOM and thus in the order       #}
+                {# of the submitted values.                                          #}
+                {% for art, zeilen in formset.abschnitte %}
+                {% if formset.mit_abschnitten %}
+                <tbody>
+                    <tr class="tabellenzeile-ruhig">
+                        <th colspan="4" scope="rowgroup" class="fw-semibold">
+                            {{ art.name }}
+                            <span class="badge bg-body-secondary text-body border ms-1">{{ zeilen|length }}</span>
+                        </th>
+                    </tr>
+                </tbody>
+                {% endif %}
+                <tbody data-sortierbar data-sofort-sichern>
+                    {% for zeile in zeilen %}
+                    {% with erwartung=zeile.erwartung_objekt %}
+                    {% with artikel=erwartung.artikel.konkret %}
+                    {# 'data-kennung': "Refresh" keeps a tick with its article, #}
+                    {# even if the rows were re-sorted elsewhere meanwhile.      #}
+                    <tr data-kennung="{{ erwartung.pk }}">
+                        <td class="text-body-secondary greifbar" data-griff aria-hidden="true">
+                            &#8942;&#8942;
+                            <input type="hidden" name="reihenfolge" value="{{ erwartung.pk }}">
+                            {{ zeile.erwartung }}
+                        </td>
+
+                        <td>
+                            <a href="{{ artikel.get_absolute_url }}?von={{ herkunft|urlencode }}"
+                                class="link-body-emphasis link-offset-2 text-decoration-none">
+                                {% if artikel.artikelnummer %}
+                                <span class="font-monospace text-body-secondary">
+                                    {{ artikel.artikelnummer }}
+                                </span>
+                                {% endif %}
+                                {% include "katalog/components/artikel_name.html" %}
+                            </a>
+                            {% if not erwartung.artikel.ist_hausartikel %}
+                            <span class="badge rounded-pill bg-body-secondary text-body border ms-1">
+                                {% translate "Rezepturartikel" %}
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        {# One tick per pack and next to it its default quantity. The   #}
+                        {# quantity field only shows with the tick. Without it there is #}
+                        {# nothing to enter.                                            #}
+                        <td data-gebindezelle>
+                            {% for gebinde, haken, menge in zeile.gebindezeilen %}
+                            {# 'data-einzeln' marks the loose single unit for the menu above. #}
+                            <div class="d-flex align-items-center gap-2 mb-1"{% if gebinde.ist_einzeln %} data-einzeln{% endif %}>
+                                <div class="form-check mb-0 min-breite-9">
+                                    {{ haken }}
+                                    <label class="form-check-label small"
+                                        for="{{ haken.id_for_label }}">{{ gebinde.anzeigename }}</label>
+                                </div>
+                                <div data-menge-zu="{{ haken.id_for_label }}">
+                                    {{ menge }}
+                                </div>
+                                {{ menge.errors }}
+                            </div>
+                            {% empty %}
+                            {% if not zeile.wiegen_haken %}
+                            <span class="text-body-secondary small">
+                                {% if erwartung.artikel.ist_hausartikel %}
+                                {# Straight to the pack section of the edit page. #}
+                                {% translate "keine aktiven Gebinde. Beim" %}
+                                <a href="{% url 'hausartikel_edit' artikel.pk %}#gebinde">{% translate "Hausartikel" %}</a> {% translate "anlegen" %}
+                                {% elif artikel.wird_gewogen %}
+                                {% blocktranslate with einheit=artikel.basiseinheit.kurz %}wird in {{ einheit }} gewogen{% endblocktranslate %}
+                                {% else %}
+                                {% blocktranslate with einheit=artikel.basiseinheit.kurz %}wird in {{ einheit }} gezählt{% endblocktranslate %}
+                                {% endif %}
+                            </span>
+                            {% endif %}
+                            {% endfor %}
+                            {# A default on an inactive pack gets no row in new inventories. #}
+                            {# It stays for the case the pack comes back, as text, not as a  #}
+                            {# tick: saving leaves it alone ('BaseZaehllisteFormSet').       #}
+                            {% for vorgabe in zeile.inaktive_vorgaben %}
+                            <div class="small text-body-secondary mb-1">
+                                {{ vorgabe.gebinde.anzeigename }}{% if vorgabe.standard_menge is not None %} · {{ vorgabe.standard_menge|menge_kurz }}{% endif %}
+                                <span class="badge bg-body-secondary text-body border ms-1">{% translate "inaktiv" %}</span>
+                            </div>
+                            {% endfor %}
+                            {# Weighable product: whether it goes on the scale at this         #}
+                            {# location. Without tick no weighing row arises here: in          #}
+                            {# storage the box stands, and the row would stay open every time. #}
+                            {% if zeile.wiegen_haken %}
+                            <div class="form-check mb-0">
+                                {{ zeile.wiegen_haken }}
+                                <label class="form-check-label small"
+                                    for="{{ zeile.wiegen_haken.id_for_label }}">{% translate "Wiegen" %}</label>
+                            </div>
+                            {{ zeile.wiegen_haken.errors }}
+                            {% endif %}
+                            {# A row without any ticked pack ('ZaehllisteZeileForm.clean'). #}
+                            {{ zeile.non_field_errors }}
+                        </td>
+
+                        {# The move buttons stand together, the ✕ set apart: whoever #}
+                        {# moves quickly one after the other should not take a row   #}
+                        {# out by accident. All in the same form so open inputs and  #}
+                        {# the dragged order go along.                               #}
+                        <td class="text-end">
+                            <div class="d-flex justify-content-end gap-2">
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-secondary" type="submit"
+                                        name="ganz_hoch" value="{{ erwartung.pk }}"
+                                        title="{% translate 'Ganz nach oben' %}" aria-label="{% translate 'Ganz nach oben' %}"
+                                        {% if forloop.first %}disabled{% endif %}>
+                                        <span class="pfeil-bis-rand oben">{% translate "&uarr;" %}</span>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" type="submit"
+                                        name="hoch" value="{{ erwartung.pk }}" title="{% translate 'Nach oben' %}"
+                                        aria-label="{% translate 'Nach oben' %}"
+                                        {% if forloop.first %}disabled{% endif %}>{% translate "&uarr;" %}</button>
+                                    <button class="btn btn-outline-secondary" type="submit"
+                                        name="runter" value="{{ erwartung.pk }}" title="{% translate 'Nach unten' %}"
+                                        aria-label="{% translate 'Nach unten' %}"
+                                        {% if forloop.last %}disabled{% endif %}>{% translate "&darr;" %}</button>
+                                    <button class="btn btn-outline-secondary" type="submit"
+                                        name="ganz_runter" value="{{ erwartung.pk }}"
+                                        title="{% translate 'Ganz nach unten' %}" aria-label="{% translate 'Ganz nach unten' %}"
+                                        {% if forloop.last %}disabled{% endif %}>
+                                        <span class="pfeil-bis-rand unten">{% translate "&darr;" %}</span>
+                                    </button>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" type="submit"
+                                    name="entfernen" value="{{ erwartung.pk }}"
+                                    title="{% translate 'Aus der Zählliste nehmen' %}"
+                                    aria-label="{% translate 'Aus der Zählliste nehmen' %}">{% translate "&times;" %}</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endwith %}
+                    {% endwith %}
+                    {% endfor %}
+                </tbody>
+                {% empty %}
+                <tbody>
+                    <tr>
+                        <td colspan="4" class="text-center text-body-secondary py-5">
+                            {% translate "An diesem Ort wird noch kein Artikel erwartet. Im Reiter" %}
+                            <a href="{% url 'zaehlliste' ort.pk %}?reiter=auswahl">{% translate "Artikel auswählen" %}</a> {% translate "zusammenstellen." %}
+                        </td>
+                    </tr>
+                </tbody>
+                {% endfor %}
+            </table>
+        </div>
+
+        {% if formset|length %}
+        <div class="fussleiste d-flex flex-wrap gap-2 bg-body border-top py-3">
+            <button class="btn btn-success" type="submit" data-seitenwechsel>{% translate "Speichern" %}</button>
+            <a href="{{ ort.get_absolute_url }}" class="btn btn-outline-secondary">{% translate "Abbrechen" %}</a>
+        </div>
+        {% endif %}
+    </form>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% if reiter == "auswahl" %}
+{% include "components/script.html" with name="multi_select" %}
+{% include "components/script.html" with name="live_filter" %}
+{% else %}
+{% include "components/sortable_script.html" %}
+{% include "components/script.html" with name="zaehlliste" %}
+{% endif %}
+{% translate "Aktualisieren hat nicht geklappt. Bitte die Seite neu laden." as nicht_aktualisiert %}
+{% include "components/soft_reload_script.html" with wert=nicht_aktualisiert %}
+{% endblock extra_scripts %}

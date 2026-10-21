@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{# Skeleton of the simple form pages: breadcrumbs, heading, form, two buttons.    #}
+{# Creating and editing share the page: 'object' decides.                         #}
+{#                                                                                #}
+{#   breite:         width class of the page, default 'seite-schmal'              #}
+{#   pfad:           the breadcrumbs before the page itself                       #}
+{#   neu:            heading when creating ("New container")                      #}
+{#   bearbeiten:     heading when editing, if "Edit X" is not it ("Rename X")     #}
+{#   unterzeile:     small line below the heading                                 #}
+{#   kopf_knoepfe:   right of the heading, mostly "Delete"                        #}
+{#   felder:         if '{{ form|crispy }}' is not enough                         #}
+{#   abbrechen_url:  where "Cancel" leads. Default is the record's page           #}
+{# Explanations do not belong here but in 'templates/help/'.                      #}
+{# The heading is one sentence for the translation. Until 10/2026 it was two      #}
+{# words, and English read "X edit".                                              #}
+
+{% block title %}{% if object %}{% firstof object.anzeigename object.name object as name %}{% blocktranslate %}{{ name }} bearbeiten{% endblocktranslate %}{% else %}{% translate "Neu" %}{% endif %}{% endblock title %}
+
+{% block content %}
+<div class="container py-4 {% block breite %}seite-schmal{% endblock breite %}">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            {% block pfad %}{% endblock pfad %}
+            {% if object %}
+            <li class="breadcrumb-item">
+                <a href="{{ object.get_absolute_url }}">{% firstof object.anzeigename object.name object %}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{% translate "Bearbeiten" %}</li>
+            {% else %}
+            <li class="breadcrumb-item active" aria-current="page">{% translate "Neu" %}</li>
+            {% endif %}
+        </ol>
+    </nav>
+
+    <div class="kopfleiste bg-body py-2 d-flex flex-wrap gap-2 justify-content-between align-items-start mb-3">
+        <div>
+            <h1 class="h3 mb-0">
+                {% if object %}
+                {% block bearbeiten %}{% firstof object.anzeigename object.name object as name %}{% blocktranslate %}{{ name }} bearbeiten{% endblocktranslate %}{% endblock bearbeiten %}
+                {% else %}
+                {% block neu %}{% translate "Neu" %}{% endblock neu %}
+                {% endif %}
+            </h1>
+            {% block unterzeile %}{% endblock unterzeile %}
+        </div>
+        <div class="d-flex flex-wrap gap-2">{% block kopf_knoepfe %}{% endblock kopf_knoepfe %}</div>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% block felder %}{{ form|crispy }}{% endblock felder %}
+        <div class="fussleiste d-flex flex-wrap gap-2 mt-3 bg-body border-top py-3">
+            <button class="btn btn-success" type="submit">
+                {% if object %}{% translate "Speichern" %}{% else %}{% translate "Anlegen" %}{% endif %}
+            </button>
+            <a href="{% block abbrechen_url %}{{ object.get_absolute_url }}{% endblock abbrechen_url %}"
+                class="btn btn-outline-secondary">{% translate "Abbrechen" %}</a>
+        </div>
+    </form>
+
+</div>
+{% endblock content %}

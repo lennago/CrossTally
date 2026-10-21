@@ -1,0 +1,16 @@
+Your account at {{ anwendung }} is deactivated
+
+Hello {{ vorname }},
+
+Your account at {{ anwendung }} is deactivated. You can no longer sign in with it, not in the counting app either.
+
+{{ aenderungen }}
+
+{% if selbst %}
+Wasn't that you? Then let an administrator know.
+{% elif wer %}
+Deactivated by {{ wer }}.
+If you did not expect this, talk to {{ wer }}.
+{% else %}
+If you did not expect this, talk to your manager.
+{% endif %}

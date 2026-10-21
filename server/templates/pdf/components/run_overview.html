@@ -1,0 +1,26 @@
+{% load i18n %}
+{# The overview in front of the products, built like the blocks behind it     #}
+{# ('run_block.html'): a family at the top as a band, the families below it   #}
+{# indented, and a line on the left that holds them together. One table per   #}
+{# family, one row long ('run_overview_row.html' includes itself). The head   #}
+{# stands as far in as the bands, so its columns stand over theirs.           #}
+<div class="uebersicht">
+    <div class="spaltenkoepfe">
+        <table>
+            {% include "pdf/components/run_overview_columns.html" %}
+            <thead>
+                <tr>
+                    <th>{% translate "Warenfamilie" %}</th>
+                    {% for inventur in lauf.inventuren %}
+                    <th class="zahl leise haus">{{ inventur.haus.name }}</th>
+                    {% endfor %}
+                    <th class="zahl gesamt">{% translate "Differenz" %}</th>
+                    <th class="zahl leise">{% translate "Seite" %}</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+    {% for block in bloecke %}
+    {% include "pdf/components/run_overview_row.html" %}
+    {% endfor %}
+</div>

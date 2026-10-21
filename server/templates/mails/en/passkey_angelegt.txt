@@ -1,0 +1,7 @@
+New passkey for your account at {{ anwendung }}
+
+Hello {{ vorname }},
+
+Your account at {{ anwendung }} has a new passkey: “{{ passkey }}”.
+
+Wasn't that you? Then remove it under “Passkeys” in the account menu, change your password and let an administrator know.

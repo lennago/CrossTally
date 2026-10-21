@@ -1,0 +1,23 @@
+{% extends "components/form_page.html" %}
+{% load i18n %}
+
+{% block title %}{% blocktranslate with name=ort.name %}{{ name }} bearbeiten{% endblocktranslate %}{% endblock title %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'haus_list' %}">{% translate "Häuser" %}</a></li>
+<li class="breadcrumb-item">
+    <a href="{{ ort.haus.get_absolute_url }}">{{ ort.haus.name }}</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{{ ort.bereich.get_absolute_url }}">{{ ort.bereich.name }}</a>
+</li>
+{% endblock pfad %}
+
+{% block unterzeile %}
+<div class="text-body-secondary small">{{ ort.haus.name }}</div>
+{% endblock unterzeile %}
+
+{% block kopf_knoepfe %}
+<a href="{% url 'zaehlliste' ort.pk %}" class="btn btn-outline-secondary btn-sm">{% translate "Zählliste" %}</a>
+<a href="{% url 'ort_delete' ort.pk %}" class="btn btn-outline-danger btn-sm">{% translate "Löschen" %}</a>
+{% endblock kopf_knoepfe %}

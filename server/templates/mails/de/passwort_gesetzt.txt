@@ -1,0 +1,14 @@
+Dein Passwort bei {{ anwendung }} wurde geändert
+
+Hallo {{ vorname }},
+
+für dein Konto bei {{ anwendung }} wurde in der Verwaltung ein neues Passwort gesetzt. Damit bist du auf allen Geräten abgemeldet.
+
+{% if selbst %}
+Warst du das nicht? Dann setze über „Passwort vergessen?“ auf der Anmeldeseite ein neues Passwort und gib einem Administrator Bescheid.
+{% elif wer %}
+Gesetzt von {{ wer }}.
+Wenn du das nicht erwartet hast, sprich mit {{ wer }}.
+{% else %}
+Wenn du das nicht erwartet hast, sprich mit deiner Führungskraft.
+{% endif %}

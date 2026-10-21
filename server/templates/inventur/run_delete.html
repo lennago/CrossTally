@@ -1,0 +1,45 @@
+{% extends "components/delete_page.html" %}
+{% load i18n %}
+
+{# 'object' is the run here ('views.Lauf'): it has a name and address like a record. #}
+
+{% block title %}{% blocktranslate %}Offene Inventuren von {{ lauf }} löschen{% endblocktranslate %}{% endblock title %}
+
+{% block art %}{% translate "Offene Inventuren löschen" %}{% endblock art %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'inventur_list' %}">{% translate "Inventuren" %}</a></li>
+{% endblock pfad %}
+
+{% block frage %}
+{% if offene %}
+{% blocktranslate %}Sollen die offenen Inventuren von <strong>{{ lauf }}</strong> wirklich gelöscht werden?{% endblocktranslate %}
+{% else %}
+{% blocktranslate %}Im Lauf <strong>{{ lauf }}</strong> ist keine Inventur mehr offen.{% endblocktranslate %}
+{% endif %}
+{% endblock frage %}
+
+{% block folgen %}
+{% if offene %}
+<ul class="small">
+    {% for inventur in offene %}
+    <li>
+        <strong>{{ inventur.haus.name }}</strong>
+    {% blocktranslate with get_status_display=inventur.get_status_display anzahl_positionen=inventur.anzahl_positionen anzahl_gezaehlt=inventur.anzahl_gezaehlt %}({{ get_status_display }}): {{ anzahl_positionen }} Zählposition(en), davon {{ anzahl_gezaehlt }} bereits gezählt.{% endblocktranslate %}
+</li>
+    {% endfor %}
+</ul>
+<p class="small text-body-secondary mb-0">
+    {% translate "Sollbestände und Notizen gehen mit. Die Zähllisten der Orte und die Artikelstammdaten bleiben unberührt." %}
+    {% if offene|length < lauf.inventuren|length %}
+    {% translate "Abgeschlossene Inventuren des Laufs bleiben stehen, denn an ihnen hängen die eingefrorenen Ergebnisse." %}
+    {% endif %}
+</p>
+{% endif %}
+{% endblock folgen %}
+
+{% block knopf %}
+<button class="btn btn-danger" type="submit" {% if not offene %}disabled{% endif %}>
+    {% translate "Endgültig löschen" %}
+</button>
+{% endblock knopf %}

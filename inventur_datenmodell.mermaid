@@ -1,0 +1,404 @@
+erDiagram
+    %% Das Datenmodell, nach Themen geordnet. Die englische Fassung liegt daneben
+    %% in 'inventur_datenmodell.en.mermaid'. Wer hier etwas ändert, zieht sie nach.
+
+    %% Lesehilfe: ||--o{ heißt „eins zu viele“, }o--o{ „viele zu viele“,
+    %% |o--o{ „optional eins zu viele“. Kursive Einträge in den Kästen sind
+    %% Kommentare zum Feld, nicht sein Inhalt.
+
+    %% ===================== Häuser und Orte (organisation) =====================
+    HAUS ||--o{ BEREICH : "gliedert sich in"
+    BEREICH ||--o{ ORT : "enthält"
+    HAUS ||--o{ HAUSARTIKEL : "führt"
+    HAUS ||--o{ INVENTUR : "wird inventiert"
+
+    %% ===================== Konten (accounts) ===================================
+    BENUTZER }o--o{ HAUS : "ist zugeordnet"
+    BENUTZER }o--o{ INVENTUR : "zählt in (bis zum Abschluss)"
+    BENUTZER ||--o{ PASSKEY : "meldet sich an mit"
+    BENUTZER |o--o{ SITZUNG : "ist angemeldet in"
+    BENUTZER ||--o| ADRESSWECHSEL : "wartet auf die Bestätigung einer neuen Adresse"
+    BENUTZER |o--o{ ADRESSWECHSEL : "hat eingetragen (optional)"
+
+    %% ===================== Katalog: Waren und Einheiten (katalog) ==============
+    BASISEINHEIT ||--o{ WARE : "geführt in (Leiteinheit der Auswertung)"
+    BASISEINHEIT |o--o{ WARENFAMILIE : "Leiteinheit (erst mit der ersten Ware)"
+    WARENFAMILIE |o--o{ WARE : "fasst zusammen"
+    WARENFAMILIE |o--o{ WARE : "Familie vor „Nicht zählbar“ (für den Weg zurück)"
+    WARENFAMILIE |o--o{ WARENFAMILIE : "gliedert (Unterfamilien)"
+    WARE ||--o{ WAREUMRECHNUNG : "rechnet in fremde Dimensionen um"
+    WARE ||--o{ GEBINDE : "hat"
+    WARE }o--o{ BEHAELTER : "wird gewogen in"
+    HAUS }o--o{ BEHAELTER : "stellt allgemein zur Wahl"
+
+    %% ===================== Katalog: Artikel (katalog) ==========================
+    ARTIKEL ||--o| HAUSARTIKEL : "MTI"
+    ARTIKEL ||--o| REZEPTURARTIKEL : "MTI"
+    WARE ||--o{ HAUSARTIKEL : "bündelt über Häuser"
+    WARENGRUPPE ||--o{ HAUSARTIKEL : "kategorisiert"
+    HAUSARTIKEL |o--o{ HAUSARTIKEL : "zählt als (Dublette, nur eingestellt)"
+    BASISEINHEIT ||--o{ HAUSARTIKEL : "gezählt in (Einheit des Hauses)"
+    INVENTURART ||--o{ HAUSARTIKEL : "zählt (genau eine je Artikel)"
+    BASISEINHEIT ||--o{ REZEPTURARTIKEL : "gezählt in"
+    REZEPTURARTIKEL }o--o{ BEHAELTER : "wird gewogen in"
+    REZEPTURARTIKEL ||--o{ REZEPTURKOMPONENTE : "besteht aus"
+    WARE ||--o{ REZEPTURKOMPONENTE : "geht ein in"
+
+    %% ===================== Zählliste (katalog) =================================
+    ORT ||--o{ ERWARTUNG : "erwartet"
+    ARTIKEL ||--o{ ERWARTUNG : "wird erwartet"
+    ERWARTUNG ||--o{ ERWARTUNGGEBINDE : "Vorgaben (nur Hausartikel)"
+    GEBINDE ||--o{ ERWARTUNGGEBINDE : "vorbelegt"
+
+    %% ===================== Inventur: Soll und Zählung (inventur) ===============
+    INVENTUR ||--|{ INVENTUR_INVENTURART : "zählt (die Reiter der App)"
+    INVENTURART ||--o{ INVENTUR_INVENTURART : "wird gezählt in"
+    INVENTUR ||--o{ SOLLBESTAND : "importiert"
+    HAUSARTIKEL ||--o{ SOLLBESTAND : "hat Soll"
+    INVENTUR ||--o{ SOLLZEILE : "lässt offen (temporär)"
+    HAUSARTIKEL |o--o{ SOLLZEILE : "gemeint, wenn inaktiv oder eingestellt"
+    INVENTUR ||--o{ ZAEHLPOSITION : "sammelt (temporär)"
+    ORT ||--o{ ZAEHLPOSITION : "Fundort"
+    ARTIKEL ||--o{ ZAEHLPOSITION : "gezählt als"
+    GEBINDE |o--o{ ZAEHLPOSITION : "in Gebinde"
+    ZAEHLPOSITION ||--o{ WIEGUNG : "je Gefäß eine"
+    BEHAELTER ||--o{ WIEGUNG : "gewogen in"
+
+    %% ===================== Inventur: Prüfung und Abschluss (inventur) ==========
+    INVENTUR ||--o{ INVENTURNOTIZ : "notiert (temporär)"
+    HAUSARTIKEL ||--o{ INVENTURNOTIZ : "wird angemerkt"
+    INVENTUR ||--o{ INVENTURERGEBNIS : "friert ein"
+    HAUSARTIKEL ||--o{ INVENTURERGEBNIS : "ergibt"
+    BASISEINHEIT ||--o{ INVENTURERGEBNIS : "eingefroren in"
+    INVENTUR ||--o{ ARTENTSCHEIDUNG : "setzt beim Abschluss"
+    WARE ||--o{ ARTENTSCHEIDUNG : "alle Artikel in eine Art"
+    INVENTURART ||--o{ ARTENTSCHEIDUNG : "Ziel"
+
+    %% ===================== Häuser und Orte (organisation) =====================
+    HAUS {
+        int id PK
+        string name UK
+    }
+
+    BEREICH {
+        int id PK
+        int haus_id FK
+        string name "Theke, Lager, Kühlung. Je Haus eindeutig"
+    }
+
+    ORT {
+        int id PK
+        int bereich_id FK "das Haus kommt über den Bereich"
+        string name "je Bereich eindeutig"
+    }
+
+    ERSCHEINUNGSBILD {
+        int id PK
+        string name UK "Standard kommt mit und ist unveränderlich"
+        bool aktiv "genau eine Fassung gilt"
+        string anwendungsname
+        bytes logo "daraus entstehen die Icons"
+        string betreiber "Name, für Fuß und Datenschutz"
+        string betreiber_kontakt "Kontakt des Betreibers"
+        string datenschutz_kontakt "Kontakt für den Datenschutz"
+        string rueckmeldeadresse "Adresse für Rückmeldungen, leer heißt kein Eintrag im Kontomenü"
+        string hintergrund "Farbe hinter dem Motiv, nur für Android"
+        text datenschutztext "deutsch, mitgeliefert oder eigener"
+        text datenschutztext_en "englisch, mitgeliefert oder eigener"
+        text impressum "deutsch, leer heißt kein Impressum"
+        text impressum_en "englisch, leer zeigt das deutsche"
+        datetime geaendert_am
+    }
+
+    MAILTEXT {
+        int id PK
+        enum art UK "Einladung, Passwort vergessen, Konto geändert …"
+        string betreff "deutsch, leer heißt mitgeliefert"
+        text text "deutsch, leer heißt mitgeliefert"
+        string betreff_en "englisch, leer heißt mitgeliefert"
+        text text_en "englisch, leer heißt mitgeliefert"
+        bool nennt_namen "ob die Mail nennt, wer es ausgelöst hat"
+        datetime geaendert_am
+    }
+
+    %% ===================== Konten (accounts) ===================================
+    BENUTZER {
+        int id PK
+        string username UK
+        string first_name
+        string last_name
+        string email UK
+        bool is_staff "Führungskraft: Zugriff auf die Weboberfläche"
+        bool is_superuser "Administrator"
+        bool is_active
+        enum darstellung "auto | light | dark, gilt überall"
+        enum sprache "de | en, gilt überall"
+        enum differenzfarben "ob die Differenz farbig steht"
+    }
+
+    PASSKEY {
+        int id PK
+        int benutzer_id FK
+        string kennung UK "Credential-ID, wie der Browser sie schickt (base64url)"
+        bytes oeffentlicher_schluessel "COSE, die öffentliche Hälfte"
+        int signaturzaehler "steigt mit jeder Anmeldung, entlarvt Klone"
+        string name "für die Person: welches Gerät"
+        datetime erstellt_am
+        datetime zuletzt_benutzt "optional"
+    }
+
+    SITZUNG {
+        string session_key PK "der Schlüssel im Cookie"
+        text session_data "signierter Inhalt"
+        datetime expire_date "abgelaufene räumt cleanup"
+        int konto_id FK "optional, bei jedem Speichern aus dem Inhalt, ohne Constraint"
+    }
+
+    ADRESSWECHSEL {
+        int id PK "nur diese Nummer steht signiert im Link"
+        int konto_id FK, UK "eine wartet je Konto, eine neuere ersetzt sie"
+        string neu "gilt erst, wenn jemand den Link bestätigt"
+        string alt "der Link gilt nur, solange das Konto sie trägt"
+        int von_id FK "optional, wer sie eingetragen hat, wenn nicht die Person"
+        bool fremd "jemand anderes, auch wenn sein Konto inzwischen fehlt"
+        datetime erstellt_am "nach der Frist des Links geräumt (cleanup)"
+    }
+
+    PASSWORTANFRAGE {
+        int id PK
+        string email "kleingeschrieben, je Stunde gezählt"
+        string ip_address "optional"
+        datetime zeitpunkt "nach 30 Tagen geräumt (cleanup)"
+    }
+
+    ANMELDEVERSUCH {
+        int id PK
+        string username "wie eingegeben, optional"
+        string ip_address "optional"
+        string session_key "seit 10/2026 immer leer, der Schlüssel wäre die Anmeldung"
+        text user_agent "Browserkennung, optional"
+        datetime timestamp "nach 30 Tagen geräumt (cleanup)"
+        text path "aufgerufene Adresse unter /admin/"
+    }
+
+    %% ===================== Katalog: Waren und Einheiten (katalog) ==============
+    BASISEINHEIT {
+        int id PK
+        string name UK "Stück(e), g, kg, Milliliter, Liter, Portion"
+        enum kennung UK "STUECK | GRAMM | KILOGRAMM | MILLILITER | LITER | PORTION"
+        int nachkommastellen "0 bei Stück, g, ml, Portion. 3 bei kg, Liter"
+        enum dimension "STUECK | MASSE | VOLUMEN | PORTION (nur Leiteinheit einer Familie)"
+        decimal faktor_zur_referenz "g = 1, kg = 1000, ml = 1, Liter = 1000"
+    }
+
+    WARENGRUPPE {
+        int id PK
+        string name UK "kein aktiv: abgeleitet aus den Hausartikeln"
+    }
+
+    WARE {
+        int id PK
+        string name UK "kanonischer Name über alle Häuser"
+        int basiseinheit_id FK
+        int warenfamilie_id FK "optional, gliedert die Auswertungen"
+        int familie_vorher_id FK "optional, die Familie vor „Nicht zählbar“: der Weg zurück stellt sie her"
+        bool abwiegbar "kommt lose auf die Waage"
+    }
+
+    INVENTURART {
+        int id PK
+        string name UK "Monats-, Jahres-, Becherinventur, mindestens eine gibt es immer"
+        int reihenfolge "der Reiter in der App und im Namen der Inventur"
+    }
+
+    WAREUMRECHNUNG {
+        int id PK
+        int ware_id FK
+        enum dimension "je fremder Dimension höchstens eine"
+        decimal referenzmenge_je_einheit "was eine Einheit dort wiegt, misst oder zählt"
+    }
+
+    WARENFAMILIE {
+        int id PK
+        string name UK "etwa alle Limonaden oder alle Eissorten"
+        text beschreibung
+        int leiteinheit_id FK "leer, solange keine Ware zugeordnet ist"
+        int uebergeordnet_id FK "optional, die Familie darüber summiert mit"
+        bool sammelt_ignorierte "genau ein Satz: Nicht zählbar"
+    }
+
+    GEBINDE {
+        int id PK
+        int ware_id FK
+        string name "Einzeln, Kasten, Karton, Tüte"
+        bool ist_einzeln "die lose Einheit, je Ware höchstens eine"
+        decimal faktor_in_basiseinheit "Kasten = 20. Je Ware jede Menge nur einmal"
+        int sortierung "je Ware eindeutig, automatisch vergeben"
+        bool aktiv
+    }
+
+    BEHAELTER {
+        int id PK
+        string name UK
+        decimal tara "Leergewicht in Gramm"
+        bool immer_erlaubt "genau ein Satz: ohne Behälter"
+    }
+
+    %% ===================== Katalog: Artikel (katalog) ==========================
+    ARTIKEL {
+        int id PK
+        string name
+        datetime erstellt_am
+        datetime geaendert_am
+    }
+
+    HAUSARTIKEL {
+        int artikel_ptr_id PK "= ARTIKEL.id"
+        int haus_id FK
+        int ware_id FK "Pflicht, stellt die Identität her"
+        int warengruppe_id FK "je Haus"
+        int basiseinheit_id FK "Einheit des Hauses, meist die der Ware"
+        decimal faktor_zur_ware "nur bei fremder Dimension"
+        enum quelle "winticket | eigen"
+        string artikelnummer "Schema je Quelle, leer bei eigen. Je Haus eindeutig, wenn gesetzt"
+        string ean "optional"
+        enum status "AKTIV | INAKTIV | EINGESTELLT | IGNORIERT"
+        bool aktiv "erzeugt: status = AKTIV"
+        datetime gueltig_bis "gesetzt, sobald nicht mehr AKTIV"
+        int zaehlt_als_id FK "optional, nur EINGESTELLT: sein Soll kommt dort dazu"
+        enum status_vorher "leer, oder der Status vor „Nicht zählbar“: der Weg zurück stellt ihn her"
+        json erwartungen_vorher "die Plätze vor Einstellen oder „Nicht zählbar“: der Weg zurück stellt sie her"
+        int inventurart_id FK "Pflicht, je Artikel, an der Ware für alle setzbar"
+    }
+
+    REZEPTURARTIKEL {
+        int artikel_ptr_id PK "= ARTIKEL.id"
+        int basiseinheit_id FK "nur Stück(e) oder g"
+        bool anteilig "Rezeptur als Gewichtsanteile in Prozent, nur bei g"
+    }
+
+    REZEPTURKOMPONENTE {
+        int id PK
+        int rezepturartikel_id FK
+        int ware_id FK "hausunabhängig"
+        decimal menge_in_basiseinheit "je 1 Einheit des Rezepturartikels, bei anteilig Prozent"
+    }
+
+    %% ===================== Zählliste (katalog) =================================
+    ERWARTUNG {
+        int id PK
+        int ort_id FK
+        int artikel_id FK
+        int sortierung "Reihenfolge in der Zählliste, je Ort eindeutig"
+        bool wiegen_erwartet "ob die Ware an diesem Ort auf die Waage kommt"
+    }
+
+    ERWARTUNGGEBINDE {
+        int id PK
+        int erwartung_id FK
+        int gebinde_id FK
+        decimal standard_menge "Auffüllbestand als Vorschlag, optional"
+    }
+
+    %% ===================== Inventur: Soll und Zählung (inventur) ===============
+    INVENTUR {
+        int id PK
+        int haus_id FK
+        date stichtag "je Haus und Tag eine Inventur, der Stichtag ist der Lauf"
+        enum status "VORBEREITUNG | ZAEHLUNG | ABGESCHLOSSEN"
+        datetime erstellt_am
+        datetime abgeschlossen_am "gesetzt, sobald abgeschlossen"
+        bool differenz_von_hand "ohne Sollbestand: Differenz je Artikel eingetragen"
+        bool gesperrt "Zählung gesperrt: in der App nur die Prüfliste"
+    }
+
+    SOLLBESTAND {
+        int id PK
+        int inventur_id FK
+        int hausartikel_id FK
+        decimal menge_basiseinheit "in der Einheit des Hauses"
+        enum herkunft "DATEI | HAND"
+        string name_in_datei "weicht sie ab, ist die Nummer womöglich neu belegt"
+    }
+
+    SOLLZEILE {
+        int id PK
+        int inventur_id FK
+        string artikelnummer "je Inventur eindeutig"
+        string name "Bezeichnung laut Datei"
+        decimal menge_basiseinheit
+        enum grund "UNBEKANNT | INAKTIV | EINGESTELLT"
+        int hausartikel_id FK "der gemeinte Satz, sonst leer"
+    }
+
+    ZAEHLPOSITION {
+        int id PK
+        int inventur_id FK
+        int ort_id FK
+        int artikel_id FK
+        int gebinde_id FK "leer beim Wiegen und bei Rezepturartikeln"
+        decimal eingabemenge "Anzahl. Beim Wiegen leer, die Menge steht in WIEGUNG"
+        int sortierung "Stellung in der Zählliste, Kopie aus der Erwartung"
+        datetime gezaehlt_am
+        datetime zuletzt_geaendert "die App holt nur Neueres"
+        bool unerwartet "beim Zählen dazugekommen"
+        bool aktiv "entfernt = False, bleibt stehen für die App"
+    }
+
+    WIEGUNG {
+        int id PK
+        int zaehlposition_id FK
+        decimal brutto_gramm "was die Waage anzeigt, samt Gefäß"
+        int behaelter_id FK "die Tara gilt für diese Wiegung"
+        datetime erfasst_am
+        uuid kennung UK "vergibt das Gerät, erkennt Doppelte nach einem Funkloch"
+    }
+
+    %% ===================== Inventur: Prüfung und Abschluss (inventur) ==========
+    INVENTURNOTIZ {
+        int id PK
+        int inventur_id FK
+        int hausartikel_id FK
+        text text "beim Prüfen erfasst"
+        bool soll_statt_ist "beim Abschluss zählt der Sollbestand"
+        decimal differenz "von Hand, in der Einheit des Hauses"
+        datetime geaendert_am
+    }
+
+    INVENTURERGEBNIS {
+        int id PK
+        int inventur_id FK
+        int hausartikel_id FK "historisch stabil, auch bei Neubelegung"
+        decimal gesamtmenge_basiseinheit "Ist"
+        decimal sollbestand "Kopie zum Abschluss"
+        decimal differenz "Ist minus Soll"
+        text notiz "Kopie der INVENTURNOTIZ zum Abschluss"
+        datetime eingefroren_am
+        int einheit_id FK "Einheit des Hauses beim Abschluss, darin die Zahlen"
+        decimal faktor_zur_ware "nur bei fremder Dimension, folgt der Ware"
+    }
+
+    INVENTUR_INVENTURART {
+        int id PK
+        int inventur_id FK
+        int inventurart_id FK "je Inventur jede Art einmal"
+    }
+
+    ARTENTSCHEIDUNG {
+        int id PK
+        int inventur_id FK "wer beim Abschluss entschied"
+        int ware_id FK "je Inventur und Ware eine"
+        int inventurart_id FK "sperrt die Gegenantwort für die ganze Ware im selben Lauf"
+    }
+
+    %% ===================== Schnittstelle der Zähl-App (api) ====================
+    PASSKEYFRAGE {
+        string pruefsumme PK "SHA-256 der Frage, die Frage selbst reist signiert"
+        datetime gefragt_am "nach zwei Minuten öffnet sie nichts, die nächste Frage räumt sie"
+    }
+
+    %% ===================== Demo (demo) =========================================
+    DEMOKENNZEICHEN {
+        int id PK
+        datetime aufgebaut_am "existiert nur, solange der Bestand aus manage.py demo stammt"
+    }

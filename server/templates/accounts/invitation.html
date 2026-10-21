@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{# The link from the invitation mail. Like the page for a forgotten password,  #}
+{# only that the account is switched on with the password ('EinladungView').   #}
+
+{% block title %}{% translate "Passwort setzen" %}{% endblock title %}
+
+{% block content %}
+<div class="container py-5 max-breite-30">
+
+    <div class="card">
+        <div class="card-body p-4">
+
+            {% if validlink %}
+            <h1 class="h4 mb-2">{% translate "Willkommen" %}</h1>
+            <p class="text-body-secondary small mb-3">
+                {% blocktranslate with username=form.user.username %}Dein Benutzername ist <strong>{{ username }}</strong>. Gib zweimal das Passwort ein, mit dem du dich künftig anmeldest. Damit ist dein Konto freigeschaltet.{% endblocktranslate %}
+            </p>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button class="btn btn-success w-100 mt-2" type="submit">{% translate "Passwort setzen" %}</button>
+            </form>
+            {% else %}
+            <h1 class="h4 mb-2">{% translate "Link ungültig" %}</h1>
+            <p class="mb-3">
+                {% translate "Dieser Einladungslink ist abgelaufen oder wurde schon benutzt. Eine Führungskraft kann dir eine neue Einladung schicken." %}
+            </p>
+            <a href="{% url 'login' %}" class="btn btn-outline-secondary">{% translate "Zur Anmeldung" %}</a>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

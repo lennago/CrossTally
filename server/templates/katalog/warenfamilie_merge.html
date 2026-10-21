@@ -1,0 +1,77 @@
+{% extends "components/merge_page.html" %}
+{% load i18n %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'warenfamilie_list' %}">{% translate "Warenfamilien" %}</a></li>
+{% endblock pfad %}
+
+{% block ueberschrift %}{% blocktranslate with name=familie.anzeigename %}Eine Familie in {{ name }} aufgehen lassen{% endblocktranslate %}{% endblock ueberschrift %}
+
+{% block einleitung %}
+{% blocktranslate with name=familie.anzeigename %}{{ name }} bleibt, die gewählte Familie verschwindet, und ihre Waren kommen hierher.{% endblocktranslate %}
+{% endblock einleitung %}
+
+{% block wahl_leer %}{% translate "Familie wählen" %}{% endblock wahl_leer %}
+
+{% block keine_weitere %}{% translate "Es gibt keine weitere Familie." %}{% endblock keine_weitere %}
+
+{% block bleibt_anzahl %}{% blocktranslate with anzahl=bleibende|length %}{{ anzahl }} Waren{% endblocktranslate %}{% endblock bleibt_anzahl %}
+
+{% block bleibt_liste %}
+{% for ware in bleibende %}
+<li class="list-group-item small d-flex justify-content-between gap-2">
+    <span>{{ ware.name }}</span>
+    <span class="text-body-secondary">{{ ware.basiseinheit.kurz }}</span>
+</li>
+{% empty %}
+<li class="list-group-item small text-body-secondary">
+    {% blocktranslate with name=quelle.name %}Bisher leer. Leiteinheit und Faktoren kommen dann von {{ name }}.{% endblocktranslate %}
+</li>
+{% endfor %}
+{% endblock bleibt_liste %}
+
+{% block kommt_anzahl %}{% blocktranslate with anzahl=dazu|length %}{{ anzahl }} Waren{% endblocktranslate %}{% endblock kommt_anzahl %}
+
+{% block kommt_liste %}
+{% for ware in dazu %}
+<li class="list-group-item small d-flex justify-content-between gap-2">
+    <span>{{ ware.name }}</span>
+    <span class="text-body-secondary">{{ ware.basiseinheit.kurz }}</span>
+</li>
+{% empty %}
+<li class="list-group-item small text-body-secondary">
+    {% translate "Dort liegt keine Ware. Es verschwindet nur die Familie." %}
+</li>
+{% endfor %}
+{% endblock kommt_liste %}
+
+{% block zusatz %}
+{% if form.faktorfelder %}
+<div class="card card-body mb-3">
+    <h3 class="h6">{% translate "Fehlende Umrechnung" %}</h3>
+    <p class="text-body-secondary small">
+    {% blocktranslate with name=familie.anzeigename %}{{ name }} summiert in{% endblocktranslate %}
+<strong>{{ familie.leiteinheit.kurz }}</strong>
+    {% translate ". Diese dazukommenden Waren führen noch keine Umrechnung dorthin oder in die Einheit einer Familie darüber. Der Faktor wird an der Ware gespeichert." %}
+</p>
+    <div class="row g-3">
+        {% for feld in form.faktorfelder %}
+        <div class="col-md-4">
+            <label class="form-label" for="{{ feld.id_for_label }}">{{ feld.label }}</label>
+            <input type="text" inputmode="decimal" name="{{ feld.html_name }}"
+                id="{{ feld.id_for_label }}"
+                class="form-control{% if zeige_fehler and feld.errors %} is-invalid{% endif %}"
+                value="{% if feld.value is not None %}{{ feld.value }}{% endif %}">
+            {% if zeige_fehler %}
+            {% for fehler in feld.errors %}
+            <div class="invalid-feedback d-block">{{ fehler }}</div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock zusatz %}
+
+{% block unwiderruflich %}{% translate "Die Familie lässt sich danach nicht wiederherstellen." %}{% endblock unwiderruflich %}

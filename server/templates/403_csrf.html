@@ -1,0 +1,13 @@
+{% extends "components/error_page.html" %}
+{% load i18n %}
+
+{# Django finds this name itself when the CSRF check fails: a form that was  #}
+{# open for hours, a second window, cookies that were cleared in between.    #}
+{# Until 10/2026 this was Django's English "CSRF verification failed", also   #}
+{# for a German account.                                                      #}
+
+{% block title %}{% translate "Formular abgelaufen" %}{% endblock title %}
+
+{% block fehlercode %}{% translate "Fehler 403" %}{% endblock fehlercode %}
+{% block ueberschrift %}{% translate "Das Formular ist abgelaufen" %}{% endblock ueberschrift %}
+{% block erklaerung %}{% translate "Die Seite war zu lange offen, oder sie wurde aus einem anderen Fenster abgeschickt. Bitte zurückgehen, die Seite neu laden und noch einmal abschicken. Eingaben, die noch im Formular stehen, bleiben dabei erhalten." %}{% endblock erklaerung %}

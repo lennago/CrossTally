@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{# What a manager sees here. The admin's login form would be an imposition    #}
+{# here: it would never accept their account without ever saying why.         #}
+
+{% block title %}{% translate "Administratorkonto nötig" %}{% endblock title %}
+
+{% block content %}
+<div class="container py-5 max-breite-36">
+
+    <div class="card">
+        <div class="card-body p-4">
+
+            <h2 class="h4 mb-3">{% translate "Dafür braucht es ein Administratorkonto" %}</h2>
+
+            <p>
+    {% blocktranslate with first_name=user.first_name %}Hallo {{ first_name }}, die Verwaltung ist Administratoren vorbehalten. Dort steht, was die Seite selbst nicht kann: abgeschlossene Inventuren löschen und ihre Rohdaten ansehen, Administratoren ernennen, Passwörter setzen, Passkeys entziehen, Sperren nach Fehlversuchen aufheben, Name, Logo, Impressum, Datenschutztext und die Texte der Mails pflegen, und die Backups.{% endblocktranslate %}
+</p>
+
+            <p class="mb-4">
+                {% translate "Alles Übrige (Inventuren, Artikel, Häuser, Benutzer) machst du hier auf der Seite. Wenn du etwas aus der Verwaltung brauchst, wende dich an einen Administrator." %}
+            </p>
+
+            <a href="{% url 'inventur_list' %}" class="btn btn-success">{% translate "Zu den Inventuren" %}</a>
+
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

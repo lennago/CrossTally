@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{# The information under Art. 13 GDPR for the own people. It stands on a       #}
+{# page of its own and not in the help sidebar, because it concerns            #}
+{# precisely the counters. Those otherwise see only the lockout page of the    #}
+{# web interface, and the sidebar exists only for managers.                    #}
+
+{% block title %}{% translate "Datenschutz" %}{% endblock title %}
+
+{% block content %}
+<div class="container py-4 max-breite-46">
+
+    {# As everywhere: the title stays put when scrolling. The page is long.    #}
+    <div class="kopfleiste bg-body py-2 mb-3">
+        <h1 class="h3 mb-0">{% translate "Datenschutz" %}</h1>
+    </div>
+
+    {# Who is responsible comes from the fields on the appearance, as in the  #}
+    {# footer. The text below likewise from there, set from five rules        #}
+    {# ('textformat.py'), never as HTML.                                      #}
+    <h2 class="h5 mt-4">{% translate "Wer verantwortlich ist" %}</h2>
+    {% if betreiber %}
+    <p class="mb-0">{{ betreiber }}</p>
+    {% if betreiber_kontakt %}
+    <p>{{ betreiber_kontakt }}</p>
+    {% endif %}
+    {% else %}
+    <p>
+        {% translate "Verantwortlich ist der Betrieb, der diese Anwendung einsetzt. Wer das genau ist, sagt dir deine Führungskraft." %}
+    </p>
+    {% endif %}
+
+    {{ datenschutztext }}
+
+    {% if datenschutz_kontakt %}
+    <p>
+    {% blocktranslate %}Wende dich dafür an: {{ datenschutz_kontakt }}{% endblocktranslate %}
+</p>
+    {% else %}
+    <p>{% translate "Wende dich dafür an deine Führungskraft oder an die Leitung des Betriebs." %}</p>
+    {% endif %}
+
+</div>
+{% endblock content %}

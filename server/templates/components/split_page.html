@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load i18n %}
+{# Skeleton for "Split": a location, a product family or a product becomes         #}
+{# two.                                                                            #}
+{#                                                                                 #}
+{# On the left what stays, on the right what moves into the new record. A          #}
+{# click pushes a row over ('split.js'). The form carries 'name',                  #}
+{# 'neuer_name' and the checkboxes 'wandern'. 'satz' is what is being split.       #}
+{#                                                                                 #}
+{#   pfad:         breadcrumbs before the record itself                            #}
+{#   einleitung:   one or two sentences. The details are in the help               #}
+{#   zeile:        content of a row. 'eintrag' is the record behind the            #}
+{#                 checkbox (an expectation, a product, a house article)           #}
+{#   leer:         if there is nothing to distribute                               #}
+{#   neu_titel:    header of the right column ("New location")                     #}
+{#   einheit:      what is counted, for "12 articles" above the columns            #}
+
+{% block title %}{% blocktranslate with name=satz.anzeigename %}{{ name }} aufteilen{% endblocktranslate %}{% endblock title %}
+
+{# Both name fields look the same. Rendered by hand because they stand in      #}
+{# the header of their column and crispy would bring its own skeleton there.   #}
+{% partialdef namensfeld %}
+<label class="form-label" for="{{ feld.id_for_label }}">{{ feld.label }}</label>
+<input type="text" name="{{ feld.html_name }}" id="{{ feld.id_for_label }}" maxlength="{{ feld.field.max_length }}" required
+    class="form-control mb-1{% if feld.errors %} is-invalid{% endif %}"
+    value="{{ feld.value|default_if_none:'' }}">
+{% for fehler in feld.errors %}
+<div class="invalid-feedback d-block">{{ fehler }}</div>
+{% endfor %}
+{% endpartialdef %}
+
+{% block content %}
+<div class="container py-4 seite-breit">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            {% block pfad %}{% endblock pfad %}
+            <li class="breadcrumb-item">
+                <a href="{{ satz.get_absolute_url }}">{{ satz.anzeigename }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{% translate "Aufteilen" %}</li>
+        </ol>
+    </nav>
+
+    <div class="kopfleiste bg-body py-2 mb-1">
+        <h1 class="h3 mb-0">
+    {% blocktranslate with name=satz.name %}{{ name }} aufteilen{% endblocktranslate %}
+</h1>
+    </div>
+    <p class="text-body-secondary small mb-3">{% block einleitung %}{% endblock einleitung %}</p>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% for fehler in form.non_field_errors %}
+        <div class="alert alert-danger">{{ fehler }}</div>
+        {% endfor %}
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-body-tertiary d-flex justify-content-between">
+                        <span>{% translate "Bleibt" %}</span>
+                        <span class="text-body-secondary small" data-anzahl="bleibt"></span>
+                    </div>
+                    <div class="card-body">
+                        {% with feld=form.name %}{% partial namensfeld %}{% endwith %}
+
+                        <div class="overflow-auto border rounded mt-3 liste-hoch" data-ortsliste="bleibt">
+                            {% for kaestchen in form.wandern %}
+                            {% with eintrag=kaestchen.data.value.instance %}
+                            <label class="wahlzeile" data-reihe="{{ forloop.counter0 }}">
+                                {{ kaestchen.tag }}
+                                <span>{% block zeile %}{{ eintrag }}{% endblock zeile %}</span>
+                            </label>
+                            {% endwith %}
+                            {% empty %}
+                            <p class="text-body-secondary small m-2">{% block leer %}{% endblock leer %}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-body-tertiary d-flex justify-content-between">
+                        <span>{% block neu_titel %}{% translate "Neu" %}{% endblock neu_titel %}</span>
+                        <span class="text-body-secondary small" data-anzahl="geht"></span>
+                    </div>
+                    <div class="card-body">
+                        {% with feld=form.neuer_name %}{% partial namensfeld %}{% endwith %}
+
+                        <div class="overflow-auto border rounded mt-3 liste-hoch" data-ortsliste="geht"></div>
+                        <p class="text-body-secondary small mt-2 mb-0" data-leer="geht">
+                            {% translate "Noch nichts hierher geschoben." %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fussleiste d-flex flex-wrap gap-2 bg-body border-top py-3">
+            <button class="btn btn-success" type="submit">{% translate "Aufteilen" %}</button>
+            <a href="{{ satz.get_absolute_url }}" class="btn btn-outline-secondary">{% translate "Abbrechen" %}</a>
+        </div>
+    </form>
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% translate "Artikel" as standardeinheit %}
+{% include "components/script.html" with name="split" wert=einheit|default:standardeinheit %}
+{% endblock extra_scripts %}

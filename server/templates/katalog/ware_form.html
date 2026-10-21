@@ -1,0 +1,43 @@
+{% extends "components/form_page.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if object %}{% blocktranslate with name=object.name %}{{ name }} bearbeiten{% endblocktranslate %}{% else %}{% translate "Neue Ware" %}{% endif %}{% endblock title %}
+{% block breite %}max-breite-52{% endblock breite %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'ware_list' %}">{% translate "Waren" context "Liste aller Waren" %}</a></li>
+{% endblock pfad %}
+
+{% block neu %}{% translate "Neue Ware" %}{% endblock neu %}
+
+{% block kopf_knoepfe %}
+{% if object %}
+<a href="{% url 'ware_delete' object.pk %}" class="btn btn-outline-danger btn-sm">{% translate "Löschen" %}</a>
+{% endif %}
+{% endblock kopf_knoepfe %}
+
+{% block felder %}
+<div class="card mb-3">
+    <div class="card-header bg-body-tertiary">{% translate "Stammdaten" %}</div>
+    <div class="card-body">
+        {{ form|crispy }}
+    </div>
+</div>
+
+{# 'id': "change" on the pack list of the detail pages leads straight here. #}
+<div class="card mb-3 sprungziel" id="gebinde">
+    <div class="card-header bg-body-tertiary">{% translate "Gebinde" %}</div>
+    <div class="card-body">
+        {% translate "Weiteres Gebinde" as weiteres_gebinde %}
+        {% include "components/formset_rows.html" with formset=formsets.gebinde knopf=weiteres_gebinde %}
+    </div>
+</div>
+{% endblock felder %}
+
+{% block abbrechen_url %}{% if object %}{{ object.get_absolute_url }}{% else %}{% url 'ware_list' %}{% endif %}{% endblock abbrechen_url %}
+
+{% block extra_scripts %}
+{% include "components/ware_form_script.html" %}
+{% include "components/script.html" with name="formset" %}
+{% endblock extra_scripts %}

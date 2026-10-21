@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load i18n %}
+{# The keys of the signed-in account. Counters get here too: the page lies     #}
+{# under '/accounts/', like changing the password. Without the bar they come   #}
+{# from the block page.                                                        #}
+
+{% block title %}{% translate "Passkeys" %}{% endblock title %}
+
+{% block content %}
+<div class="container py-4 max-breite-36">
+
+    {% if user.is_staff %}
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">{{ user.username }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{% translate "Passkeys" %}</li>
+        </ol>
+    </nav>
+    {% endif %}
+
+    <div class="kopfleiste bg-body py-2 d-flex flex-wrap gap-2 justify-content-between align-items-start mb-3">
+        <div>
+            <h1 class="h3 mb-1">{% translate "Passkeys" %}</h1>
+            <div class="text-body-secondary small">
+                {% translate "Anmelden ohne Passwort, mit Gesicht, Finger oder PIN des Geräts." %}
+            </div>
+        </div>
+    </div>
+
+    {# Without a password one of the own keys confirms, before a new key as before    #}
+    {# removing one ('fehlender_beweis'). Once above both cards: it holds two minutes #}
+    {# for every step. The script shows the block where the browser can.              #}
+    {% if not user.has_usable_password and passkeys %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <div data-passkey hidden>
+                {% include "components/passkey_confirm.html" %}
+                <div class="alert alert-danger small mb-0" role="alert" data-passkey-meldung hidden></div>
+            </div>
+            <p class="text-body-secondary small mb-0" data-passkey-ohne>
+                {% translate "Dafür braucht es einen Browser mit Passkeys und eine sichere Verbindung (HTTPS)." %}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card mb-3">
+        <div class="card-header bg-body-tertiary">{% translate "Deine Passkeys" %}</div>
+        <ul class="list-group list-group-flush">
+            {% for passkey in passkeys %}
+            <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div>
+                    <strong>{{ passkey.name }}</strong>
+                    <div class="text-body-secondary small">
+                        {% blocktranslate with datum=passkey.erstellt_am|date:"SHORT_DATE_FORMAT" %}angelegt am {{ datum }}{% endblocktranslate %}
+                        {% if passkey.zuletzt_benutzt %}
+                        · {% blocktranslate with datum=passkey.zuletzt_benutzt|date:"SHORT_DATETIME_FORMAT" %}zuletzt benutzt {{ datum }}{% endblocktranslate %}
+                        {% else %}
+                        · {% translate "noch nie benutzt" %}
+                        {% endif %}
+                    </div>
+                </div>
+                {# Removing asks what a new key asks ('PasskeyLoeschenView'): the password     #}
+                {# with the step, or without one the confirmation above. Not the field of a    #}
+                {# new key, which 'passkey.js' reads. A refusal comes back to this key's form. #}
+                <form method="post" action="{% url 'passkey_delete' passkey.pk %}" novalidate
+                    class="d-flex flex-wrap align-items-start gap-2">
+                    {% csrf_token %}
+                    {% if user.has_usable_password %}
+                    <div>
+                        <label class="visually-hidden" for="passkey-entfernen-{{ passkey.pk }}">{% translate "Dein Passwort" %}</label>
+                        <input type="password" name="passwort" id="passkey-entfernen-{{ passkey.pk }}"
+                            class="form-control form-control-sm breite-12{% if abgelehnt == passkey.pk %} is-invalid{% endif %}"
+                            autocomplete="current-password" placeholder="{% translate 'Dein Passwort' %}"
+                            {% if abgelehnt == passkey.pk %}aria-invalid="true" aria-describedby="passkey-entfernen-{{ passkey.pk }}-absage" autofocus{% endif %}>
+                        {% if abgelehnt == passkey.pk %}
+                        <div class="invalid-feedback" id="passkey-entfernen-{{ passkey.pk }}-absage">{{ absage }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {# Without a password the last key is the only way in, and a new one #}
+                    {# needs it for the confirmation ('PasskeyBestaetigenView').          #}
+                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                        data-rueckfrage="{% if not user.has_usable_password and passkeys|length == 1 %}{% translate 'Das ist dein letzter Passkey, und dein Konto hat kein Passwort. Danach kannst du dich nicht mehr anmelden, bis ein Administrator dir ein Passwort setzt. Trotzdem entfernen?' %}{% else %}{% translate 'Diesen Passkey entfernen? Das Gerät kann sich damit nicht mehr anmelden.' %}{% endif %}">
+                        {% translate "Entfernen" %}
+                    </button>
+                    {% if abgelehnt == passkey.pk and not user.has_usable_password %}
+                    <div class="text-danger small w-100" role="alert">{{ absage }}</div>
+                    {% endif %}
+                </form>
+            </li>
+            {% empty %}
+            <li class="list-group-item text-body-secondary">
+                {% if user.has_usable_password %}
+                {% translate "Noch kein Passkey. Mit dem Passwort geht es weiter wie bisher." %}
+                {% else %}
+                {% translate "Dein Konto hat keinen Passkey, mit dem du bestätigen könntest. Ein Administrator kann dir ein Passwort setzen." %}
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% if passkeys and user.has_usable_password %}
+        <div class="card-footer bg-body text-body-secondary small">
+            {% translate "Entfernen fragt nach deinem Passwort, damit niemand deine Passkeys entfernt, der nur dein Gerät hat." %}
+        </div>
+        {% endif %}
+    </div>
+
+    {# Without a password and without a key nothing confirms a new one. The list says who helps. #}
+    {% if user.has_usable_password or passkeys %}
+    <div class="card">
+        <div class="card-header bg-body-tertiary">{% translate "Neuen Passkey anlegen" %}</div>
+        <div class="card-body">
+            <p class="text-body-secondary small">
+                {% translate "Der Passkey entsteht auf diesem Gerät und bleibt dort, bei Apple und Google auch auf den anderen Geräten desselben Kontos. Ein Name hilft, die Geräte auseinanderzuhalten." %}
+            </p>
+            {# The script shows the block where the browser can ('passkey.js'). #}
+            {# Without it the note below stays.                                 #}
+            <div data-passkey hidden>
+                <div class="mb-3">
+                    <label class="form-label" for="passkey-name">{% translate "Name" %}</label>
+                    <input type="text" class="form-control max-breite-30" id="passkey-name" maxlength="100"
+                        placeholder="{% translate 'z. B. Handy, Laptop im Büro' %}" data-passkey-name>
+                </div>
+                {# Asked before the device's dialog ('PasskeyAnlegenOptionenView'). An     #}
+                {# account without a usable password confirms above, with one of its keys. #}
+                {% if user.has_usable_password %}
+                <div class="mb-3">
+                    <label class="form-label" for="passkey-passwort">{% translate "Dein Passwort" %}</label>
+                    <input type="password" class="form-control max-breite-30" id="passkey-passwort"
+                        autocomplete="current-password" aria-describedby="passkey-passwort-hilfe" data-passkey-passwort>
+                    <div class="form-text" id="passkey-passwort-hilfe">
+                        {% translate "Zur Sicherheit, damit niemand einen Passkey anlegt, der nur dein Gerät hat." %}
+                    </div>
+                </div>
+                {% else %}
+                <p class="small">{% translate "Bestätige dafür zuerst oben mit einem deiner Passkeys." %}</p>
+                {% endif %}
+                <button type="button" class="btn btn-success" data-passkey-anlegen
+                    data-passkey-optionen="add/options/" data-passkey-ziel="add/">
+                    {% translate "Passkey anlegen" %}
+                </button>
+                <div class="alert alert-danger small mt-3 mb-0" role="alert" data-passkey-meldung hidden></div>
+            </div>
+            <p class="text-body-secondary small mb-0" data-passkey-ohne>
+                {% translate "Dafür braucht es einen Browser mit Passkeys und eine sichere Verbindung (HTTPS)." %}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% include "components/passkey_script.html" %}
+{% endblock extra_scripts %}

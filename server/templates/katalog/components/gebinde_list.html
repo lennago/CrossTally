@@ -1,0 +1,87 @@
+{% load i18n %}
+{# The packs of a product in their order, to drag, to move and to switch off. #}
+{#                                                                            #}
+{#   {% include "katalog/components/gebinde_list.html" with ware=ware %}      #}
+{#                                                                            #}
+{# Stands on the product's page and on that of every house article: whoever   #}
+{# maintains a house sees there in which order its packs come when counting.  #}
+{# The order belongs to the product nonetheless. 'vom_hausartikel' makes the  #}
+{# note say that it applies in every house.                                   #}
+{#                                                                            #}
+{# Arrows and the inactive button send in the background and get the list     #}
+{# back ('instant_actions.js'). 'weiter' leads back to the page the list      #}
+{# stands on, otherwise the answer would be the product's page.               #}
+<div data-liste>
+<form method="post" action="{% url 'gebinde_sortieren' ware.pk %}" data-sofort>
+    {% csrf_token %}
+    <input type="hidden" name="weiter" value="{{ request.get_full_path }}">
+    {# 'reihenfolge' rides along per row as a hidden field: after        #}
+    {# dragging, the row order is in the DOM and thus in the order       #}
+    {# of the submitted values.                                          #}
+    <ul class="list-group list-group-flush" data-sortierbar>
+        {% for gebinde in ware.gebinde.all %}
+        <li class="list-group-item d-flex align-items-center gap-2
+            {% if not gebinde.aktiv %}ausgegraut{% endif %}">
+            <span class="text-body-secondary greifbar" data-griff aria-hidden="true">&#8942;&#8942;</span>
+            <input type="hidden" name="reihenfolge" value="{{ gebinde.pk }}">
+
+            <span class="flex-grow-1">
+                {{ gebinde.anzeigename }}
+                {% if not gebinde.aktiv %}
+                <span class="badge bg-body-secondary text-body border ms-1">{% translate "inaktiv" %}</span>
+                {% endif %}
+            </span>
+
+            <span class="text-body-secondary small text-nowrap">
+                {{ gebinde.faktor_in_basiseinheit|floatformat:"-3" }}
+                {{ ware.basiseinheit.kurz }}
+            </span>
+
+            {# Arrows together, inactive button set apart, as in the counting list. #}
+            <div class="d-flex flex-wrap gap-2">
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-secondary" type="submit"
+                        name="hoch" value="{{ gebinde.pk }}" title="{% translate 'Nach oben' %}"
+                        {% if forloop.first %}disabled{% endif %}>{% translate "&uarr;" %}</button>
+                    <button class="btn btn-outline-secondary" type="submit"
+                        name="runter" value="{{ gebinde.pk }}" title="{% translate 'Nach unten' %}"
+                        {% if forloop.last %}disabled{% endif %}>{% translate "&darr;" %}</button>
+                </div>
+                {# The button names the state it wants: a stale tab switches nothing back. #}
+                <button class="btn btn-sm {% if gebinde.aktiv %}btn-outline-warning{% else %}btn-outline-success{% endif %}"
+                    type="submit"
+                    formaction="{% url 'gebinde_umschalten' gebinde.pk %}"
+                    name="aktiv" value="{% if gebinde.aktiv %}0{% else %}1{% endif %}"
+                    title="{% if gebinde.aktiv %}{% translate "Inaktiv setzen" %}{% else %}{% translate "Aktivieren" %}{% endif %}">
+                    {% if gebinde.aktiv %}{% translate "&times;" %}{% else %}{% translate "&plus;" %}{% endif %}
+                </button>
+            </div>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-body-secondary">
+            {% if vom_hausartikel %}
+            {% translate "Keine Gebinde. Die Gebinde hängen an der Ware und gelten für alle Häuser." %}
+            {% else %}
+            {% translate "Noch keine Gebinde hinterlegt. Dann lässt sich die Ware nur in ihrer Basiseinheit zählen." %}
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+
+    {% if ware.gebinde.all %}
+    <div class="card-body border-top d-flex align-items-center gap-3">
+        {# With script the order goes out in the background, and the  #}
+        {# button says afterwards that it is saved.                   #}
+        <button class="btn btn-success btn-sm text-nowrap" type="submit"
+            data-reihenfolge-speichern>{% translate "Reihenfolge speichern" %}</button>
+        <span class="text-body-secondary small">
+            {% if vom_hausartikel %}
+            {% translate "Die Reihenfolge gehört der Ware. Sie gilt in jedem Haus und beim Zählen an jedem Ort. Ein inaktives Gebinde steht nicht mehr zur Auswahl, bleibt aber an bestehenden Vorgaben erhalten." %}
+            {% else %}
+            {% translate "Diese Reihenfolge gilt beim Zählen an jedem Ort. Ein inaktives Gebinde steht nicht mehr zur Auswahl, bleibt aber an bestehenden Vorgaben erhalten." %}
+            {% endif %}
+        </span>
+    </div>
+    {% endif %}
+</form>
+</div>

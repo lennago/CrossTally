@@ -1,0 +1,10 @@
+{% load i18n static %}
+{# Merging two products: shows the conversion only if the two are kept in     #}
+{# different dimensions ('static/js/ware_merge.js').                          #}
+{#                                                                            #}
+{# The dimension and short form of this page's product stand here, those of   #}
+{# the selectable products on their options ('WarenAuswahl').                 #}
+<script src="{% static 'js/ware_merge.js' %}"
+    data-dimension="{{ artikel.basiseinheit.dimension }}"
+    data-einheit="{{ artikel.basiseinheit.kurz }}"
+    data-wert="{% translate '{ziel} je {quelle}' %}"></script>

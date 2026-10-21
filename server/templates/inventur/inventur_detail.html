@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ inventur }}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'inventur_list' %}">{% translate "Inventuren" %}</a></li>
+            {% if lauf %}
+            <li class="breadcrumb-item"><a href="{{ lauf.get_absolute_url }}">{{ lauf }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ inventur.haus.name }}</li>
+            {% else %}
+            <li class="breadcrumb-item active" aria-current="page">{{ inventur }}</li>
+            {% endif %}
+        </ol>
+    </nav>
+
+    {# If other houses count the same inventory on the same day, this page     #}
+    {# stands as a tab under the run.                                          #}
+    {% if lauf %}
+    {% include "inventur/components/run_tabs.html" with aktiv=inventur.pk %}
+    {% endif %}
+
+    <div class="kopfleiste bg-body py-2 d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+        <div>
+            <div class="d-flex align-items-center gap-2">
+                <h1 class="h3 mb-0">{{ inventur }}</h1>
+                {% include "inventur/components/status_badge.html" %}
+            </div>
+            <div class="mt-2 max-breite-22">
+                {% include "inventur/components/progress.html" %}
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            {# Exactly one button leading on per status. What else is possible     #}
+            {# stands next to it and asks first.                                   #}
+            {% if inventur.status == "VORBEREITUNG" %}
+            <form method="post" action="{% url 'inventur_zaehlung_starten' inventur.pk %}" data-sofort>
+                {% csrf_token %}
+                <button class="btn btn-primary" type="submit">{% translate "Zählen starten" %}</button>
+            </form>
+            {% elif inventur.status == "ZAEHLUNG" %}
+            <a href="{% url 'inventur_pruefen' inventur.pk %}" class="btn btn-success">
+                {% translate "Prüfen" %}
+            </a>
+            {# The icon shows the state, the word what the button does. Closing  #}
+            {# works either way.                                                  #}
+            <form method="post" action="{% url 'inventur_sperre' inventur.pk %}" data-sofort>
+                {% csrf_token %}
+                {% if inventur.gesperrt %}
+                <input type="hidden" name="an" value="0">
+                <button class="btn btn-warning" type="submit">
+                    {% include "inventur/components/lock_icon.html" %} {% translate "Öffnen" %}
+                </button>
+                {% else %}
+                <input type="hidden" name="an" value="1">
+                <button class="btn btn-outline-secondary" type="submit">
+                    {% include "inventur/components/lock_icon.html" with offen=True %} {% translate "Sperren" %}
+                </button>
+                {% endif %}
+            </form>
+            <form method="post" action="{% url 'inventur_zurueck' inventur.pk %}" data-sofort>
+                {% csrf_token %}
+                <button class="btn btn-outline-secondary" type="submit"
+                    data-rueckfrage="{% translate 'Zurück in die Vorbereitung? Die bereits gezählten Mengen bleiben erhalten, gezählt werden kann so lange nicht.' %}">
+                    {% translate "Zurück in die Vorbereitung" %}
+                </button>
+            </form>
+            {% elif inventur.status == "ABGESCHLOSSEN" %}
+            {# The sheet for working through in the ERP, frozen state,       #}
+            {# grouped by product family.                                    #}
+            <a href="{% url 'inventur_pdf' inventur.pk %}" class="btn btn-success" target="_blank">
+                {% translate "PDF" %}
+            </a>
+            {% endif %}
+
+            {# A closed inventory is only deleted in the administration, because the  #}
+            {# frozen results hang on it.                                             #}
+            {% if inventur.laeuft %}
+            <a href="{% url 'inventur_delete' inventur.pk %}" class="btn btn-outline-danger">
+                {% translate "Löschen" %}
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 col-xl-4">
+            {% if inventur.laeuft %}
+            <div class="card mb-4">
+                <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center">
+                    <span>{% translate "Sollbestand" %}</span>
+                    <span class="text-body-secondary small">
+    {% blocktranslate %}{{ anzahl_soll }} Artikel{% endblocktranslate %}
+</span>
+                </div>
+                <div class="card-body">
+                    {% if offene_sollfragen %}
+                    <a href="{% url 'inventur_sollbestand' inventur.pk %}"
+                        class="alert alert-warning d-block py-2 small mb-3 text-decoration-none">
+                        <strong>
+    {% blocktranslate %}{{ offene_sollfragen }} offene Frage(n){% endblocktranslate %}
+</strong>
+                        {% translate "zum Sollbestand: unbekannte Nummern, inaktive oder eingestellte Artikel, Artikel ohne Soll." %}
+                        {% if inventur.status == "VORBEREITUNG" %}{% translate "Jetzt klären &rarr;" %}{% else %}
+                        {% translate "Geklärt wird in der Vorbereitung." %}{% endif %}
+                    </a>
+                    {% endif %}
+                    {# Without a target the difference can be typed in instead, from the #}
+                    {# inventory management system ('Inventur.differenz_von_hand').     #}
+                    {% if inventur.differenz_von_hand %}
+                    <p class="small mb-2">
+                        <strong>{% translate "Differenz von Hand." %}</strong>
+                        {% translate "Sie wird je Artikel eingetragen, in der Prüfliste oder in der Zähl-App. Ein Sollbestand kommt so lange nicht herein." %}
+                    </p>
+                    <form method="post" action="{% url 'inventur_differenz_von_hand' inventur.pk %}" data-sofort>
+                        {% csrf_token %}
+                        <input type="hidden" name="an" value="0">
+                        <button class="btn btn-outline-secondary btn-sm" type="submit">
+                            {% translate "Ausschalten" %}
+                        </button>
+                    </form>
+                    {% else %}
+                    {% if inventur.status == "VORBEREITUNG" %}
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <button class="btn btn-outline-primary btn-sm" type="submit">
+                            {% translate "Einlesen" %}
+                        </button>
+                        <a href="{% url 'inventur_soll_pflegen' inventur.pk %}" class="btn btn-outline-secondary btn-sm">
+                            {% translate "Von Hand pflegen" %}
+                        </a>
+                    </form>
+                    <p class="text-body-secondary small mt-3 mb-0">
+                        {% translate "Die letzte Datei gilt. Sie ersetzt auch, was von Hand eingetragen ist." %}
+                    </p>
+                    {% else %}
+                    <p class="text-body-secondary small mb-0">
+                        {% translate "Eingelesen wird in der Vorbereitung. Fehlt eine Datei oder ist sie falsch: „Zurück in die Vorbereitung“, dann hochladen. Die gezählten Mengen bleiben dabei erhalten." %}
+                    </p>
+                    {% endif %}
+                    {% if not hat_sollbestand %}
+                    <form method="post" action="{% url 'inventur_differenz_von_hand' inventur.pk %}" data-sofort class="border-top pt-3 mt-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="an" value="1">
+                        <p class="text-body-secondary small mb-2">
+                            {% translate "Keine Datei mit dem Bestand? Dann lässt sich die Differenz aus der Warenwirtschaft je Artikel eintragen." %}
+                        </p>
+                        <button class="btn btn-outline-secondary btn-sm" type="submit">
+                            {% translate "Differenz von Hand eintragen" %}
+                        </button>
+                    </form>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {# The tabs of the counting app. Changed in preparation only: during #}
+            {# the count the apps already hold their rows.                       #}
+            <div class="card mb-4">
+                <div class="card-header bg-body-tertiary">{% translate "Inventurarten" %}</div>
+                <div class="card-body">
+                    <ul class="list-unstyled small mb-2">
+                        {% for art in inventur.inventurarten.all %}
+                        <li>{{ art.name }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% if inventur.status == "VORBEREITUNG" %}
+                    <a href="{% url 'inventur_arten' inventur.pk %}"
+                        class="btn btn-outline-secondary btn-sm">{% translate "Arten ändern" %}</a>
+                    {% elif inventur.laeuft %}
+                    <p class="text-body-secondary small mb-0">
+                        {% translate "Geändert werden die Arten in der Vorbereitung." %}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# Only while it runs: closing clears the assignment, who counted is not  #}
+            {# kept ('Inventur.abschliessen').                                         #}
+            {% if inventur.laeuft %}
+            <div class="card mb-4">
+                <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center">
+                    <span>{% translate "Zählende" %}</span>
+                    <span class="text-body-secondary small">
+    {% blocktranslate with zaehlende=inventur.zaehlende.count %}{{ zaehlende }} zugeordnet{% endblocktranslate %}
+</span>
+                </div>
+                <div class="card-body">
+                    {# Whoever is not listed here does not see the inventory in the counting app. #}
+                    <ul class="list-unstyled small mb-2">
+                        {% for person in inventur.alle_zaehlenden %}
+                        <li>
+                            <a href="{{ person.get_absolute_url }}"
+                                class="link-body-emphasis text-decoration-none">{{ person }}</a>
+                            {% if person.is_superuser %}
+                            <span class="badge bg-body-secondary text-body border">{% translate "Admin, immer dabei" %}</span>
+                            {% elif person.is_staff %}
+                            <span class="badge bg-body-secondary text-body border">{% translate "Führungskraft" %}</span>
+                            {% endif %}
+                        </li>
+                        {% empty %}
+                        <li class="text-warning-emphasis">
+                            {% translate "Niemand zugeordnet. Es kann noch niemand zählen." %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <a href="{% url 'inventur_zaehlende' inventur.pk %}"
+                        class="btn btn-outline-secondary btn-sm">{% translate "Zählende zuordnen" %}</a>
+                    <p class="text-body-secondary small mt-3 mb-0">
+                        {% translate "Zugeordnet wird je Inventur. Administratoren zählen ohne Eintrag mit." %}
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card">
+                <div class="card-header bg-body-tertiary">{% translate "Was hier gilt" %}</div>
+                <div class="card-body small text-body-secondary">
+                    {% if inventur.status == "VORBEREITUNG" %}
+                    {% translate "Zeit für den Sollbestand, aus der Datei oder von Hand. „Zählen starten“ gibt die Inventur für die Zähl-App frei." %}
+                    {% elif inventur.status == "ZAEHLUNG" %}
+                    {% translate "Gezählt wird in der Zähl-App. Hier steht, was schon da ist. Differenzen, Notizen und der Abschluss stehen unter" %}
+                    <a href="{% url 'inventur_pruefen' inventur.pk %}">{% translate "Prüfen" %}</a>.
+                    {% else %}
+                    {% blocktranslate with zeitpunkt=inventur.abgeschlossen_am|date:"SHORT_DATETIME_FORMAT" %}Abgeschlossen am {{ zeitpunkt }}. Die Zeilen unten sind eingefroren und ändern sich nicht mehr.{% endblocktranslate %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-8">
+            {% if inventur.laeuft %}
+            <h2 class="h5 mb-2">{% translate "Zählpositionen" %}</h2>
+            {% if arten_reiter %}
+            {# As in the counting app: one tab per type of the inventory, where #}
+            {# something is to be counted. Real addresses, no switching by script. #}
+            <ul class="nav nav-tabs mb-2">
+                {% for reiter in arten_reiter %}
+                <li class="nav-item">
+                    <a class="nav-link {% if reiter.aktiv %}active{% endif %}"
+                        href="?reiter={{ reiter.wert }}"
+                        {% if reiter.aktiv %}aria-current="page"{% endif %}>
+                        {{ reiter.name }}
+                        <span class="badge bg-body-secondary text-body border ms-1">{{ reiter.gezaehlt }}/{{ reiter.gesamt }}</span>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% include "inventur/components/positions.html" %}
+            {% endif %}
+
+            {# The frozen state. The running differences including search and    #}
+            {# notes are in the review view.                                     #}
+            {% if inventur.status == "ABGESCHLOSSEN" %}
+            <h2 class="h5 mb-2">
+                {% translate "Ergebnis" %}
+                <span class="text-body-secondary small fw-normal ms-2">
+    {% blocktranslate with zeilen=zeilen|length %}{{ zeilen }} Artikel, davon {{ anzahl_auffaellig }} mit Abweichung{% endblocktranslate %}
+</span>
+            </h2>
+            {% include "inventur/components/result_table.html" %}
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

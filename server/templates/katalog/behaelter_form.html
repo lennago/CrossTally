@@ -1,0 +1,18 @@
+{% extends "components/form_page.html" %}
+{% load i18n %}
+
+{% block title %}{% if object %}{% blocktranslate with name=object.anzeigename %}{{ name }} bearbeiten{% endblocktranslate %}{% else %}{% translate "Neuer Behälter" %}{% endif %}{% endblock title %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'behaelter_list' %}">{% translate "Behälter" %}</a></li>
+{% endblock pfad %}
+
+{% block neu %}{% translate "Neuer Behälter" %}{% endblock neu %}
+
+{% block kopf_knoepfe %}
+{% if object and not object.immer_erlaubt %}
+<a href="{% url 'behaelter_delete' object.pk %}" class="btn btn-outline-danger btn-sm">{% translate "Löschen" %}</a>
+{% endif %}
+{% endblock kopf_knoepfe %}
+
+{% block abbrechen_url %}{% url 'behaelter_list' %}{% endblock abbrechen_url %}

@@ -1,0 +1,171 @@
+<h3>Format</h3>
+<p>
+    Zuerst das System wählen, aus dem die Datei stammt. Es sagt, welche Datei erwartet
+    wird und wie sie gelesen wird. Bei <strong>WinTICKET</strong> ist das die
+    Artikelbestandsliste des Hauses, als xlsx, xls oder csv. Die Hilfe am Dateifeld nennt
+    für jedes Format die passende Datei.
+</p>
+<p>
+    In WinTICKET liegt die Liste unter <strong>Berichte → Warenwirtschaft →
+    Artikelbestand → Artikelbestandsliste nach Artikelbezeichnung (708)</strong>. Beim
+    Speichern „Excel-Datei ohne Formatierung“ wählen.
+</p>
+<h3>Was im Plan steht</h3>
+<p>
+    Nur, was eine Entscheidung braucht. Einen Artikel erkennt der Import an
+    <strong>Nummer und Bezeichnung</strong>: was das Haus schon genau so führt und wozu
+    die Datei nichts anderes sagt, fehlt im Plan, ebenso alles nicht Zählbare. Wie viele
+    das waren, steht in der Meldung über dem Plan.
+</p>
+<p>
+    Jeder Block ist nach <strong>Warengruppen</strong> gegliedert, und beide Ebenen
+    lassen sich auf- und zuklappen. Im Kopf einer Warengruppe stehen Knöpfe, die alle
+    ihre Zeilen auf einmal setzen. So ist eine ganze Warengruppe mit einem Klick
+    erledigt, etwa Pfand und Gutscheine als <em>Nicht zählbar</em>.
+</p>
+<p>
+    Ein Plan hat höchstens <strong>{{ hoechstens_planzeilen }} Zeilen</strong>, denn er geht
+    beim Übernehmen in einem Stück zurück an den Server. Wird er größer, sagt der Import
+    das schon beim Einlesen. Dann die Warengruppen auf mehrere Exporte verteilen und
+    nacheinander einlesen. Eine Warengruppe, die in einer Datei fehlt, bleibt dabei
+    unberührt (siehe <em>Fehlt in der Datei</em>).
+</p>
+<h3>Neue Artikel</h3>
+<p>
+    <em>Aktiv</em> heißt anlegen und führen, <em>Inaktiv</em> anlegen, aber vorerst nicht
+    zählen, etwa Saisonware. <em>Eingestellt</em> legt den Artikel nur zur Kenntnis an:
+    er belegt weder Nummer noch Ware und bekommt in keiner Inventur eine Zeile. In der
+    Zähl-App lässt er sich ganz hinten hinzuzählen, wenn die Inventur seine Inventurart
+    zählt. So ist es vorgeschlagen, wenn in der Datei keine Anzahl je Gebinde steht. <em>Nicht zählbar</em>
+    legt die Ware in die Warenfamilie „Nicht zählbar“: für Pfand, Gutscheine und alles,
+    was die Warenwirtschaft als Artikel führt, ohne dass es einer ist. Das gilt in jedem Haus. Ein
+    Klick schiebt die Zeile in den passenden Block. Gar nicht anlegen lässt sich ein
+    Artikel nicht. Er stünde sonst bei jedem Import wieder hier.
+</p>
+<p>
+    Die Spalte <strong>Inventurart</strong> sagt, in welchem Reiter der neue Artikel gezählt
+    wird. <em>Wie bei der Ware</em> nimmt die Art, in der die übrigen Artikel der Ware schon
+    stehen. Eine neue Ware kommt so in die erste Art der Liste. Eine andere Wahl gilt nur für
+    diesen Artikel.
+</p>
+<h3>Eingestellt</h3>
+<p>
+    Diesen Artikel gab es schon, er ist eingestellt. <em>Zurückholen</em> macht ihn wieder
+    aktiv. Führt die Nummer inzwischen ein anderer Artikel, wird der dabei eingestellt.
+    Der Hinweis unter der Zeile nennt ihn.
+</p>
+<h3>Konflikte</h3>
+<p>
+    Der Artikel wird geführt, aber die Datei sagt etwas anderes: eine andere Warengruppe,
+    eine andere Einheit oder eine Anzahl je Gebinde, die bei der Ware nicht hinterlegt
+    ist. Vorgewählt ist nichts: über jeden Konflikt wird eigens entschieden, und solange
+    einer offen ist, lässt sich der Plan nicht übernehmen. Mit der Wahl wandert die Zeile
+    zu den <strong>behobenen Konflikten</strong>. Dort lässt sich die Wahl noch ändern.
+    <em>Lassen</em> rührt nichts an. Die Zeile steht dann beim nächsten Import
+    wieder hier. <em>Ändern</em> übernimmt die Warengruppe und die Einheit aus der
+    Datei, dazu die gewählte Ware und die Gebinde, die im Feld stehen.
+</p>
+<p>
+    Die Einheit ist die des Hauses. Die Ware behält ihre eigene, denn in ihr wird über
+    die Häuser ausgewertet. Zählt das Haus in einer anderen Dimension als die Ware
+    (Stück statt Kilogramm), fragt die Zeile nach der <strong>Umrechnung</strong>: wie
+    viele Einheiten der Ware ein Stück ist. Das Feld nennt die Richtung („1 Stk. = wie
+    viele g?“): ein Gebinde von 1 kg, das die Ware in g führt, ist 1000, nicht 0,001.
+    Ohne sie wird die Zeile nicht übernommen.
+    Die Gebinde im Feld stehen in der Einheit der Datei und werden in die der Ware
+    umgerechnet. Konnte der Plan die Gebinde der Ware nicht in dieser Einheit zeigen,
+    weil die Umrechnung noch fehlte, nennt der Hinweis sie. Sie bleiben, wie sie sind, mit
+    Namen und Zustand, und aus dem Feld kommt nur dazu, was der Ware fehlt. Wer die
+    Umrechnung einträgt, bekommt die Zeile vor dem Übernehmen mit den Gebinden der Ware
+    zurück.
+</p>
+<p>
+    Eine neue Einheit wartet, solange eine Inventur, die noch nicht abgeschlossen ist, für
+    den Artikel ein Soll, eine offene Sollzeile oder eine Differenz von Hand trägt. Diese
+    Zahlen stehen in der bisherigen. Abgeschlossene Ergebnisse behalten ihre Einheit ohnehin.
+</p>
+<p>
+    Weicht ein Artikel in mehrerem ab, steht unter <em>Ändern</em> zur Wahl, was davon
+    übernommen wird: Warengruppe, Einheit, Gebinde. Anfangs ist alles gewählt. Was
+    abgewählt wird, bleibt, wie es ist, und steht beim nächsten Import wieder hier.
+    Bleibt die Einheit, behält der Artikel auch seine Umrechnung, und die Zeile fragt
+    nicht danach.
+</p>
+<h3>Nummer mit anderer Bezeichnung</h3>
+<p>
+    Ob umbenannt oder neu belegt wurde, verrät die Datei nicht. <em>Umbenennen</em> führt
+    den vorhandenen Artikel unter dem neuen Namen weiter. <em>Ersetzen</em> stellt ihn ein
+    und legt daneben einen neuen an. Als was, steht darunter zur Wahl. Gibt es keine Ware
+    mit dem neuen Namen, ist die des vorhandenen Artikels vorgewählt. Eine neu vergebene
+    Nummer gehört meist zu einer anderen Ware, deshalb vor <em>Ersetzen</em> die Ware
+    prüfen.
+</p>
+<h3>Fehlt in der Datei</h3>
+<p>
+    Diese Artikel führt das Haus aus demselben System, die Datei kennt sie nicht mehr.
+    WinTICKET exportiert jede gewählte Warengruppe vollständig, eine fehlende Nummer ist
+    dort also ausgelistet. Zur Wahl stehen <em>Lassen</em>, <em>Inaktiv</em> und
+    <em>Eingestellt</em>. Vorgewählt ist <em>Lassen</em>: ein versehentlich
+    unvollständiger Export soll nichts abräumen.
+</p>
+<p>
+    Eine Warengruppe, zu der die Datei <strong>keine einzige</strong> Zeile hat, gilt
+    als nicht ausgewählt. Ihre Artikel stehen gar nicht erst im Plan. Wer weiß, dass
+    sich an einer Warengruppe nichts geändert hat, lässt sie beim Export also einfach
+    weg. Welche das waren, steht in der Meldung über dem Plan. Fehlt von einer
+    ausgewählten Warengruppe mehr als die Hälfte, kommt eine Warnung: dann wurde
+    vermutlich gefiltert exportiert.
+</p>
+<h3>Ware</h3>
+<p>
+    Die <strong>Ware</strong> ist die hausübergreifende Identität des Artikels.
+    Leer gelassen entsteht eine neue, entweder unter der Bezeichnung des Artikels oder unter
+    dem Namen, den du darunter einträgst. Dieselbe Ware führt ein Haus nur einmal. Greifen
+    zwei Zeilen nach derselben, sind beide rot markiert. Trägt ein neuer Artikel den Namen
+    einer Ware, die das Haus schon unter einer anderen Nummer führt, ist nichts
+    vorgewählt: dann braucht die neue Ware einen eigenen Namen.
+</p>
+<h3>Gebinde</h3>
+<p>
+    Im <strong>Gebinde</strong>-Feld steht alles, was die Ware führt, dazu die Mengen,
+    die nur in der Datei stehen. Was stimmt, bleibt beim Übernehmen unberührt. Jede
+    Menge kommt je Ware nur einmal vor.
+</p>
+<p>
+    Das Feld gehört zu der Ware, die der Plan vorgeschlagen hat. Wählst du eine andere
+    oder eine, wo der Plan keine vorgeschlagen hat, kommt die Zeile bei <em>Jetzt übernehmen</em> mit
+    deren Gebinden zurück. Prüf sie. Erst das nächste Übernehmen schreibt. Genauso, wenn
+    du statt der vorgeschlagenen eine neue Ware anlegst: dann stehen nur die Gebinde aus
+    der Datei im Feld. Und wenn du die Umrechnung änderst, mit der die Gebinde der Ware im
+    Feld umgerechnet sind. Ist sie beim Artikel hinterlegt, steht sie schon im Feld.
+</p>
+<p>
+    Zugeordnet wird über die <strong>Menge</strong>, nicht über den Namen. Wer einen
+    Namen ändert, benennt das Gebinde um: die schon gezählten Zeilen bleiben daran
+    hängen. Eine neue Menge legt ein Gebinde an. Eine gestrichene Zeile setzt das
+    Gebinde auf inaktiv. Gelöscht wird keines, denn an einem Gebinde hängen Zählungen
+    aus früheren Inventuren.
+</p>
+<p>
+    Gebinde gehören der Ware und gelten in allen Häusern. Was hier wegfällt, fällt
+    überall weg.
+</p>
+<p>
+    Nennt die Datei die Menge eines <strong>inaktiven</strong> Gebindes, steht es unter
+    seinem Namen im Feld, und der Hinweis unter der Zeile sagt es. Beim Übernehmen ist es
+    dann wieder aktiv, in allen Häusern, und die Meldung danach zählt es mit. Wer das nicht
+    will, nimmt die Zeile aus dem Feld. Führt das Haus den Artikel schon, ist die Zeile ein
+    Konflikt, und <em>Ändern</em> holt das Gebinde zurück.
+</p>
+<p>
+    Gibt es den Namen bei der Ware bereits mit einer anderen Menge, ist ein eigener
+    vorgeschlagen („Kasten 20“). So bleibt das vorhandene Gebinde, wie es ist, und das
+    Haus bekommt ein zweites. Auch ein inaktives Gebinde hält seinen Namen. Ist der
+    Vorschlag ebenfalls vergeben, zählt er weiter („Kasten 20 (2)“). Der Name lässt sich
+    ändern.
+</p>
+<p>
+    Bei Ware, die in Stück gezählt wird, steht auch <em>Einzeln = 1</em> im Feld.
+    Die Warenwirtschaft kennt nur die Einkaufsverpackung, im Regal steht aber eine angebrochene.
+    Führt die Ware das Einzelstück inaktiv, bleibt es dabei.
+</p>

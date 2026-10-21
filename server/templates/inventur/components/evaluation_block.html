@@ -1,0 +1,63 @@
+{% load i18n %}
+{# One family of the report over inventories, with the families below it first  #}
+{# and its own products after them. Includes itself for every family below.     #}
+{# The header carries the sum of the whole subtree.                             #}
+<details class="border rounded mb-2" data-gruppe="{{ block.kennung }}">
+    <summary class="px-3 py-2 bg-body-tertiary d-flex justify-content-between gap-3">
+        <strong>{{ block.name }}</strong>
+        <span class="text-body-secondary small text-end">
+            {% blocktranslate count anzahl=block.anzahl %}{{ anzahl }} Ware{% plural %}{{ anzahl }} Waren{% endblocktranslate %} &middot; {% translate "Summe der Differenzen:" %}
+            <span class="{{ block.differenz_klasse }} differenz-leise">{{ block.differenz_gesamt|default:"-" }}</span>
+        </span>
+    </summary>
+    {% if block.unterbloecke %}
+    <div class="ps-3 pt-2">
+        {% for unter in block.unterbloecke %}
+        {% include "inventur/components/evaluation_block.html" with block=unter %}
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% if block.zeilen %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th scope="col">{% translate "Ware" %}</th>
+                    <th class="breite-7" scope="col">{% translate "Häuser" %}</th>
+                    {% if bestaende_sinnvoll %}
+                    <th scope="col" class="text-center breite-9">{% translate "Ergebnis" %}</th>
+                    <th scope="col" class="text-center breite-9">{% translate "Soll" %}</th>
+                    {% endif %}
+                    <th scope="col" class="text-center breite-9">{% translate "Differenz" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for zeile in block.zeilen %}
+                <tr>
+                    <td>
+                        <a href="{{ zeile.ware.get_absolute_url }}"
+                            class="link-body-emphasis link-offset-2 text-decoration-none">
+                            {{ zeile.ware.name }}
+                        </a>
+                        {% if zeile.ohne_umrechnung_text %}
+                        <div class="small text-warning-emphasis">{{ zeile.ohne_umrechnung_text }}</div>
+                        {% endif %}
+                    </td>
+                    <td class="text-body-secondary small">{{ zeile.haeuser }}</td>
+                    {% if bestaende_sinnvoll %}
+                    <td class="text-center">{{ zeile.ist_text }}</td>
+                    <td class="text-center">{{ zeile.soll_text }}</td>
+                    {% endif %}
+                    <td class="text-center{% if zeile.auffaellig %} fw-semibold{% endif %}">
+                        <span class="{{ zeile.differenz_klasse }}">{{ zeile.differenz_text }}</span>
+                        {% if zeile.teilsumme_text %}
+                        <div class="small text-body-secondary fw-normal">{{ zeile.teilsumme_text }}</div>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</details>

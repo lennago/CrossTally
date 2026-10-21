@@ -1,0 +1,15 @@
+{% load static %}
+{# Includes an own script from 'static/js/':                                       #}
+{#                                                                                 #}
+{#   {% include "components/script.html" with name="live_filter" %}                #}
+{#   {% include "components/script.html" with name="split" wert="Waren" %}         #}
+{#                                                                                 #}
+{# 'wert' passes the script **one** value from the page. It reads it at            #}
+{# startup via 'document.currentScript.dataset.wert'. That way a script also       #}
+{# gets a translated text: visible words belong in the template, because           #}
+{# gettext does not work in a '.js' file. If a script needs several, it gets       #}
+{# its own component next to it ('notes_script.html' and the other                 #}
+{# '*_script.html'). Classic scripts without 'defer', at the end of the page       #}
+{# in the order of inclusion: some listen to events of the others                  #}
+{# ('formset:geaendert') or call them ('notizenSichern').                          #}
+<script src="{% static 'js/'|add:name|add:'.js' %}"{% if wert is not None %} data-wert="{{ wert }}"{% endif %}></script>

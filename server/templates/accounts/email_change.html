@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{# The own address, from the account menu. Counters get here too: the page    #}
+{# lies under '/accounts/', like changing the password ('EmailAendernView').  #}
+
+{% block title %}{% translate "E-Mail-Adresse ändern" %}{% endblock title %}
+
+{% block content %}
+<div class="container py-5 max-breite-30">
+
+    <div class="card">
+        <div class="card-body p-4">
+
+            <h1 class="h4 mb-2">{% translate "E-Mail-Adresse ändern" %}</h1>
+            <p class="text-body-secondary small mb-3">
+                {% blocktranslate with email=user.email %}Zurzeit gilt <strong>{{ email }}</strong>.{% endblocktranslate %}
+                {% if bestaetigung %}
+                {% blocktranslate count tage=tage %}An die neue Adresse geht eine Mail mit einem Link. Erst wenn du ihn bestätigt hast, gilt sie. Der Link gilt einen Tag.{% plural %}An die neue Adresse geht eine Mail mit einem Link. Erst wenn du ihn bestätigt hast, gilt sie. Der Link gilt {{ tage }} Tage.{% endblocktranslate %}
+                {% else %}
+                {% translate "Die neue Adresse gilt sofort." %}
+                {% endif %}
+            </p>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {{ form|crispy }}
+                {# Without a password one of the own keys confirms instead ('EmailAendernView'). #}
+                {# The script shows the block where the browser can ('passkey.js').             #}
+                {% if not user.has_usable_password %}
+                {% if hat_passkey %}
+                <div data-passkey hidden>
+                    {% include "components/passkey_confirm.html" %}
+                    <div class="alert alert-danger small mb-3" role="alert" data-passkey-meldung hidden></div>
+                </div>
+                <p class="text-body-secondary small" data-passkey-ohne>
+                    {% translate "Dafür braucht es einen Browser mit Passkeys und eine sichere Verbindung (HTTPS)." %}
+                </p>
+                {% else %}
+                <p class="small">
+                    {% translate "Dein Konto hat keinen Passkey, mit dem du bestätigen könntest. Ein Administrator kann dir ein Passwort setzen." %}
+                </p>
+                {% endif %}
+                {% endif %}
+                <button class="btn btn-success w-100 mt-2" type="submit">
+                    {% if bestaetigung %}{% translate "Mail schicken" %}{% else %}{% translate "Adresse ändern" %}{% endif %}
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% if not user.has_usable_password and hat_passkey %}
+{% include "components/passkey_script.html" %}
+{% endif %}
+{% endblock extra_scripts %}

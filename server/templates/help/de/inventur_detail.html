@@ -1,0 +1,95 @@
+<h3>Die drei Schritte</h3>
+<ul>
+    <li><strong>Vorbereitung</strong>: die Zählpositionen stehen. Jetzt ist Zeit für den
+        Sollbestand, aus der Datei oder von Hand. Fehlt eine Inventurart, kommt sie über
+        „Arten ändern“ dazu. „Zählen starten“ gibt die Inventur für die Zähl-App frei.</li>
+    <li><strong>Zählung</strong>: die Zählenden füllen die Positionen in der Zähl-App. Hier
+        lässt sich verfolgen, was schon da ist. Eingetragen wird auf dieser Seite bewusst
+        nichts. Differenzen, Notizen und der Abschluss stehen unter „Prüfen“. Ist alles
+        gezählt, hält „Sperren“ das Zählen an.</li>
+    <li><strong>Abgeschlossen</strong>: die Zeilen sind eingefroren und ändern sich nicht
+        mehr, auch nicht, wenn sich ein Sollbestand später als falsch herausstellt. In
+        der Warenwirtschaft werden sie von Hand eingetragen.</li>
+</ul>
+<h3>Sperren</h3>
+<p>
+    Ist fertig gezählt, hält <strong>Sperren</strong> die Zählung an. In der Zähl-App ist
+    dann nur noch die Prüfliste offen: Notizen und die Differenz von Hand gehen weiter, neue
+    Zählungen nimmt der Server nicht an. Was ein Handy noch aus einem Funkloch schickt,
+    wartet dort, bis die Zählung wieder offen ist. Das Schloss im Knopf zeigt den Stand,
+    <strong>Öffnen</strong> gibt das Zählen wieder frei. Führungskräfte schalten hier und in
+    der App. Abgeschlossen wird gesperrt wie offen, und „Zurück in die Vorbereitung“ öffnet
+    das Schloss.
+</p>
+{% if lauf %}
+<h3>Die Häuser des Tages</h3>
+<p>
+    Am selben Tag zählen noch andere Häuser. Die Reiter oben wechseln zwischen ihnen. „Gesamt“ zeigt alle nebeneinander und schließt sie auf Wunsch gemeinsam
+    ab. Diese Seite gilt nur für {{ inventur.haus.name }}.
+</p>
+{% endif %}
+<h3>Die Zählpositionen</h3>
+<p>
+    Je Ort in derselben Reihenfolge wie in der Zähl-App, also so, wie die Ware im Regal steht,
+    nicht nach dem Alphabet. Wer hier nachsieht, was noch fehlt, geht dieselbe Liste durch wie
+    die Zählenden im Lager. Die Reihenfolge stellt die Zählliste des Orts ein.
+</p>
+<p>
+    Diese Inventur zählt {{ inventur.arten_anzeige }}. Bei mehreren Arten stehen die
+    Positionen wie in der Zähl-App in einem Reiter je Art, soweit es dafür Zeilen gibt. Jeder
+    Reiter zeigt, wie weit er ist.
+</p>
+<h3>Sollbestand einlesen</h3>
+<p>
+    Zuerst das System wählen, aus dem die Datei stammt. Bei WinTICKET ist das die
+    Inventurzählliste als Excel-Datei: <strong>Berichte → Warenwirtschaft → Zähl-, Auffüll-
+    und Differenzlisten → Inventurzählliste mit Sollbestand nach Lager und Artikelnummer
+    (236)</strong>, gespeichert als „Excel-Datei ohne Formatierung“. Gelesen werden
+    Artikelnummer, Bezeichnung und „Istbestand lt. Rechner“, die Kopf- und Lagerzeilen
+    des Blatts stören nicht. Eine CSV-Datei mit „Artikelnummer;Menge“ geht ebenso,
+    dazu darf eine Spalte mit der Bezeichnung stehen.
+    Übernommen wird, was {{ inventur.haus.name }} führt. Zur Frage unter „Sollbestand
+    klären“ werden unbekannte Nummern, eingestellte Artikel mit Bestand und inaktive mit
+    Bestand, die bei dieser Inventur dran sind. Das Soll von Artikeln anderer Arten wird
+    gespeichert und zählt erst mit, wenn jemand sie zählt. Den Bestand einer eingestellten
+    Dublette bekommt der Artikel, als der sie zählt. Artikel mit dem Status „Nicht zählbar“
+    werden übergangen.
+</p>
+<p>
+    Ohne Datei, oder für die Artikel, die sie nicht kennt, steht „Von Hand pflegen“: das
+    Soll je Artikel zum Eintragen. Es gilt wie eines aus der Datei.
+</p>
+<p>
+    <strong>Die letzte Datei gilt</strong>: was sie nicht nennt, fällt weg, auch ein Soll
+    von Hand. Eingelesen wird
+    nur in der Vorbereitung. Fehlt später etwas: „Zurück in die Vorbereitung“, hochladen,
+    wieder starten. Die gezählten Mengen bleiben dabei erhalten. Beim Abschluss verschwinden
+    die Sollbestände. Was bleibt, ist ihre Kopie im Ergebnis.
+</p>
+<h3>Differenz von Hand</h3>
+<p>
+    Gibt es keine Datei mit dem Bestand, zeigt aber die Warenwirtschaft die Differenz, sobald
+    die gezählten Mengen dort stehen, dann lässt sie sich hier eintragen: <strong>Differenz
+    von Hand eintragen</strong> in der Karte „Sollbestand“. Das geht nur, solange kein
+    Sollbestand hereingekommen ist, weder aus einer Datei noch von Hand. Mit einem Soll
+    rechnet sich die Differenz selbst, und zwei Differenzen je Artikel widersprächen sich.
+</p>
+<p>
+    Eingetragen wird je Artikel in der Prüfliste oder in der Zähl-App, dort auch von den
+    Zählenden. Ein- und ausschalten können Führungskräfte hier, über der Prüfliste und in der
+    App. Solange es an ist, kommt kein Sollbestand herein. Ausgeschaltet bleibt, was schon
+    eingetragen ist, und gilt wieder, sobald es wieder an ist. Beim Abschluss wird die
+    eingetragene Differenz eingefroren, das Soll bleibt leer.
+</p>
+<h3>Zählende</h3>
+<p>
+    Nur wer der Inventur zugeordnet ist, sieht sie in der Zähl-App. Administratoren dürfen
+    ohnehin überall zählen. Beim Abschluss wird die Zuordnung gelöscht: wer gezählt hat,
+    bleibt nicht gespeichert.
+</p>
+<h3>Zurücknehmen und Löschen</h3>
+<p>
+    „Zurück in die Vorbereitung“ dreht nur den Status, gezählte Mengen bleiben. Löschen nimmt
+    Zählpositionen, Sollbestände und Notizen mit. Eine abgeschlossene Inventur lässt sich hier nicht
+    löschen, denn an ihr hängt der einzige Beleg des Tages. Das geht nur in der Verwaltung.
+</p>

@@ -1,0 +1,30 @@
+{% extends "components/split_page.html" %}
+{% load i18n %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'ware_list' %}">{% translate "Waren" %}</a></li>
+{% endblock pfad %}
+
+{% block einleitung %}
+{% blocktranslate with name=ware.name %}Neben {{ name }} entsteht eine zweite Ware. Ein Klick auf einen Hausartikel schiebt ihn auf die andere Seite. Die neue Ware erbt Einheit, Familie, die Angaben zum Wiegen und alle Gebinde. Die Rezepturen bleiben bei {{ name }}.{% endblocktranslate %}
+{% endblock einleitung %}
+
+{% block zeile %}
+{{ eintrag.haus.name }}
+<span class="badge rounded-pill bg-body-secondary text-body border ms-1">{{ eintrag.artikelnummer|default:"–" }}</span>
+<span class="text-body-secondary">{{ eintrag.name }}</span>
+{% if not eintrag.aktiv %}
+<span class="badge bg-body-secondary text-body border ms-1">{{ eintrag.get_status_display|lower }}</span>
+{% endif %}
+{% endblock zeile %}
+
+{% block leer %}
+{% blocktranslate with name=ware.name %}{{ name }} führt noch kein Haus. Aufteilen lässt sich die Ware trotzdem, die neue bleibt dann leer.{% endblocktranslate %}
+{% endblock leer %}
+
+{% block neu_titel %}{% translate "Neue Ware" %}{% endblock neu_titel %}
+
+{% block extra_scripts %}
+{% translate "Hausartikel" as wort %}
+{% include "components/script.html" with name="split" wert=wort %}
+{% endblock extra_scripts %}

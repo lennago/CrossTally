@@ -1,0 +1,10 @@
+{% load i18n %}
+{# "Expand all / Collapse all" above a grouped list.                             #}
+{#                                                                               #}
+{# The groups are closed by default. Whoever wants to see everything should      #}
+{# not have to open each one. Without JavaScript the buttons are missing.        #}
+{# Then the click on the group remains. They are served by 'expand.js'.          #}
+<div class="d-flex justify-content-end gap-3 mb-2 small" data-aufklapp-knoepfe hidden>
+    <button type="button" class="btn btn-link btn-sm p-0" data-alle-gruppen="auf">{% translate "Alle aufklappen" %}</button>
+    <button type="button" class="btn btn-link btn-sm p-0" data-alle-gruppen="zu">{% translate "Alle zuklappen" %}</button>
+</div>

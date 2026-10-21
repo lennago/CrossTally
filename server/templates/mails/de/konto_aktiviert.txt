@@ -1,0 +1,14 @@
+Dein Konto bei {{ anwendung }} ist wieder aktiv
+
+Hallo {{ vorname }},
+
+dein Konto bei {{ anwendung }} ist wieder aktiv. Anmelden geht wieder.
+
+{{ aenderungen }}
+
+{% if wer %}
+Wieder aktiviert von {{ wer }}.
+Wenn du das nicht erwartet hast, sprich mit {{ wer }}.
+{% else %}
+Wenn du das nicht erwartet hast, sprich mit deiner Führungskraft.
+{% endif %}

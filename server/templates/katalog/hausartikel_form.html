@@ -1,0 +1,225 @@
+{% extends "components/form_page.html" %}
+{% load i18n %}
+{% load crispy_forms_tags crispy_forms_filters %}
+
+{% block title %}{% if object %}{% blocktranslate with name=object.name %}{{ name }} bearbeiten{% endblocktranslate %}{% else %}{% translate "Neuer Hausartikel" %}{% endif %}{% endblock title %}
+{% block breite %}max-breite-52{% endblock breite %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'haus_list' %}">{% translate "Häuser" %}</a></li>
+<li class="breadcrumb-item"><a href="{{ haus.get_absolute_url }}">{{ haus.name }}</a></li>
+<li class="breadcrumb-item"><a href="{% url 'hausartikel_list' haus.pk %}">{% translate "Hausartikel" %}</a></li>
+{% endblock pfad %}
+
+{% block neu %}{% translate "Neuer Hausartikel" %}{% endblock neu %}
+
+{% block unterzeile %}
+<p class="text-body-secondary small mb-0">
+    {% translate "Für" %} <strong>{{ haus.name }}</strong>{% translate ". Ein Hausartikel gehört immer genau einem Haus. Für ein anderes Haus wird er dort angelegt." %}
+</p>
+{% endblock unterzeile %}
+
+{% block kopf_knoepfe %}
+{% if object %}
+<a href="{% url 'hausartikel_delete' object.pk %}" class="btn btn-outline-danger btn-sm">{% translate "Löschen" %}</a>
+{% endif %}
+{% endblock kopf_knoepfe %}
+
+{% block felder %}
+{% if weiter %}<input type="hidden" name="weiter" value="{{ weiter }}">{% endif %}
+{{ form.non_field_errors }}
+
+<div class="card mb-3">
+    <div class="card-header bg-body-tertiary">
+    {% blocktranslate with name=haus.name %}Was {{ name }} führt{% endblocktranslate %}
+</div>
+    <div class="card-body">
+        {{ form.quelle|as_crispy_field }}
+        {{ form.artikelnummer|as_crispy_field }}
+        {{ form.name|as_crispy_field }}
+        {{ form.basiseinheit|as_crispy_field }}
+        {{ form.ean|as_crispy_field }}
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header bg-body-tertiary">{% translate "Warengruppe" %}</div>
+    <div class="card-body">
+        {{ form.warengruppe|as_crispy_field }}
+
+        <div data-neu-wenn-leer="{{ form.warengruppe.id_for_label }}">
+            <hr>
+
+            <div class="text-body-secondary small mb-3">{% translate "Oder neu anlegen:" %}</div>
+            {{ form.neue_warengruppe|as_crispy_field }}
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header bg-body-tertiary">{% translate "Ware" %}</div>
+    <div class="card-body">
+        <p class="text-body-secondary small">
+            {% translate "Führt ein anderes Haus dieselbe Ware schon, hier auswählen, sonst unten eine neue beschreiben." %}
+        </p>
+        {{ form.ware|as_crispy_field }}
+        {# Only if the house counts in another dimension than the chosen #}
+        {# product. The script hides it otherwise.                       #}
+        {{ form.faktor_zur_ware|as_crispy_field }}
+
+        <div data-neu-wenn-leer="{{ form.ware.id_for_label }}">
+            <hr>
+
+            <div class="text-body-secondary small mb-3">{% translate "Oder neu anlegen:" %}</div>
+            {{ form.neuer_ware|as_crispy_field }}
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header bg-body-tertiary">{% translate "Inventurart" %}</div>
+    <div class="card-body">
+        {{ form.inventurart|as_crispy_field }}
+        {% if form.geltung %}
+        {# Asked only once the type changes: the script shows it then. #}
+        {# Without script it stands there and is needed only then.     #}
+        <div data-geltung="{{ form.inventurart.id_for_label }}"
+            data-gespeichert="{{ form.initial.inventurart|default:'' }}">
+            {{ form.geltung|as_crispy_field }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if einstellungen %}
+{# The settings of the product the article has. If another one is    #}
+{# chosen above, the script hides the card and the server skips it.  #}
+<div class="card mb-3" data-einstellungen-der-ware="{{ einstellungen.instance.pk }}">
+    <div class="card-header bg-body-tertiary">{% translate "Einstellungen der Ware" %}</div>
+    <div class="card-body">
+        <div class="alert alert-warning small" role="note">
+            <strong>{% translate "Gilt in jedem Haus." %}</strong>
+            {% translate "Diese Angaben gehören zur Ware, nicht zum Hausartikel. Was hier geändert wird, ändert sich überall, wo die Ware geführt wird." %}
+            {% if andere_haeuser %}
+            {% blocktranslate with haus=haus.name haeuser=andere_haeuser|join:", " %}Neben {{ haus }} führen sie: {{ haeuser }}.{% endblocktranslate %}
+            {% else %}
+            {% blocktranslate with haus=haus.name %}Bisher führt sie nur {{ haus }}.{% endblocktranslate %}
+            {% endif %}
+            {% translate "Einheit und vorhandene Gebinde ändern sich auf der" %}
+            <a href="{% url 'ware_detail' einstellungen.instance.pk %}" class="alert-link">{% translate "Seite der Ware" %}</a>.
+        </div>
+        {{ einstellungen|crispy }}
+    </div>
+</div>
+{% endif %}
+
+{# 'id': the links "no active packs" and "change" lead straight here. #}
+<div class="card mb-3 sprungziel" id="gebinde">
+    <div class="card-header bg-body-tertiary">{% translate "Gebinde" %}</div>
+    <div class="card-body">
+
+        {% if object %}
+        <p class="text-body-secondary small">
+    {% blocktranslate with name=object.ware.name %}Diese Gebinde hat „{{ name }}“ heute. Sie gelten für alle Häuser:{% endblocktranslate %}
+</p>
+        {# Inactive in words too, not only in grey: whoever types it below gets asked. #}
+        <p>
+            {% for gebinde in object.ware.gebinde.all %}
+            <span class="badge rounded-pill bg-body-secondary text-body border text-body me-1
+                {% if not gebinde.aktiv %}ausgegraut{% endif %}">
+                {{ gebinde.anzeigename }}
+                <span class="text-body-secondary">
+                    · {{ gebinde.faktor_in_basiseinheit|floatformat:"-3" }}
+                    {{ object.ware.basiseinheit.kurz }}
+                    {% if not gebinde.aktiv %}· {% translate "inaktiv" %}{% endif %}
+                </span>
+            </span>
+            {% empty %}
+            <span class="text-body-secondary small">{% translate "noch keine" %}</span>
+            {% endfor %}
+        </p>
+        <div class="text-body-secondary small mb-3">{% translate "Weitere anlegen:" %}</div>
+        {% endif %}
+
+        {% translate "Weiteres Gebinde" as weiteres_gebinde %}
+        {% include "components/formset_rows.html" with formset=gebinde_formset knopf=weiteres_gebinde %}
+
+    </div>
+</div>
+
+{# The locations only when creating: later they are maintained at the location itself. #}
+{% if not object %}
+
+<div class="card mb-3">
+    <div class="card-header bg-body-tertiary">{% translate "Erwartet an diesen Orten" %}</div>
+    <div class="card-body">
+        {{ orte_formset.management_form }}
+        {{ orte_formset.gebindenamen|json_script:"vorhandene-gebinde" }}
+
+        {% for fehler in orte_formset.non_form_errors %}
+        <div class="alert alert-danger">{{ fehler }}</div>
+        {% endfor %}
+
+        {% for ort_form in orte_formset %}
+        <div class="border rounded p-3 mb-2">
+            {{ ort_form.ort }}
+            {{ ort_form.ort.errors }}
+            <div class="form-check">
+                {{ ort_form.erwartet }}
+                <label class="form-check-label fw-semibold"
+                    for="{{ ort_form.erwartet.id_for_label }}">
+                    {{ ort_form.ort_objekt.name }}
+                </label>
+            </div>
+
+            <div class="mt-2 ms-4" data-gebindeauswahl
+                data-prefix="{{ ort_form.gebinde.html_name }}">
+                {# The entries one by one: rendered as a whole, the enclosing #}
+                {# div carries the Bootstrap class and appears as an empty    #}
+                {# box, even if there are no packs.                           #}
+                {% for eintrag in ort_form.gebinde %}
+                <div class="form-check form-check-inline">
+                    {{ eintrag.tag }}
+                    <label class="form-check-label" for="{{ eintrag.id_for_label }}">
+                        {{ eintrag.choice_label }}
+                        {# A typed pack the product carries inactive, as the counting list marks it. #}
+                        {% if eintrag.data.value in orte_formset.inaktive %}
+                        <span class="badge bg-body-secondary text-body border ms-1">{% translate "inaktiv" %}</span>
+                        {% endif %}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            {{ ort_form.gebinde.errors }}
+        </div>
+        {% empty %}
+        <p class="text-body-secondary mb-0">
+    {% blocktranslate with name=haus.name %}{{ name }} hat noch keine Orte. Sie werden auf der{% endblocktranslate %}
+<a href="{{ haus.get_absolute_url }}">{% translate "Haus-Seite" %}</a> {% translate "angelegt." %}
+        </p>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock felder %}
+
+{% block abbrechen_url %}{% if weiter %}{{ weiter }}{% elif object %}{{ object.get_absolute_url }}{% else %}{% url 'hausartikel_list' haus.pk %}{% endif %}{% endblock abbrechen_url %}
+
+{% block extra_scripts %}
+{% include "components/script.html" with name="or_new" %}
+{% translate "1 {haus} = wie viele {ware}?" as umrechnung %}
+{% include "components/script.html" with name="house_unit" wert=umrechnung %}
+{% if not object %}
+{% include "components/script.html" with name="formset" %}
+{% include "components/script.html" with name="hausartikel_form" %}
+{% endif %}
+{# The question "this article or all" hides until the type changes. Only the #}
+{# edit form asks it (until 10/2026 the script was loaded only when creating). #}
+{% if form.geltung %}
+{% include "components/script.html" with name="type_scope" %}
+{% endif %}
+{% if einstellungen %}
+{% include "components/ware_form_script.html" with praefix=einstellungen.prefix %}
+{% include "components/script.html" with name="ware_settings" %}
+{% endif %}
+{% endblock extra_scripts %}

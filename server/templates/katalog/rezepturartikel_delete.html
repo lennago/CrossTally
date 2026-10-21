@@ -1,0 +1,14 @@
+{% extends "components/delete_page.html" %}
+{% load i18n %}
+
+{% block art %}{% translate "Rezepturartikel löschen" %}{% endblock art %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'rezepturartikel_list' %}">{% translate "Rezepturartikel" %}</a></li>
+{% endblock pfad %}
+
+{% block folgen %}
+<p class="mb-0">
+    {% blocktranslate with komponenten=object.komponenten.all|length erwartet_an=object.erwartet_an.all|length %}Die {{ komponenten }} Rezepturkomponente(n) und {{ erwartet_an }} Ortserwartung(en) entfallen mit. Die beteiligten Hausartikel bleiben unberührt.{% endblocktranslate %}
+</p>
+{% endblock folgen %}

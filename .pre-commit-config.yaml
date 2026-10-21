@@ -1,0 +1,8 @@
+# Secrets must not reach the public repository. 'pre-commit install' puts the
+# hook into .git/hooks, and 'secrets.yml' in the CI is only the net behind it.
+# Until 10/2026 the hook existed only on the maintainer's machine.
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks

@@ -1,0 +1,168 @@
+<h3>Format</h3>
+<p>
+    First choose the system the file comes from. It determines which file is expected
+    and how it is read. For <strong>WinTICKET</strong> that is the site's article
+    stock list, as xlsx, xls or csv. The help next to the file field names the right file
+    for each format.
+</p>
+<p>
+    In WinTICKET (its menus are German) the list sits under <strong>Berichte →
+    Warenwirtschaft → Artikelbestand → Artikelbestandsliste nach Artikelbezeichnung
+    (708)</strong>. When saving, choose “Excel-Datei ohne Formatierung” (Excel file
+    without formatting).
+</p>
+<h3>What the plan contains</h3>
+<p>
+    Only what needs a decision. The import recognises an article by
+    <strong>number and name</strong>: whatever the site already carries exactly like this,
+    and about which the file says nothing different, is missing from the plan, as is
+    everything not countable. How many those were is stated in the message above the plan.
+</p>
+<p>
+    Every block is structured by <strong>article group</strong>, and both levels can be
+    expanded and collapsed. The head of an article group carries buttons that set all of
+    its lines at once. A whole article group is thus done with one click, deposits and
+    vouchers as <em>Not countable</em>, for instance.
+</p>
+<p>
+    A plan has at most <strong>{{ hoechstens_planzeilen }} lines</strong>, because applying it
+    sends it back to the server in one piece. If it would grow larger, the import says so
+    when the file is read. Then spread the article groups over several exports and import
+    them one after the other. An article group missing from a file stays untouched (see
+    <em>Missing from the file</em>).
+</p>
+<h3>New articles</h3>
+<p>
+    <em>Active</em> means create and carry it, <em>Inactive</em> means create it but do not
+    count it for now, such as seasonal goods. <em>Discontinued</em> creates the article for
+    the record only: it takes neither number nor product and gets no line in any
+    inventory. In the counting app it can be added at the very end if the inventory counts
+    its inventory type. That is what is suggested when the file holds no quantity per pack. <em>Not
+    countable</em> puts the product into the family “Not countable”: for deposits, vouchers
+    and everything the merchandise management system carries as an article without it being one. That applies at every
+    site. One click moves the line into the matching block. An article cannot be left
+    uncreated. It would otherwise show up here at every import again.
+</p>
+<p>
+    The column <strong>Inventory type</strong> says in which tab the new article is counted.
+    <em>As for the product</em> takes the type the other articles of the product already
+    stand in. A new product thus goes into the first type of the list. Another choice
+    applies to this article only.
+</p>
+<h3>Discontinued</h3>
+<p>
+    This article existed before and is discontinued. <em>Bring back</em> makes it active
+    again. If another article carries the number in the meantime, that one is discontinued
+    in the process. The note under the line names it.
+</p>
+<h3>Conflicts</h3>
+<p>
+    The article is carried, but the file says something else: a different article group, a
+    different unit or a quantity per pack that is not kept on the product. Nothing is
+    preselected: every conflict is decided separately, and as long as one is open the plan
+    cannot be applied. With the choice the line moves to the <strong>resolved
+    conflicts</strong>. The choice can still be changed there. <em>Leave</em> touches
+    nothing. The line then shows up here again at the next import. <em>Change</em> takes the
+    article group and the unit from the file, together with the selected product and the
+    packs in the field.
+</p>
+<p>
+    The unit is the one of the site. The product keeps its own, because that is the unit
+    the report across sites uses. If the site counts in a different dimension than the
+    product (pieces instead of kilograms), the line asks for the <strong>conversion</strong>:
+    how many units of the product one piece is. The field names the direction (“1 pcs = how
+    many g?”): a pack of 1 kg of a product carried in g is 1000, not 0.001. Without it the
+    line is not applied. The
+    packs in the field are in the unit of the file and are converted into the unit of the
+    product. If the plan could not show the product's packs in this unit because the
+    conversion was still missing, the note names them. They stay as they are, with their
+    names and state, and the field only adds what the product lacks. Whoever enters the
+    conversion gets the line back with the product's packs before it is applied.
+</p>
+<p>
+    A new unit waits as long as an inventory that is not closed yet carries a target, an
+    open target stock line or a difference by hand for the article. Those numbers are in the
+    current unit. Closed results keep their unit anyway.
+</p>
+<p>
+    If an article differs in several respects, <em>Change</em> offers which of them is
+    applied: article group, unit, packs. Everything is selected at first. Whatever is
+    deselected stays as it is and shows up here again at the next import. If the unit
+    stays, the article keeps its conversion too, and the line does not ask for it.
+</p>
+<h3>Number with a different name</h3>
+<p>
+    Whether it was renamed or reassigned is not something the file reveals. <em>Rename</em>
+    carries the existing article on under the new name. <em>Replace</em> discontinues it and
+    creates a new one beside it. As what, is offered below. If there is no product with the
+    new name, the one of the existing article is preselected. A reassigned number mostly
+    belongs to another product, so check the product before <em>Replace</em>.
+</p>
+<h3>Missing from the file</h3>
+<p>
+    These articles are carried by the site from the same system, the file no longer knows
+    them. WinTICKET exports every selected article group in full, so a missing number has
+    been delisted there. The
+    choices are <em>Leave</em>, <em>Inactive</em> and <em>Discontinued</em>.
+    <em>Leave</em> is preselected: an accidentally incomplete export must not clear
+    anything away.
+</p>
+<p>
+    An article group for which the file holds <strong>not a single</strong> line counts as
+    not selected. Its articles do not enter the plan at all. Anyone who knows that nothing
+    changed in an article group simply leaves it out of the export. Which ones those were
+    is stated in the message above the plan. If more than half of a selected article group
+    is missing, a warning appears: the export was probably filtered.
+</p>
+<h3>Product</h3>
+<p>
+    The <strong>product</strong> is the identity of an article across all sites. Left empty, a new
+    one is created, either under the name of the article or under the name you enter below.
+    A site carries the same product only once. If two lines reach for the same one, both are
+    marked red. If a new article carries the name of a product that the site already carries
+    under a different number, nothing is preselected: the new product then needs a name of
+    its own.
+</p>
+<h3>Packs</h3>
+<p>
+    The <strong>pack</strong> field holds everything the product carries, plus the
+    quantities that only appear in the file. Whatever is already right stays untouched when
+    the plan is applied. Each quantity occurs only once per product.
+</p>
+<p>
+    The field belongs to the product the plan suggested. If you choose another one, or a
+    product where none was suggested, the line comes back with that product's packs on
+    <em>Apply now</em>. Check them. Only the next apply writes. The same if you create a
+    new product instead of the suggested one: then the field holds only the packs from the
+    file. And if you change the conversion the product's packs in the field were converted
+    with. If the article carries one already, it is in the field.
+</p>
+<p>
+    Packs are matched by <strong>quantity</strong>, not by name. Changing a name renames
+    the pack, and the lines already counted stay attached to it. A new quantity creates a
+    pack. A deleted line sets the pack to inactive. Nothing is deleted, because counts from
+    earlier inventories hang on a pack.
+</p>
+<p>
+    Packs belong to the product and apply at every site. What is dropped here is dropped
+    everywhere.
+</p>
+<p>
+    If the file names the quantity of an <strong>inactive</strong> pack, it stands in the
+    field under its own name, and the note under the line says so. Applying then makes it
+    active again, at every site, and the message afterwards counts it. Whoever does not
+    want that takes the line out of the field. If the site already carries the article, the
+    line is a conflict, and <em>Change</em> brings the pack back.
+</p>
+<p>
+    If the name already exists on the product with a different quantity, a name of its own
+    is suggested (“crate 20”). That way the existing pack stays as it is and the site gets a
+    second one. An inactive pack keeps its name too. If the suggestion is taken as well, it
+    counts on (“crate 20 (2)”). The name can be changed.
+</p>
+<p>
+    For products counted in pieces, <em>Einzeln = 1</em> (the loose single unit, stored
+    under its German name) is in the field as well.
+    The merchandise management system only knows the purchase pack, but what stands on the shelf is an opened one.
+    If the product carries the single unit inactive, it stays that way.
+</p>

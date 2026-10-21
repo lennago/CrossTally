@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{# The expected stock per article by hand. First the articles without          #}
+{# expected stock, then those with. Those with are disabled until "Edit"       #}
+{# releases the row: the script lifts 'disabled' and sets the release, the     #}
+{# server reads the value only with it (see 'SollPflegeForm').                 #}
+
+{% block title %}{% blocktranslate %}Sollbestand pflegen: {{ inventur }}{% endblocktranslate %}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4 max-breite-80">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'inventur_list' %}">{% translate "Inventuren" %}</a></li>
+            <li class="breadcrumb-item">
+                <a href="{{ inventur.get_absolute_url }}">{{ inventur }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{% translate "Sollbestand pflegen" %}</li>
+        </ol>
+    </nav>
+
+    <div class="kopfleiste bg-body py-2 mb-1">
+        <h1 class="h3 mb-0">{% translate "Sollbestand pflegen" %}</h1>
+    </div>
+    <p class="text-body-secondary mb-3">
+    {% blocktranslate with name=inventur.haus.name %}Das Soll je Artikel, in der Einheit, in der {{ name }} ihn führt. Erst die Artikel ohne Soll, darunter die mit. Ein Soll, das schon steht, wird erst nach „Bearbeiten“ geändert.{% endblocktranslate %}
+    </p>
+
+    <form method="post" novalidate data-sofort>
+        {% csrf_token %}
+
+        <div class="card mb-4">
+            <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center">
+                <span>{% translate "Ohne Soll" %}</span>
+                <span class="text-body-secondary small">{{ form.ohne|length }}</span>
+            </div>
+            {% if form.ohne %}
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">{% translate "Nummer" %}</th>
+                            <th scope="col">{% translate "Artikel" %}</th>
+                            <th scope="col">{% translate "Warengruppe" %}</th>
+                            <th scope="col">{% translate "Soll" %}</th>
+                            <th scope="col"><span class="visually-hidden">{% translate "Aktionen" %}</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for feld in form.ohne %}
+                        <tr{% if feld.soll.errors %} class="tabellenzeile-auffaellig"{% endif %}>
+                            <td class="font-monospace text-body-secondary breite-7">
+                                {{ feld.zeile.hausartikel.artikelnummer|default:"–" }}
+                            </td>
+                            <td>{% include "katalog/components/artikel_name.html" with artikel=feld.zeile.hausartikel %}</td>
+                            <td class="small text-body-secondary breite-14">
+                                {{ feld.zeile.hausartikel.warengruppe.anzeigename }}
+                            </td>
+                            <td class="breite-16">
+                                <div class="input-group input-group-sm">
+                                    {{ feld.soll }}
+                                    <span class="input-group-text">{{ feld.zeile.hausartikel.basiseinheit.kurz }}</span>
+                                </div>
+                                {% if feld.soll.errors %}<div class="invalid-feedback d-block">{{ feld.soll.errors|join:" " }}</div>{% endif %}
+                            </td>
+                            <td class="breite-10"></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="card-body py-2 small text-body-secondary">
+                {% translate "Jeder Artikel, der dran ist, hat sein Soll." %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center">
+                <span>{% translate "Mit Soll" %}</span>
+                <span class="text-body-secondary small">{{ form.mit|length }}</span>
+            </div>
+            {% if form.mit %}
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">{% translate "Nummer" %}</th>
+                            <th scope="col">{% translate "Artikel" %}</th>
+                            <th scope="col">{% translate "Herkunft" %}</th>
+                            <th scope="col">{% translate "Soll" %}</th>
+                            <th scope="col"><span class="visually-hidden">{% translate "Aktionen" %}</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for feld in form.mit %}
+                        <tr{% if feld.soll.errors %} class="tabellenzeile-auffaellig"{% elif feld.offen %} class="tabellenzeile-auffaellig"{% endif %}>
+                            <td class="font-monospace text-body-secondary breite-7">
+                                {{ feld.zeile.hausartikel.artikelnummer|default:"–" }}
+                            </td>
+                            <td>{% include "katalog/components/artikel_name.html" with artikel=feld.zeile.hausartikel %}</td>
+                            <td class="small text-body-secondary breite-14">
+                                {{ feld.zeile.soll.get_herkunft_display }}
+                            </td>
+                            <td class="breite-16">
+                                <div class="input-group input-group-sm">
+                                    {{ feld.soll }}
+                                    <span class="input-group-text">{{ feld.zeile.hausartikel.basiseinheit.kurz }}</span>
+                                </div>
+                                {% if feld.soll.errors %}<div class="invalid-feedback d-block">{{ feld.soll.errors|join:" " }}</div>{% endif %}
+                            </td>
+                            <td class="breite-10">
+                                {{ feld.frei }}
+                                <button class="btn btn-outline-secondary btn-sm" type="button" data-frei{% if feld.offen %} hidden{% endif %}>
+                                    {% translate "Bearbeiten" %}
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="card-body py-2 small text-body-secondary">
+                {% translate "Noch kein Artikel hat ein Soll." %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="fussleiste d-flex align-items-center flex-wrap gap-2 bg-body border-top py-3">
+            <button class="btn btn-success" type="submit">{% translate "Speichern" %}</button>
+            <a href="{{ inventur.get_absolute_url }}" class="btn btn-outline-secondary">{% translate "Zurück zur Inventur" %}</a>
+            <span class="text-body-secondary small ms-2">
+                {% translate "Ein leeres Feld bei einer freigegebenen Zeile entfernt das Soll. Eine hochgeladene Datei ersetzt alles, was hier steht." %}
+            </span>
+        </div>
+    </form>
+
+</div>
+{% include "components/script.html" with name="soll_edit" %}
+{% endblock content %}

@@ -1,0 +1,94 @@
+<h3>Roles</h3>
+<p>
+    <strong>Counters</strong> only use the counting app. <strong>Managers</strong> may also
+    use this web interface: maintaining master data, creating and closing inventories.
+    <strong>Administrators</strong> additionally reach the administration and the backups.
+    An administrator is created by an administrator in the administration, which has the box
+    for it. An administrator is always a manager too.
+</p>
+<h3>Sites</h3>
+<p>
+    The sites of a counter are a suggestion: for an inventory of these sites they appear at
+    the top of the “Counters” page, and when creating one their site stands next to the
+    name. They are still entered there explicitly. For
+    managers the selection is hidden, because they are not tied to a site. Their sites are
+    not lost in the process.
+</p>
+<h3>Language</h3>
+<p>
+    The language applies to the person's interface{% if mail_moeglich %} and to their
+    e-mails{% endif %}. When creating, your own is preselected. The person can change it later in the
+    account menu.
+</p>
+{% if mail_moeglich %}
+<h3>Invitation or password</h3>
+<p>
+    A new account is invited: the person gets an e-mail with a link, sets their password
+    there and is activated with it. That way nobody else knows their password. Until then
+    the account shows as <strong>invited</strong> in the list, and on its page the invitation
+    can be sent again, say when the link has expired. It lasts {{ einladung_tage }} day{{ einladung_tage|pluralize }}. Whoever would
+    rather give the password right away ticks <strong>Set the password yourself</strong>.
+    Then the two fields appear.
+</p>
+<p>
+    Whoever switches an invited account on and deactivates it again makes every link sent
+    so far invalid. The account stays invited, and a new invitation brings a link that
+    works again.
+</p>
+{% else %}
+<h3>First password</h3>
+<p>
+    When creating the account you give the first password and pass it on to the person.
+    They change it themselves afterwards.
+</p>
+{% endif %}
+<h3>Address</h3>
+<p>
+    The address is changed by the person themselves, in the counting app through the
+    account menu and on the website through the account menu or the block page, or by an
+    administrator here and in the administration.
+    A manager sees the field greyed out only.{% if mail_moeglich %} A new address first gets
+    a mail with a link. The address applies once the person has confirmed it, until then the
+    previous one stays. That way a mistyped address never gets into the account. Only an
+    invited or deactivated account gets the new address at once: there is nothing to confirm
+    there, and the invitation should go to the right address. Only the last link counts. A
+    new password, a removed passkey or deactivating takes it back.{% endif %}
+</p>
+<h3>Password</h3>
+<p>
+    The password is not changed here. Everyone changes their own: managers through the menu
+    at the top right, counters in the counting app through the account menu or through the
+    links on the block page of the website. It is stored only as a check value
+    anyway. Nobody can read it out, not even an administrator. Whoever forgets theirs gets a
+    new one set by an administrator in the administration. A manager cannot do
+    that.{% if mail_moeglich %} “Forgot your password?” on the sign-in page works too.{% endif %}
+    A new password signs the account out on every device, in the counting app too. Only
+    whoever changes their own stays signed in on the device they do it on. What has not been
+    sent on the others yet stays and goes out after the next sign-in.
+</p>
+{% if mail_moeglich %}
+<h3>Notifications</h3>
+<p>
+    Whoever changes, deactivates or deletes an account sends the person an e-mail. It names
+    what changed, with the old and the new value, and who did it. When the address changes,
+    it goes to the old one and to the new one. Likewise everyone gets a mail when their
+    password is set anew or a passkey is added or removed, even when they did it themselves.
+    A deactivated account only gets the mail about the deactivation. Only once it is active
+    again do mails come again.
+</p>
+<p>
+    What the mails say is set by an administrator in the administration under
+    <strong>Mail texts</strong>. That is also where it is decided whether a mail names who
+    triggered it.
+</p>
+{% endif %}
+<h3>When someone leaves</h3>
+<p>
+    Whoever leaves the business has their account <strong>deleted</strong>, not set to
+    inactive. No count data hangs on the account. Only the assignments to sites and
+    inventories and the passkeys disappear. An account is created again in a minute,
+    should somebody come back after all. Inactive is meant for a temporary case, such as a longer absence.
+    Whoever sets an account to inactive signs it out everywhere, on the website and in the
+    counting app. Once it is active again, the person signs in anew. What their counting app has
+    not sent yet stays and goes out after the new sign-in.
+</p>

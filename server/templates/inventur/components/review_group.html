@@ -1,0 +1,36 @@
+{% load i18n %}
+{# One group of the check list, by product group or by product family.          #}
+{#                                                                               #}
+{# By family the groups form a tree: a family holds its subfamilies first and    #}
+{# its own articles after them, and this file includes itself for every family   #}
+{# below. Every family carries the sum of its subtree. By product group the      #}
+{# group is a plain block without anything below it.                             #}
+<details class="border rounded mb-2" data-gruppe="{{ gruppe.kennung }}">
+    <summary class="px-3 py-2 bg-body-tertiary d-flex justify-content-between gap-3">
+        <strong>{{ gruppe.name }}</strong>
+        <span class="small text-body-secondary text-end">
+            {% blocktranslate with anzahl=gruppe.anzahl %}{{ anzahl }} Artikel{% endblocktranslate %}{% if gruppe.anzahl_auffaellig %},
+            <span class="text-warning-emphasis">
+    {% blocktranslate with anzahl_auffaellig=gruppe.anzahl_auffaellig %}{{ anzahl_auffaellig }} mit Abweichung{% endblocktranslate %}
+</span>{% endif %}
+            {# Only by product family: there is a lead unit there in which   #}
+            {# the differences of the products can be summed up.             #}
+            {% if gruppe.wert %}
+            <span class="d-block" title="{% translate 'Summe der Differenzen nach jetzigem Stand' %}">
+                {% translate "Differenz gesamt:" %}
+                <span class="font-monospace fw-semibold text-body" data-wert="{{ gruppe.wert }}"><span class="{{ gruppe.differenz_klasse }} differenz-leise">{{ gruppe.differenz|default:"—" }}</span></span>
+            </span>
+            {% endif %}
+        </span>
+    </summary>
+    {% if gruppe.unterbloecke %}
+    <div class="ps-3 pt-2">
+        {% for unter in gruppe.unterbloecke %}
+        {% include "inventur/components/review_group.html" with gruppe=unter %}
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% if gruppe.eintraege %}
+    {% include "inventur/components/review_rows.html" with zeilen=gruppe.eintraege gegliedert=True %}
+    {% endif %}
+</details>

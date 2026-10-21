@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load i18n %}
+{# The link from the mail. Nothing happens on opening: the button writes the  #}
+{# address ('EmailBestaetigenView'). Nobody needs to be signed in here. A dead #}
+{# link names every way it dies ('Adresswechsel.zuruecknehmen').                #}
+
+{% block title %}{% translate "E-Mail-Adresse bestätigen" %}{% endblock title %}
+
+{% block content %}
+<div class="container py-5 max-breite-30">
+
+    <div class="card">
+        <div class="card-body p-4">
+
+            {% if wechsel and not vergeben %}
+            <h1 class="h4 mb-2">{% translate "E-Mail-Adresse bestätigen" %}</h1>
+            <p class="mb-3">
+                {% blocktranslate with email=wechsel.neu username=wechsel.konto.username %}Soll <strong>{{ email }}</strong> die Adresse des Kontos <strong>{{ username }}</strong> werden?{% endblocktranslate %}
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                <button class="btn btn-success w-100" type="submit">{% translate "Ja, Adresse übernehmen" %}</button>
+            </form>
+            {% elif vergeben %}
+            <h1 class="h4 mb-2">{% translate "Adresse schon vergeben" %}</h1>
+            <p class="mb-3">
+                {% translate "Diese Adresse gehört inzwischen zu einem anderen Konto. Trag eine andere ein, oder sprich mit einem Administrator." %}
+            </p>
+            <a href="{% url 'login' %}" class="btn btn-outline-secondary">{% translate "Zur Anmeldung" %}</a>
+            {% else %}
+            <h1 class="h4 mb-2">{% translate "Link ungültig" %}</h1>
+            <p class="mb-3">
+                {% translate "Dieser Link gilt nicht mehr. Er ist abgelaufen, wurde schon benutzt oder zurückgenommen, etwa durch einen neueren oder ein neues Passwort. Trag die Adresse noch einmal ein, dann kommt ein neuer." %}
+            </p>
+            <a href="{% url 'login' %}" class="btn btn-outline-secondary">{% translate "Zur Anmeldung" %}</a>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

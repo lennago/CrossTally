@@ -1,0 +1,35 @@
+{% extends "admin/base.html" %}
+
+{# The admin in the site's clothing: our bar at the top, the colours from      #}
+{# Bootstrap ('static/admin_site.css'). The inside stays the admin: its lists, #}
+{# filters and the delete preview are the reason why it still exists here      #}
+{# at all.                                                                     #}
+{% load i18n static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} &middot; {% endif %}{{ title }} &middot; {% translate "Verwaltung" %}{% endblock %}
+
+{# The admin's dark mode stays on, because it listens to the same choice as the #}
+{# site (key 'theme'), see 'components/theme_script.html'. The script is in the #}
+{# head so nothing flashes.                                                     #}
+{# Our stylesheet is in 'extrahead' and not in 'extrastyle': the subpages       #}
+{# append their own files there via '{{ block.super }}' (forms.css,             #}
+{# changelists.css). Those would otherwise come after ours and win.             #}
+{% block extrahead %}
+{% include "components/theme_script.html" %}
+<link rel="stylesheet" href="{% static 'admin_site.css' %}">
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+{% if eigenes_logo %}
+<link rel="icon" href="{% url 'icon' name='favicon-32' %}?stand={{ logo_stand }}" sizes="32x32" type="image/png">
+{% else %}
+<link rel="icon" href="{% static 'logo.svg' %}" type="image/svg+xml">
+{% endif %}
+{% endblock %}
+
+{% block header %}{% include "components/demo_band.html" %}{% include "admin/components/navbar.html" %}{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{# Popups have no bar. The script notices that itself and does nothing.    #}
+{% block extrabody %}{% include "components/script.html" with name="admin_navbar" %}{% endblock %}

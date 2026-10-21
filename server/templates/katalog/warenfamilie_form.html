@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if familie %}{% blocktranslate with name=familie.anzeigename %}{{ name }} bearbeiten{% endblocktranslate %}{% elif form.oberfamilie %}{% blocktranslate with name=form.oberfamilie.anzeigename %}Neue Unterfamilie von {{ name }}{% endblocktranslate %}{% else %}{% translate "Neue Warenfamilie" %}{% endif %}{% endblock title %}
+
+{% block content %}
+<div class="container py-4 max-breite-52">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item">
+                <a href="{% url 'warenfamilie_list' %}">{% translate "Warenfamilien" %}</a>
+            </li>
+            {# Editing: the family with the ones above it, as on its own page. #}
+            {# Creating below a family: that family's path.                  #}
+            {% if familie %}
+            {% for oben in familie.pfad %}
+            <li class="breadcrumb-item"><a href="{{ oben.get_absolute_url }}">{{ oben.anzeigename }}</a></li>
+            {% endfor %}
+            <li class="breadcrumb-item active" aria-current="page">{% translate "Bearbeiten" %}</li>
+            {% else %}
+            {% if form.oberfamilie %}
+            {% for oben in form.oberfamilie.pfad %}
+            <li class="breadcrumb-item"><a href="{{ oben.get_absolute_url }}">{{ oben.anzeigename }}</a></li>
+            {% endfor %}
+            {% endif %}
+            <li class="breadcrumb-item active" aria-current="page">{% translate "Neu" %}</li>
+            {% endif %}
+        </ol>
+    </nav>
+
+    <div class="kopfleiste bg-body py-2 mb-3">
+        <h1 class="h3 mb-0">
+            {% if familie %}{% blocktranslate with name=familie.anzeigename %}{{ name }} bearbeiten{% endblocktranslate %}{% elif form.oberfamilie %}{% blocktranslate with name=form.oberfamilie.anzeigename %}Neue Unterfamilie von {{ name }}{% endblocktranslate %}{% else %}{% translate "Neue Warenfamilie" %}{% endif %}
+        </h1>
+    </div>
+
+    {# With products in families below there is something to sum even     #}
+    {# before a box is ticked: the script keeps the unit block visible.     #}
+    <form method="post" novalidate data-familienformular
+        {% if form.waren_darunter or form.unterfamilien %}data-waren-darunter{% endif %}>
+        {% csrf_token %}
+        {# The family this one is created below: rides along, so the choice   #}
+        {# of products is the same when validating as it was when shown.       #}
+        {% if form.oberfamilie %}<input type="hidden" name="unter" value="{{ form.oberfamilie.pk }}">{% endif %}
+
+        <div class="card mb-3">
+            <div class="card-body">
+                {{ form.name|as_crispy_field }}
+                {{ form.beschreibung|as_crispy_field }}
+                {# A family may stand below another one: its products are  #}
+                {# summed there too. "Not countable" stands alone.          #}
+                {% if not form.instance.sammelt_ignorierte %}
+                {{ form.uebergeordnet|as_crispy_field }}
+                {% endif %}
+            </div>
+        </div>
+
+        {# The products stand before the unit: only from them follows which     #}
+        {# unit is up for choice at all.                                        #}
+        {#                                                                      #}
+        {# Two columns: on the left what is up for choice, on the right what is #}
+        {# in. The checkbox itself is hidden but there: a click on the row hits #}
+        {# the label and toggles it. Without JavaScript all rows stay on the    #}
+        {# left and the chosen ones are highlighted. The form gets the same     #}
+        {# data in both cases.                                                  #}
+        {% for fehler in form.ware.errors %}
+        <div class="alert alert-danger py-2">{{ fehler }}</div>
+        {% endfor %}
+
+        <div class="row g-3 mb-3" data-warenwahl>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-body-tertiary">{% translate "Zur Wahl" %}</div>
+                    <div class="card-body">
+                        <p class="text-body-secondary small">
+                            {% if form.oberfamilie %}
+                            {% blocktranslate with name=form.oberfamilie.anzeigename %}Zuerst die Waren von „{{ name }}“, sie wechseln in die neue Unterfamilie. Danach die Waren, die noch keiner Familie angehören.{% endblocktranslate %}
+                            {% else %}
+                            {% translate "Nur Waren, die noch keiner Familie angehören, denn eine Ware gehört in genau eine." %}
+                            {% endif %}
+                        </p>
+                        <input class="form-control form-control-sm mb-2" type="search"
+                            data-warensuche placeholder="{% translate 'Ware suchen' %}" aria-label="{% translate 'Ware suchen' %}">
+                        <div class="overflow-auto border rounded max-hoehe-18"
+                            data-warenliste="frei">
+                            {% for kaestchen in form.ware %}
+                            <label class="wahlzeile" data-ware data-reihe="{{ forloop.counter0 }}"
+                                data-einheit="{{ kaestchen.data.value.instance.basiseinheit_id }}"
+                                data-name="{{ kaestchen.choice_label|lower }}">
+                                {{ kaestchen.tag }}
+                                <span>{{ kaestchen.choice_label }}</span>
+                                <span class="text-body-secondary small ms-auto">
+                                    {# Marked: the product stands in the family #}
+                                    {# above and moves down.                    #}
+                                    {% if form.oberfamilie and kaestchen.data.value.instance.warenfamilie_id == form.oberfamilie.pk %}
+                                    <span class="badge bg-body-secondary text-body border me-1">{{ form.oberfamilie.anzeigename }}</span>
+                                    {% endif %}
+                                    {{ kaestchen.data.value.instance.basiseinheit.kurz }}
+                                </span>
+                            </label>
+                            {% empty %}
+                            <p class="text-body-secondary small m-2">
+                                {% translate "Alle Waren sind bereits einer Familie zugeordnet." %}
+                            </p>
+                            {% endfor %}
+                        </div>
+                        <p class="text-body-secondary small mt-2 mb-0" data-leer-hinweis hidden>
+                            {% translate "Kein Treffer." %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-body-tertiary d-flex justify-content-between">
+                        <span>{% translate "In dieser Familie" %}</span>
+                        <span class="text-body-secondary small" data-warenzahl>{% translate "0 gewählt" %}</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-body-secondary small">
+                            {% translate "Ein Klick nimmt die Ware wieder heraus. Ohne Waren geht es auch: dann bleibt es bei Name und Beschreibung, und die erste Ware bestimmt später die Einheit." %}
+                        </p>
+                        <div class="overflow-auto border rounded max-hoehe-18"
+                            data-warenliste="gewaehlt"></div>
+                        <p class="text-body-secondary small mt-2 mb-0" data-nichts-gewaehlt>
+                            {% translate "Noch nichts gewählt." %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Created below a family: its other subfamilies can move under the new one. #}
+        {% if form.unterfamilien %}
+        <div class="card mb-3">
+            <div class="card-header bg-body-tertiary">{% translate "Unterfamilien übernehmen" %}</div>
+            <div class="card-body">
+                {% if form.unterfamilien.field.queryset %}
+                {{ form.unterfamilien|as_crispy_field }}
+                {% else %}
+                <p class="text-body-secondary small mb-0">
+                    {% blocktranslate with name=form.oberfamilie.anzeigename %}„{{ name }}“ hat noch keine Unterfamilien.{% endblocktranslate %}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {# "Not countable" sums nothing: the block stays off there, even if the    #}
+        {# script wanted to show it after the product choice ('d-none' wins).      #}
+        <div class="card mb-3{% if form.instance.sammelt_ignorierte %} d-none{% endif %}" data-einheitenblock hidden>
+            <div class="card-header bg-body-tertiary">{% translate "Summe der Familie" %}</div>
+            <div class="card-body">
+                <p class="text-body-secondary small">
+                    {% translate "In welcher Einheit die Summe stehen soll. Jede Einheit geht, auch die Portion: eine Familie in Litern kann lauter Flaschen in Stück halten. Fehlt einer Ware die Umrechnung dorthin, fragt das Formular beim Speichern danach." %}
+                </p>
+                {{ form.leiteinheit|as_crispy_field }}
+            </div>
+        </div>
+
+        {# What the chosen products still lack to be summed here or in a      #}
+        {# family above. The fields arise with the choice, so a family in    #}
+        {# litres can take a family of bottles in one go.                    #}
+        {% if form.faktorfelder %}
+        <div class="card mb-3">
+            <div class="card-header bg-body-tertiary">{% translate "Fehlende Umrechnungen" %}</div>
+            <div class="card-body">
+                <p class="text-body-secondary small">
+                    {% translate "Diese Waren führen noch keine Umrechnung in eine Einheit, in der sie hier oder in einer Familie darüber summiert werden. Der Faktor wird an der Ware gespeichert." %}
+                </p>
+                <div class="row g-3">
+                    {% for feld in form.faktorfelder %}
+                    <div class="col-md-4">{{ feld|as_crispy_field }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="fussleiste d-flex flex-wrap gap-2 bg-body border-top py-3">
+            <button class="btn btn-success" type="submit">{% translate "Speichern" %}</button>
+            <a href="{% if familie %}{{ familie.get_absolute_url }}{% else %}{% url 'warenfamilie_list' %}{% endif %}"
+                class="btn btn-outline-secondary">
+                {% translate "Abbrechen" %}
+            </a>
+        </div>
+    </form>
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% translate "{anzahl} gewählt" as gewaehlt %}
+{% include "components/script.html" with name="warenfamilie_form" wert=gewaehlt %}
+{% endblock extra_scripts %}

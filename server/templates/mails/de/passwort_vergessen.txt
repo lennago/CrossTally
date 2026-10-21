@@ -1,0 +1,10 @@
+Neues Passwort für {{ anwendung }}
+
+Hallo {{ vorname }},
+
+für dein Konto bei {{ anwendung }} wurde ein neues Passwort angefordert. Über diesen Link setzt du es:
+{{ link }}
+
+Dein Benutzername: {{ benutzername }}
+
+Der Link gilt {{ tage }} Tage und nur einmal. Hast du nichts angefordert, musst du nichts tun. Dein Passwort bleibt dann, wie es ist.

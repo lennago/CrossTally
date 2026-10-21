@@ -1,0 +1,16 @@
+{% load i18n %}
+{# The status of an inventory as a badge.                                          #}
+{# Call: {% include "inventur/components/status_badge.html" with inventur=... %}   #}
+{% if inventur.status == "VORBEREITUNG" %}
+<span class="badge text-bg-secondary">{% translate "Vorbereitung" %}</span>
+{% elif inventur.status == "ZAEHLUNG" and inventur.gesperrt %}
+{# Two badges that may stack: beside a long title the line runs out on the phone. #}
+<span class="d-inline-flex flex-wrap gap-1">
+    <span class="badge text-bg-primary">{% translate "Zählung läuft" %}</span>
+    <span class="badge text-bg-warning">{% include "inventur/components/lock_icon.html" %} {% translate "Gesperrt" %}</span>
+</span>
+{% elif inventur.status == "ZAEHLUNG" %}
+<span class="badge text-bg-primary">{% translate "Zählung läuft" %}</span>
+{% else %}
+<span class="badge text-bg-success">{% translate "Abgeschlossen" %}</span>
+{% endif %}

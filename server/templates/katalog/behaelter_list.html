@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Behälter" %}{% endblock title %}
+
+{% block content %}
+<div class="container py-4 seite-mittel">
+
+    <div class="kopfleiste bg-body d-flex flex-wrap gap-2 justify-content-between align-items-center mb-1 py-2">
+        <div class="d-flex align-items-center gap-3">
+            <h1 class="h3 mb-0">{% translate "Behälter" %}</h1>
+            <span class="text-body-secondary small" data-ersetzen="anzahl">
+    {% blocktranslate with behaelter=behaelter|length %}{{ behaelter }} Behälter{% endblocktranslate %}
+</span>
+        </div>
+        <a href="{% url 'behaelter_add' %}" class="btn btn-success btn-sm">{% translate "Neuer Behälter" %}</a>
+    </div>
+
+    {% url 'behaelter_list' as zurueck %}
+    {% include "components/list_filter.html" with zuruecksetzen=zurueck %}
+
+    <div data-liste>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    {% include "components/column_header.html" with kopf=spalten.name %}
+                    {% include "components/column_header.html" with kopf=spalten.tara klasse="text-center" breite="8rem" %}
+                    <th scope="col">{% translate "In den Häusern" %}</th>
+                    <th scope="col">{% translate "Wird benutzt für" %}</th>
+                    <th class="breite-13" scope="col"><span class="visually-hidden">{% translate "Aktionen" %}</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for eintrag in behaelter %}
+                <tr>
+                    <td>
+                        <a href="{% url 'behaelter_edit' eintrag.pk %}"
+                            class="link-body-emphasis link-offset-2 text-decoration-none">
+                            {{ eintrag.anzeigename }}
+                        </a>
+                        {% if eintrag.immer_erlaubt %}
+                        <span class="badge rounded-pill bg-body-secondary text-body border ms-1"
+                            title="{% translate 'Steht bei jeder Wiegung zur Wahl' %}">{% translate "überall" %}</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="text-center font-monospace text-body-secondary">
+                        {{ eintrag.tara|floatformat:"-3" }} g
+                    </td>
+
+                    <td class="small">
+                        {% for haus in eintrag.haeuser.all %}
+                        <span class="badge rounded-pill bg-body-secondary text-body border me-1">{{ haus.name }}</span>
+                        {% empty %}
+                        <span class="text-body-secondary">
+                            {% if eintrag.immer_erlaubt %}{% translate "überall" %}{% else %}{% translate "nur an seinen Artikeln" %}{% endif %}
+                        </span>
+                        {% endfor %}
+                    </td>
+
+                    <td class="small">
+                        {% for ware in eintrag.waren.all %}
+                        <a href="{{ ware.get_absolute_url }}"
+                            class="badge rounded-pill text-bg-secondary text-decoration-none me-1">
+                            {{ ware.name }}
+                        </a>
+                        {% endfor %}
+                        {% for artikel in eintrag.rezepturartikel.all %}
+                        <a href="{{ artikel.get_absolute_url }}"
+                            class="badge rounded-pill text-bg-info-subtle text-info-emphasis border border-info-subtle text-decoration-none me-1">
+                            {{ artikel.name }}
+                        </a>
+                        {% endfor %}
+                        {% if not eintrag.waren.all and not eintrag.rezepturartikel.all %}
+                        <span class="text-body-secondary">
+                            {% if eintrag.immer_erlaubt %}
+                            {% translate "braucht keine Zuordnung" %}
+                            {% else %}
+                            {% translate "noch nichts zugeordnet" %}
+                            {% endif %}
+                        </span>
+                        {% endif %}
+                    </td>
+
+                    {# No 'btn-group': the buttons should stand apart, and "Edit"    #}
+                    {# should be in the same place in every row, even where there    #}
+                    {# is nothing to delete. An invisible twin keeps the space free. #}
+                    <td class="text-end">
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'behaelter_edit' eintrag.pk %}"
+                                class="btn btn-sm btn-outline-secondary">{% translate "Bearbeiten" %}</a>
+                            {% if eintrag.immer_erlaubt %}
+                            <span class="btn btn-sm btn-outline-danger invisible"
+                                aria-hidden="true">{% translate "Löschen" %}</span>
+                            {% else %}
+                            <a href="{% url 'behaelter_delete' eintrag.pk %}"
+                                class="btn btn-sm btn-outline-danger">{% translate "Löschen" %}</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-body-secondary py-5">
+                        {% if filterform.ist_eingeschraenkt %}{% translate "Kein Behälter passt zu dieser Suche." %}{% else %}{% translate "Noch keine Behälter angelegt." %}{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    </div>
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% include "components/script.html" with name="live_filter" %}
+{% endblock extra_scripts %}

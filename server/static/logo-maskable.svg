@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img"
+     aria-label="Inventur">
+    <title>Inventur</title>
+    <!--
+        The same tally for the home screen, with two differences. Both follow
+        from the rules of the devices:
+
+        1. The surface runs to the edge, without rounding of its own. Android
+           lays its own shape over it (circle, squircle, teardrop), and iOS
+           rounds by itself as well. Own rounded corners would make a double
+           edge, and iOS turns transparent corners black.
+        2. The logo sits in the safe zone: Android cuts away up to 10 percent
+           per side, and only the circle with 80 percent diameter is reliably
+           visible. That is why it is scaled down to 85 percent.
+    -->
+    <rect width="512" height="512" fill="#0d6efd" />
+    <g fill="none" stroke="#ffffff" stroke-width="34" stroke-linecap="round"
+       transform="translate(256 256) scale(0.85) translate(-256 -256)">
+        <path d="M168 184v144" />
+        <path d="M224 184v144" />
+        <path d="M280 184v144" />
+        <path d="M336 184v144" />
+        <path d="M134 330 378 192" />
+    </g>
+</svg>

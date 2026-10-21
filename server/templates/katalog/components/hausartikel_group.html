@@ -1,0 +1,22 @@
+{% load i18n %}
+{# One block of the house article list, by product group or by family. By       #}
+{# family the blocks nest: the families below first, then the own articles,      #}
+{# and this file includes itself for every family below.                         #}
+<details class="border rounded mb-2" data-gruppe="{{ gruppe.kennung }}">
+    <summary class="px-3 py-2 bg-body-tertiary d-flex justify-content-between gap-3">
+        <strong>{{ gruppe.name }}</strong>
+        <span class="small text-body-secondary">
+    {% blocktranslate with eintraege=gruppe.anzahl %}{{ eintraege }} Artikel{% endblocktranslate %}
+</span>
+    </summary>
+    {% if gruppe.unterbloecke %}
+    <div class="ps-3 pt-2">
+        {% for unter in gruppe.unterbloecke %}
+        {% include "katalog/components/hausartikel_group.html" with gruppe=unter %}
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% if gruppe.eintraege %}
+    {% include "katalog/components/hausartikel_table.html" with zeilen=gruppe.eintraege gegliedert=True ohne_spalte=filterform.gliederung.0 %}
+    {% endif %}
+</details>

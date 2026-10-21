@@ -1,0 +1,84 @@
+{% load i18n %}
+{# One family of the run's "Total" tab: the families below it first, then its   #}
+{# own products with the houses side by side. Includes itself for every family  #}
+{# below. Header and foot carry the sums of the whole subtree. The difference    #}
+{# over all houses stands last, after the houses it adds up, as on the sheet.   #}
+<details class="border rounded mb-2" data-gruppe="{{ block.kennung }}">
+    <summary class="px-3 py-2 bg-body-tertiary d-flex justify-content-between gap-3">
+        <strong>{{ block.name }}</strong>
+        <span class="text-body-secondary small text-end">
+            {% blocktranslate count anzahl=block.anzahl %}{{ anzahl }} Ware{% plural %}{{ anzahl }} Waren{% endblocktranslate %} &middot; {% translate "Summe der Differenzen:" %}
+            <span class="{{ block.differenz_klasse }} differenz-leise">{{ block.differenz_gesamt|default:"-" }}</span>
+        </span>
+    </summary>
+    {% if block.unterbloecke %}
+    <div class="ps-3 pt-2">
+        {% for unter in block.unterbloecke %}
+        {% include "inventur/components/run_block.html" with block=unter %}
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% if block.zeilen %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th scope="col">{% translate "Ware" %}</th>
+                    <th scope="col" class="text-center breite-9">{% translate "Ergebnis" %}</th>
+                    <th scope="col" class="text-center breite-9">{% translate "Soll" %}</th>
+                    {% for inventur in lauf.inventuren %}
+                    <th scope="col" class="text-center breite-9 text-body-secondary fw-normal">
+                        {{ inventur.haus.name }}
+                    </th>
+                    {% endfor %}
+                    <th scope="col" class="text-center breite-9">{% translate "Differenz" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for zeile in block.zeilen %}
+                <tr>
+                    <td>
+                        <a href="{{ zeile.ware.get_absolute_url }}"
+                            class="link-body-emphasis link-offset-2 text-decoration-none">
+                            {{ zeile.ware.name }}
+                        </a>
+                        {% if zeile.gegenlaeufig %}
+                        <span class="badge rounded-pill text-bg-info-subtle text-info-emphasis border border-info-subtle ms-1">{% translate "gegenläufig" %}</span>
+                        {% endif %}
+                        {% if zeile.ohne_umrechnung_text %}
+                        <div class="small text-warning-emphasis">{{ zeile.ohne_umrechnung_text }}</div>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">{{ zeile.ist_text }}</td>
+                    <td class="text-center">{{ zeile.soll_text }}</td>
+                    {% for zelle in zeile.je_haus_zellen %}
+                    <td class="text-center small"><span class="{{ zelle.klasse }}">{{ zelle.text }}</span></td>
+                    {% endfor %}
+                    <td class="text-center{% if zeile.auffaellig %} fw-semibold{% endif %}">
+                        <span class="{{ zeile.differenz_klasse }}">{{ zeile.differenz_text }}</span>
+                        {% if zeile.teilsumme_text %}
+                        <div class="small text-body-secondary fw-normal">{{ zeile.teilsumme_text }}</div>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="fw-semibold">
+                    <td>{% translate "Summe" %}</td>
+                    <td></td>
+                    <td></td>
+                    {% for summe in block.haus_summen %}
+                    <td class="text-center small">
+                        <span class="{{ summe.klasse }} differenz-leise">{{ summe.text|default:"-" }}</span>
+                    </td>
+                    {% endfor %}
+                    <td class="text-center">
+                        <span class="{{ block.differenz_klasse }} differenz-leise">{{ block.differenz_gesamt|default:"-" }}</span>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    {% endif %}
+</details>

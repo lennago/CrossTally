@@ -1,0 +1,13 @@
+{# What a product is called, the same everywhere.                                         #}
+{#                                                                                        #}
+{# In front the maintained name of the product. That is also its name in                  #}
+{# the counting app. The house's designation comes from the ERP, is often                 #}
+{# abbreviated and therefore stands only small next to it, and only if it                 #}
+{# differs.                                                                               #}
+{#                                                                                        #}
+{# Expects 'artikel' (a house or recipe article). So that works without a                 #}
+{# query per row, 'ware' belongs in the list's 'select_related'.                          #}
+<span class="ms-1">{{ artikel.warenname }}</span>
+{% if artikel.name_im_haus %}
+<span class="text-body-secondary small ms-1">{{ artikel.name_im_haus }}</span>
+{% endif %}

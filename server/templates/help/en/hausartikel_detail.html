@@ -1,0 +1,29 @@
+{# The containers only show for a product that is weighed. #}
+{% if hausartikel.ware.abwiegbar %}
+<h3>Containers when weighing</h3>
+<p>
+    The assignment belongs to the product and therefore applies at every site. It is shown
+    here because you notice what something is weighed in while maintaining a site. “No
+    container” (scale tared) is always offered when counting anyway. Nothing is
+    preselected: the counters choose the container in every weighing line themselves,
+    because a guessed tare would go unnoticed while counting.
+</p>
+{% endif %}
+<h3>Packs</h3>
+<p>
+    The packs belong to the product, and so does their order. It can be changed here:
+    drag by the handle or move with the arrows. The arrows save at once, after dragging
+    “Save order” saves. That is how the packs then appear when
+    counting, at every location and <strong>at every site</strong> that carries the
+    product. An inactive pack is no longer offered when counting and gets no line in new
+    inventories, even where a count list names it. New packs are created
+    under “Edit”, quantities and names are changed on the product's page.
+</p>
+<h3>Occurs at</h3>
+<p>
+    Where the article occurs is decided by the count list of the location. The order and the
+    packs per location are kept there. “Add” ticks all active packs there. “Remove” only
+    takes it out of the count list. The article itself remains.
+</p>
+{% include "help/en/shared/artikelstatus.html" %}
+{% include "help/en/shared/inventurart.html" %}

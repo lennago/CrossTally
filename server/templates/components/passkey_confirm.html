@@ -1,0 +1,18 @@
+{% load i18n %}
+{# The confirmation of an account without a password ('PasskeyBestaetigenView'), #}
+{# where another account types its password: before a new passkey, before        #}
+{# removing one and before a new address. Inside a block with 'data-passkey',    #}
+{# whose box takes the refusal ('passkey.js'). The line below the button shows   #}
+{# once the server noted it.                                                     #}
+<div class="mb-3">
+    <p class="small mb-2">
+        {% translate "Dein Konto hat kein Passwort. Bestätige deshalb zuerst mit einem deiner Passkeys, dass du es bist." %}
+    </p>
+    <button type="button" class="btn btn-outline-success" data-passkey-bestaetigen
+        data-passkey-optionen="{% url 'passkey_bestaetigen_optionen' %}" data-passkey-ziel="{% url 'passkey_bestaetigen' %}">
+        {% translate "Mit Passkey bestätigen" %}
+    </button>
+    <div class="form-text text-success" role="status" data-passkey-bestaetigt hidden>
+        {% translate "Bestätigt. Die Bestätigung gilt zwei Minuten." %}
+    </div>
+</div>

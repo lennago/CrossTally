@@ -1,0 +1,65 @@
+<h3>Inactive, but with a target stock</h3>
+<p>
+    The merchandise management system holds a stock, here the article is not in the range right now.
+    <strong>Activate again</strong> takes the target stock over and creates its count lines
+    wherever it is expected. <strong>Discard</strong> leaves the article inactive and drops
+    the target stock. If the file lists the article with a stock of 0, nobody is asked:
+    the merchandise management system and the site agree, and the target stock is saved
+    silently.
+</p>
+<h3>Discard all</h3>
+<p>
+    Discarding also works for a whole block and, at the bottom of the page, for all open
+    lines together. It changes nothing in the master data, only the target stock of these
+    lines is dropped. Useful when the file is going to be uploaded again anyway or the
+    questions have already been answered elsewhere. The only way back is a new upload.
+</p>
+<h3>Discontinued, but with a target stock</h3>
+<p>
+    The number belongs to a discontinued record. Either the article comes back
+    (<strong>Activate again</strong>: only possible as long as number and product are free at
+    the site, and brings its places in the count lists back to their old position, as far as it remembered them), or the merchandise management system has <strong>reassigned</strong> the number: then create the new
+    article and afterwards press “Match again” at the bottom of the page. Here too: with a stock of 0 in the file,
+    the question does not arise.
+</p>
+<p>
+    If the site now actively carries the same product under another number, the line
+    names that article. Then the merchandise management system gave the product a new
+    number and still holds stock on the old one. One product is counted, so the target
+    stock is the sum: <strong>Add to …</strong> adds it to the active article's target
+    stock, in that article's unit. The old number then counts as the new one, like a
+    duplicate after merging. On the next import its stock is added by itself, and the
+    article import no longer offers it for bringing back. “Activate again” does not work
+    here, because the product is taken.
+</p>
+<h3>Number unknown</h3>
+<p>
+    {{ inventur.haus.name }} does not know these numbers. If it is an article that is
+    missing here: <strong>Create new</strong> opens the form with number and name and leads
+    back here after creating. Then press “Match again” at the bottom, and the target stock
+    lands in its place. The file does not have to be uploaded again for that.
+</p>
+<h3>Name differs</h3>
+<p>
+    The number fits, the name in the file does not. Usually a rename in the merchandise management system, but
+    possibly a <strong>reassigned number</strong>, and then the old record should be
+    discontinued and the new one created. The target stock sits on the article here either
+    way.
+</p>
+<h3>Active, but without a target stock</h3>
+<p>
+    {{ inventur.haus.name }} carries these articles as active, and they have no target
+    stock, neither from the file nor by hand.
+    <strong>Inactive</strong> means: it will return, it stays in the count lists.
+    <strong>Discontinue</strong> means: over, number and product become free. In both cases
+    the still empty count lines of this inventory disappear. Whoever wants the article
+    counted anyway leaves it be.
+</p>
+<h3>Articles of other types in the file</h3>
+<p>
+    The file usually names the whole stock, including articles that belong to none of the
+    types of this inventory ({{ inventur.arten_anzeige }}). Their target stock is saved but
+    does not count here and does not appear in the review list. If somebody counts such an
+    article in the app anyway, its target stock and difference are ready. The same holds for
+    an inactive article that is still listed as a question above.
+</p>

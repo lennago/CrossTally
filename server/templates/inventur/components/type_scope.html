@@ -1,0 +1,33 @@
+{% load i18n %}
+{# For whom a switch of the type applies: this article, or every article of its     #}
+{# product, in every house. The same question as on the article's page. Asked only  #}
+{# where the product has further articles ('weitere'). The script shows it once a   #}
+{# switch is chosen in the row, without it it always stands there. Below, what      #}
+{# another house of the run decided for the whole product: then only "this          #}
+{# article" is open, see 'closing.festgelegte_arten'. Expects 'eintrag', an          #}
+{# 'Artwechsel'.                                                                     #}
+{% if eintrag.weitere %}
+{# The script hides the outer element: Bootstrap's 'd-flex' wins over 'hidden'. #}
+<div data-geltung-frage>
+<div class="d-flex flex-wrap gap-3 small mt-1">
+    <span class="text-body-secondary">{% translate "gilt für" %}</span>
+    {% with name="geltung_"|add:eintrag.schluessel %}
+    <label class="form-check mb-0">
+        <input class="form-check-input" type="radio" name="{{ name }}" value="{{ NUR_DIESER }}"
+            {% if eintrag.geltung == NUR_DIESER %}checked{% endif %}>
+        {% translate "nur diesen Artikel" %}
+    </label>
+    <label class="form-check mb-0{% if eintrag.ware_gesperrt %} text-body-secondary{% endif %}">
+        <input class="form-check-input" type="radio" name="{{ name }}" value="{{ GANZE_WARE }}"
+            {% if eintrag.ware_gesperrt %}disabled{% elif eintrag.geltung == GANZE_WARE %}checked{% endif %}>
+        {% blocktranslate count anzahl=eintrag.weitere %}auch den anderen Artikel der Ware{% plural %}auch die {{ anzahl }} anderen Artikel der Ware{% endblocktranslate %}
+    </label>
+    {% endwith %}
+</div>
+</div>
+{% endif %}
+{% if eintrag.festgelegt %}
+<div class="small text-info-emphasis mt-1" data-festgelegt>
+    {% blocktranslate with haus=eintrag.festgelegt.inventur.haus.name art=eintrag.festgelegt.inventurart.name %}Im Lauf entschieden: {{ haus }} hat alle Artikel der Ware nach „{{ art }}“ gesetzt. Für die ganze Ware gilt das auch hier.{% endblocktranslate %}
+</div>
+{% endif %}

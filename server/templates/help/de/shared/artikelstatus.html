@@ -1,0 +1,27 @@
+{# The four article statuses: included wherever the status buttons are. #}
+<h3>Status</h3>
+<ul>
+    <li><strong>Aktiv</strong>: wird geführt und gezählt.</li>
+    <li><strong>Inaktiv</strong>: gerade nicht im Sortiment, kommt aber wieder (Saisonware).
+        Der Artikel behält Nummer, Ware und seinen Platz in den Zähllisten. Eine neue Inventur
+        legt für ihn keine Zeile an. In der Zähl-App lässt er sich trotzdem hinzuzählen, sofern
+        die Inventur seine Inventurart zählt.</li>
+    <li><strong>Eingestellt</strong>: vorbei. Ausgelistet, oder die Nummer wurde in der Warenwirtschaft
+        neu belegt. Nummer und Ware werden im Haus frei, der Artikel fällt aus allen
+        Zähllisten. Alte Inventurergebnisse zeigen weiter auf ihn. Ausgelistetes steht
+        manchmal noch im Regal. Deshalb bietet die Zähl-App ihn ganz hinten weiter an,
+        solange Nummer und Ware im Haus frei sind und die Inventur seine Inventurart zählt.
+        Wird er wieder aktiviert, kommen seine Plätze in den Zähllisten an ihre alte Stelle
+        zurück, soweit es Ort und Gebinde noch gibt. Ein älterer Satz, der sich beim Einstellen
+        noch keine Plätze gemerkt hat, kommt ohne sie zurück. Was gilt, sagt die Seite des
+        Artikels.</li>
+    <li><strong>Nicht zählbar</strong>: war nie eine Ware, etwa Pfand, Gutscheine, Rabatte. Die Ware
+        kommt in die Warenfamilie „Nicht zählbar“, verschwindet damit <em>in jedem Haus</em>
+        aus Listen, Zählungen und Auswertungen und wird beim Import still übergangen. Wer eine
+        Ware versehentlich dorthin stellt und wieder herausnimmt, bekommt in jedem Haus die
+        alten Status zurück. Die Ware kommt in ihre alte Warenfamilie, und die Artikel
+        bekommen ihre Plätze in den Zähllisten an der alten Stelle wieder, soweit es Familie,
+        Ort und Gebinde noch gibt. Ältere Sätze, die sich Familie und Plätze noch nicht gemerkt
+        haben, kommen ohne sie zurück.</li>
+</ul>
+<p>Die Listen zeigen von sich aus das <em>Geführte</em>: aktiv und inaktiv.</p>

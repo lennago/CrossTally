@@ -1,0 +1,77 @@
+<h3>No longer active, but counted</h3>
+<p>
+    Whoever finds an inactive or discontinued article on the shelf can still count it in the
+    counting app. Here it can be reactivated. For a discontinued one that only works as long
+    as no other article has taken over its number or its product. Otherwise the reason is
+    given in the line. A discontinued article gets its places in the count lists back at
+    their old position in the process, as far as it remembered them. The counted quantity
+    goes into the result in any case.
+</p>
+<h3>Counted unexpectedly</h3>
+<p>
+    Whatever was added in the counting app through the search and carries a quantity can go
+    into the location's count list: the article together with its pack, only the pack if the
+    article is already there, or the weighing. Whatever is added goes to the end of the list.
+    A line left empty is no find, and a discontinued article is expected nowhere any more.
+    Neither stands here.
+</p>
+<h3>Expected, but nothing entered</h3>
+<p>
+    A pack from the count list nobody entered anything into, or that was deleted in the app.
+    Only this pack at this location is removed. The article stays with its other packs. The
+    scale stands here only if the article also has an active pack there. If it only has the
+    scale there, it is removed in the count list of the location. If the article was not
+    counted anywhere, it also appears under “Not counted at all”.
+</p>
+<h3>Not counted at all</h3>
+<p>
+    Listed here is everything nothing was entered for and where “Target counts” is not
+    set. <strong>Inactive</strong> means: not in the range right now, will return. The
+    article stays in the count lists but gets no line any more until it is active again.
+    <strong>Discontinue</strong> means: over. It drops out of every count list and frees up
+    number and product. Both only concern the record at {{ inventur.haus.name }}.
+    <strong>Switch to …</strong> puts the article into another inventory type, say the
+    annual inventory if it should be counted only once a year. If the product has further
+    articles, the same question comes as on the article's page: this article only, or all
+    articles of the product, at the other sites too.
+</p>
+<h3>Counted, but without a target stock</h3>
+<p>
+    These articles were counted but have no target, neither from the file nor by hand.
+    Without a target stock the line freezes <strong>without a difference</strong>. The find
+    would look as if it fitted. <strong>Target 0</strong> means: the merchandise management
+    system holds no stock here, everything counted is surplus. An <strong>own value</strong>
+    is given in the unit {{ inventur.haus.name }} carries the article in. The unit stands
+    behind the field. The value may be negative. The choice only takes effect on closing
+    and only for this inventory. Until then it can be taken back here.
+</p>
+<h3>Counted, but in no type of this inventory</h3>
+<p>
+    These articles belong to none of the types this inventory counts
+    ({{ inventur.arten_anzeige }}), but were counted in the app anyway. The quantity goes
+    into the result either way. <strong>Take into …</strong> puts the article into one of the
+    types of this inventory. From the next inventory of that type on it then gets its lines.
+    Here too the page asks whether that applies to this article only or to all articles of
+    the product. Listed is only what was counted itself, not what came along as an
+    ingredient of a prepared item.
+</p>
+<h3>Already decided in the run</h3>
+<p>
+    If another site of the same day chose a type for all articles of a product while
+    closing, that is noted on the line. For the whole product it cannot be turned around
+    here, only for this article. Whoever wants it otherwise changes it afterwards on the
+    product itself.
+</p>
+<h3>Weighed in a container from elsewhere</h3>
+<p>
+    When weighing, the counting app offers the containers of other sites last. If one of
+    those was used, the assignment is evidently wrong: the container belongs to this
+    article, or it also exists at this site. With an answer it appears further forward next
+    time. The weighing itself counts in any case.
+</p>
+<h3>Weighed at 0 g</h3>
+<p>
+    A 0 on the scale means: there was nothing to weigh here. It counts as counted, with a
+    quantity of zero, and raises no question in any block. The scale is not there to be
+    taken out, and the chosen container does not count as one from elsewhere.
+</p>

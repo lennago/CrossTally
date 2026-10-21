@@ -1,0 +1,10 @@
+New password for {{ anwendung }}
+
+Hello {{ vorname }},
+
+A new password was requested for your account at {{ anwendung }}. Through this link you set it:
+{{ link }}
+
+Your username: {{ benutzername }}
+
+The link lasts {{ tage }} days and works once. If you did not request anything, there is nothing to do. Your password then stays as it is.

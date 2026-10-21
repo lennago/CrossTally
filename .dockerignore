@@ -1,0 +1,41 @@
+**/db.sqlite3
+**/*.sqlite3
+# What SQLite keeps beside a database while it writes: journal, WAL, shared memory.
+**/*.sqlite3-*
+**/data/
+**/.env
+# Copies and variants of it ('.env.bak', '.env.local'). The templates are not needed in the image.
+**/.env.*
+**/*.log
+**/.coverage
+**/.coverage.*
+**/htmlcov/
+backups/
+audit/
+server/staticfiles/
+server/pwa/
+server/scripts/create_superuser.py
+app/node_modules/
+app/test-results/
+app/playwright-report/
+app/coverage/
+app/*.png
+**/__pycache__/
+**/.ruff_cache/
+**/.pytest_cache/
+**/.venv/
+server/VERSION
+# Of '.git' only what names the checkout's state ('bin/version.sh'). Its
+# content and not the name itself: a worktree's '.git' is a file and comes
+# along, the version is then "unknown".
+.git/*
+!.git/HEAD
+!.git/packed-refs
+!.git/refs/heads/
+.github/
+.claude/
+.vscode/
+CLAUDE.md
+projektkontext.md
+pruefauftrag.md
+testing_notes.md

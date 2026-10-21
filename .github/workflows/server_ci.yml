@@ -1,0 +1,204 @@
+# Checks the server: style, types and tests.
+#
+# Third-party actions are pinned to a commit, not to a tag. A tag can be moved
+# to other code afterwards, a commit cannot. The version follows as a comment,
+# and Dependabot bumps both together.
+#
+# Two triggers, on purpose. On a pull request the workflow runs on its own, on
+# a push to main 'image.yml' calls it before building ('workflow_call'). That
+# way it runs exactly once per event.
+#
+# No path filter, even if a pull request does not touch the server. The jobs
+# are required in the ruleset, and a required check that never starts would
+# hold the pull request forever.
+name: Server
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_call:
+
+# A fixed name of its own: as a building block of 'image.yml',
+# 'github.workflow' would read "Image" here. Both blocks and the caller would
+# share one group, and with 'cancel-in-progress' GitHub would abort the run as
+# a deadlock.
+concurrency:
+  group: server-${{ github.ref }}
+  # Not on 'main': there a cancelled run would take the release with it ('image.yml').
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+# None of the steps needs more. The source is read, nothing is written. Without
+# this the repo's permissions apply, and those are more generous than needed.
+permissions:
+  contents: read
+
+env:
+  # The same version as on the development machine. Which Python applies is in
+  # 'server/.python-version', and uv fetches it itself.
+  UV_VERSION: "0.12.15"
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./server
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: server/uv.lock
+
+      # '--locked': installs what 'uv.lock' records. If the lock no longer
+      # matches 'pyproject.toml', the run fails. '--frozen' would not. It takes
+      # the lock as it is, and a forgotten 'uv lock' would only show up when
+      # something is missing in the image. This holds for every 'uv sync' in
+      # this file. 'uv run --frozen' afterwards may trust the lock.
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Lint
+        run: uv run --frozen ruff check .
+
+      - name: Check formatting
+        run: uv run --frozen ruff format --check .
+
+  # A job of its own, so a type error does not hide behind a style error and
+  # vice versa. The whole server including tests is checked, and zero
+  # diagnostics is the bar.
+  typecheck:
+    name: Type check
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./server
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: server/uv.lock
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Type check
+        run: uv run --frozen pyright
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    # The tests take just under four minutes against PostgreSQL. A run that
+    # hangs (on 2026-09-22 one sat in the demo tests for eighteen minutes)
+    # should go red and show its log instead of blocking for six hours.
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: ./server
+
+    # Tested against the database that also runs in operation. Locally it stays
+    # SQLite for the quick run. The difference is real: 'icontains' in SQLite
+    # does not find "BRÖTCHEN" when the article is called "Brötchen".
+    services:
+      db:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: crosstally
+          POSTGRES_USER: crosstally
+          POSTGRES_PASSWORD: ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U crosstally"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DJANGO_SETTINGS_MODULE: django_project.settings
+      SECRET_KEY: ci-only-key-not-secret
+      # Without 'DEBUG' the application does not start without this key.
+      BACKUP_KEY: ci-only-key-not-secret-and-long-enough
+      DEBUG: "0"
+      ADMIN_URL: ci-admin/
+      DATABASE_URL: postgres://crosstally:ci-only@localhost:5432/crosstally
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: server/uv.lock
+
+      # The C implementation of psycopg is built when installing, against the
+      # libpq of the runner. The compiler is there, the headers are fetched.
+      - name: Install build requirements
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev
+
+      # Like the image: without the development tools, with the group for
+      # PostgreSQL. If a test only runs with the tools, it would show up here
+      # and not in operation. Every 'uv run' below names the same selection,
+      # so it finds the environment as it should be and changes nothing.
+      - name: Install dependencies
+        run: uv sync --locked --no-dev --group postgres --group test
+
+      # psycopg falls back to its Python implementation silently. Then the
+      # tests would be green and would have tested something else than what
+      # runs in operation.
+      - name: Check psycopg implementation
+        run: >-
+          uv run --frozen --no-dev --group postgres --group test python -c
+          "import psycopg, sys; sys.exit(psycopg.pq.__impl__ != 'c' and 'psycopg runs as: ' + psycopg.pq.__impl__)"
+
+      - name: Django system checks
+        run: uv run --frozen --no-dev --group postgres --group test python manage.py check
+
+      # The settings of operation as 'check --deploy' sees them: HSTS, cookies,
+      # mail. Placeholders, like everything here. With them the check has
+      # nothing left to say, so any new warning turns the job red. What it
+      # reports in operation is known: 'mail.E001' without a mail server (the
+      # mails go to standard output, on purpose), 'security.W021' with the
+      # short HSTS of the start. The values here leave both out.
+      - name: Django deployment checks
+        env:
+          SECRET_KEY: ci-only-key-not-secret-but-long-enough-for-the-deployment-check
+          BEHIND_TLS_PROXY: "true"
+          HSTS_SECONDS: "31536000"
+          EMAIL_HOST: smtp.example.invalid
+          DEFAULT_FROM_EMAIL: crosstally@example.invalid
+        run: >-
+          uv run --frozen --no-dev --group postgres --group test
+          python manage.py check --deploy --fail-level WARNING
+
+      - name: Check for missing migrations
+        run: uv run --frozen --no-dev --group postgres --group test python manage.py makemigrations --check --dry-run
+
+      - name: Run migrations
+        run: uv run --frozen --no-dev --group postgres --group test python manage.py migrate --noinput
+
+      # In parallel with as many workers as the runner has cores. Each gets its
+      # own copy of the test database ('django_project/test_runner.py'). Under
+      # 'coverage', lines and branches, each worker writing a file of its own.
+      - name: Run tests
+        run: >-
+          uv run --frozen --no-dev --group postgres --group test
+          coverage run --branch manage.py test --parallel auto --verbosity 2
+
+      # Below 'fail_under' in 'pyproject.toml' the job turns red.
+      - name: Check coverage
+        run: |
+          uv run --frozen --no-dev --group postgres --group test coverage combine
+          uv run --frozen --no-dev --group postgres --group test coverage report

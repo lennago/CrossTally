@@ -1,0 +1,7 @@
+Dein Passwort bei {{ anwendung }} wurde geändert
+
+Hallo {{ vorname }},
+
+das Passwort deines Kontos bei {{ anwendung }} wurde {{ wo }} geändert.
+
+Warst du das nicht? Dann setze über „Passwort vergessen?“ auf der Anmeldeseite ein neues Passwort und gib einem Administrator Bescheid.

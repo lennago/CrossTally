@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% blocktranslate %}{{ inventur }} prüfen{% endblocktranslate %}{% endblock title %}
+
+{# Stands in the filter card behind the buttons ('list_filter.html', 'nachsatz'). #}
+{% partialdef filter_nachsatz %}
+<span class="text-body-secondary small" data-ersetzen="anzahl">
+    {% blocktranslate with zeilen=zeilen|length %}{{ zeilen }} von {{ anzahl_gesamt }} Artikeln gezeigt, {{ anzahl_notizen }} mit Notiz{% endblocktranslate %}
+</span>
+{% endpartialdef %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'inventur_list' %}">{% translate "Inventuren" %}</a></li>
+            <li class="breadcrumb-item">
+                <a href="{{ inventur.get_absolute_url }}">{{ inventur }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{% translate "Prüfen" %}</li>
+        </ol>
+    </nav>
+
+    <div class="kopfleiste bg-body py-2 mb-1">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <h1 class="h5 mb-0">{% translate "Prüfen und abschließen" %}</h1>
+                {% include "inventur/components/status_badge.html" %}
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                {# Without JavaScript an ordinary link to the same address. The      #}
+                {# script compares 'data-zaehlstand' with what is stored: without    #}
+                {# anything new disabled, with something new yellow and pressable.   #}
+                <a href="{{ request.get_full_path }}" class="btn btn-outline-secondary btn-sm"
+                    data-auffrischen data-zaehlstand="{{ zaehlstand }}"
+                    data-zaehlstand-adresse="{% url 'inventur_stand' inventur.pk %}">{% translate "Werte aktualisieren" %}</a>
+                <span class="text-body-secondary small text-nowrap">
+                    {% translate "Stand" context "Zeitpunkt" %} <span data-wert="stand">{{ stand|time:"H:i" }}</span>
+                    <span data-geaendert aria-live="polite"></span>
+                </span>
+            </div>
+        </div>
+    </div>
+    <p class="text-body-secondary small mb-3">
+    {% blocktranslate %}{{ inventur }}. Hier steht, was der Abschluss einfriert:{% endblocktranslate %}
+<strong data-wert="anzahl-gesamt">{{ anzahl_gesamt }}</strong> {% translate "Artikel, davon" %}
+        <strong data-wert="anzahl-auffaellig">{{ anzahl_auffaellig }}</strong> {% translate "mit Abweichung und" %} <span data-wert="anzahl-offen">{{ anzahl_offen }}</span> {% if inventur.differenz_von_hand %}{% translate "ohne jede Zählung. Die Mengen kommen aus der Zähl-App. Eingetragen werden hier die Notiz und die Differenz aus der Warenwirtschaft, in der Einheit des Ist." %}{% else %}{% translate "ohne jede Zählung. Die Mengen kommen aus der Zähl-App. Eingetragen werden hier die Notiz und der Haken „Soll zählt“." %}{% endif %}
+    </p>
+
+    {# Without a target the difference can be typed in instead, switched here  #}
+    {# as in the counting app ('Inventur.differenz_von_hand'). An ordinary form, #}
+    {# outside the one of the list: the page comes anew, with or without the    #}
+    {# field for the difference. Open notes go out on leaving ('notes.js').     #}
+    {% if von_hand_umschaltbar %}
+    <form method="post" action="{% url 'inventur_differenz_von_hand' inventur.pk %}"
+        class="d-flex align-items-center flex-wrap gap-2 small mb-3">
+        {% csrf_token %}
+        <input type="hidden" name="weiter" value="{{ request.get_full_path }}">
+        {% if inventur.differenz_von_hand %}
+        <input type="hidden" name="an" value="0">
+        <button class="btn btn-outline-secondary btn-sm" type="submit">
+            {% translate "Differenz von Hand ausschalten" %}
+        </button>
+        {% else %}
+        <input type="hidden" name="an" value="1">
+        <span class="text-body-secondary">
+            {% translate "Keine Datei mit dem Bestand? Dann lässt sich die Differenz aus der Warenwirtschaft je Artikel eintragen." %}
+        </span>
+        <button class="btn btn-outline-secondary btn-sm" type="submit">
+            {% translate "Differenz von Hand eintragen" %}
+        </button>
+        {% endif %}
+    </form>
+    {% endif %}
+
+    <div class="alert alert-info py-2 small" data-neue-zeilen hidden>
+        {% translate "Es sind Artikel dazugekommen, die in dieser Liste noch fehlen. Ungesicherte Notizen vorher speichern, dann die" %}
+        <a href="{{ request.get_full_path }}" class="alert-link">{% translate "Seite neu laden" %}</a>.
+    </div>
+
+    {# Resetting also forgets the remembered view ('_ansicht').      #}
+    {% url 'inventur_pruefen' inventur.pk as pfad %}
+    {% include "components/list_filter.html" with zuruecksetzen=pfad|add:"?zuruecksetzen=1" nachsatz="inventur/inventur_review.html#filter_nachsatz" %}
+    {# Scroll position and expanded groups persist here beyond the tab       #}
+    {# ('view_state.js', 'expand.js').                                       #}
+    <span data-ansicht-dauerhaft hidden></span>
+
+    {# One form over the whole list: the notes and the closing belong in the    #}
+    {# same submit, otherwise a note just typed is lost when closing. Saved is  #}
+    {# only what is currently visible. A filter does not cut off the rest, it   #}
+    {# just does not pass it along.                                             #}
+    {# The marker is what the saving script looks for: "the first POST form"    #}
+    {# missed since the navigation bar carries one for signing out.             #}
+    {# 'autocomplete="off"': on Back and Forward the browser would otherwise put #}
+    {# back what the fields held when the page was left, over the stored notes. #}
+    <form method="post" data-pruefliste autocomplete="off">
+        {% csrf_token %}
+        {# The state whose numbers are visible here. Closed only if it still     #}
+        {# applies ('_abschliessen'). The script keeps it up to date.            #}
+        <input type="hidden" name="zaehlstand" value="{{ zaehlstand }}" data-zaehlstand-feld>
+        {# The same for notes, ticks and differences by hand. Outside the list,  #}
+        {# so a filter does not swap it. The page's own saves carry it on        #}
+        {# ('notes.js'), what someone else writes stops the closing.             #}
+        <input type="hidden" name="bemerkungsstand" value="{{ bemerkungsstand }}" data-bemerkungsstand-feld>
+
+        <div data-liste>
+        {% if gruppen is not None %}
+        {% include "components/expand_buttons.html" %}
+        {# By family the groups nest ('review_group.html' includes itself). #}
+        {% for gruppe in gruppen %}
+        {% include "inventur/components/review_group.html" %}
+        {% empty %}
+        <p class="text-body-secondary text-center py-4">{% translate "Keine Zeile passt zu dieser Suche." %}</p>
+        {% endfor %}
+        {% else %}
+        {% include "inventur/components/review_rows.html" with gegliedert=False %}
+        {% endif %}
+        </div>
+
+        {# The snapshot: all rows at the state 'zaehlstand', including those the  #}
+        {# filter currently hides. Filter and search fetch the list anew, and new #}
+        {# numbers would silently come along. The script therefore puts the       #}
+        {# numbers from here back in, new ones only come via "Refresh values".    #}
+        {# A 'template' is neither shown nor submitted. Only the values, not the  #}
+        {# whole table once more ('review_snapshot.html').                        #}
+        <template data-schnappschuss>
+            {% include "inventur/components/review_snapshot.html" with zeilen=alle %}
+        </template>
+
+        <div class="fussleiste d-flex align-items-center flex-wrap gap-2 mt-3 bg-body border-top py-3">
+            <button class="btn btn-outline-primary" type="submit">{% translate "Notizen speichern" %}</button>
+
+            {% if kann_abschliessen %}
+            {# As long as there are new values, the script disables the button and    #}
+            {# shows the note next to it ('refresh.js'). The server checks it anyway. #}
+            <button class="btn btn-success" type="submit" name="abschliessen" value="1"
+                data-abschliessen
+                data-rueckfrage="{% blocktranslate %}{{ inventur }} abschließen? Was hier eingetragen ist, wird mitgespeichert. Zeigt die Zählung, dass Stammdaten nicht mehr passen (etwa inaktive Artikel, unerwartete oder leere Gebinde), wird vorher noch danach gefragt. Danach werden die Ergebnisse samt Notizen eingefroren. Zählpositionen und Sollbestände verschwinden. Das lässt sich nicht rückgängig machen.{% endblocktranslate %}">
+                {% translate "Inventur abschließen" %}
+            </button>
+            <span class="small text-warning-emphasis" data-veraltet-hinweis hidden>
+                {% translate "Es gibt neue Werte. Erst aktualisieren und prüfen, dann abschließen." %}
+            </span>
+            {% else %}
+            <span class="align-self-center text-body-secondary small">
+                {% translate "Abgeschlossen wird aus der Zählung heraus. Sie läuft noch nicht." %}
+            </span>
+            {% endif %}
+
+            {# The state of the notes: the script saves on leaving by itself,     #}
+            {# and whoever does not see that otherwise presses again to be safe.  #}
+            <span class="text-body-secondary small ms-2" data-notizstand aria-live="polite"></span>
+
+            <a href="{{ inventur.get_absolute_url }}" class="btn btn-outline-secondary ms-auto">
+                {% translate "Zurück zur Übersicht" %}
+            </a>
+        </div>
+    </form>
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% include "components/refresh_script.html" %}
+{# Before the filter script: it calls 'window.notizenSichern' when switching. #}
+{% include "components/notes_script.html" %}
+{% include "components/script.html" with name="live_filter" %}
+{% endblock extra_scripts %}

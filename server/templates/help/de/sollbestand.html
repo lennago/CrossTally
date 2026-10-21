@@ -1,0 +1,64 @@
+<h3>Inaktiv, aber mit Soll</h3>
+<p>
+    Die Warenwirtschaft führt einen Bestand, hier ist der Artikel gerade nicht im Sortiment.
+    <strong>Wieder aktivieren</strong> übernimmt das Soll und legt seine Zählpositionen an,
+    wo er erwartet wird. <strong>Verwerfen</strong> lässt den Artikel inaktiv und das
+    Soll unter den Tisch fallen. Führt die Datei den Artikel mit Bestand 0, fragt
+    niemand: Warenwirtschaft und Haus sind sich einig, das Soll wird still gespeichert.
+</p>
+<h3>Alle verwerfen</h3>
+<p>
+    Verwerfen geht auch für einen ganzen Block und, unten auf der Seite, für alle offenen
+    Zeilen zusammen. Es ändert nichts an den Stammdaten, nur das Soll dieser Zeilen fällt
+    weg. Nützlich, wenn die Datei ohnehin noch einmal hochgeladen wird oder die Fragen
+    schon anderswo beantwortet sind. Rückgängig geht es nur über einen neuen Upload.
+</p>
+<h3>Eingestellt, aber mit Soll</h3>
+<p>
+    Die Nummer gehört einem eingestellten Satz. Entweder kommt der Artikel zurück
+    (<strong>Wieder aktivieren</strong>: geht nur, solange Nummer und Ware im Haus
+    frei sind, und bringt seine Plätze in den Zähllisten an die alte Stelle zurück, soweit er sie sich gemerkt hat), oder die Warenwirtschaft hat die Nummer <strong>neu belegt</strong>: dann den
+    neuen Artikel anlegen und danach unten auf der Seite „Erneut zuordnen“ drücken. Auch hier gilt: steht in der
+    Datei Bestand 0, stellt sich die Frage nicht.
+</p>
+<p>
+    Führt das Haus dieselbe Ware inzwischen aktiv unter einer anderen Nummer, nennt die
+    Zeile diesen Artikel. Dann hat die Warenwirtschaft der Ware eine neue Nummer gegeben
+    und führt auf der alten noch Bestand. Gezählt wird eine Ware, also ist das Soll die
+    Summe: <strong>Bei … dazurechnen</strong> legt es zum Soll des aktiven Artikels, in
+    dessen Einheit. Die alte Nummer zählt danach als die neue, wie eine Dublette nach dem
+    Zusammenführen. Beim nächsten Einlesen kommt ihr Bestand von selbst dazu, und der
+    Artikelimport bietet sie nicht mehr zum Zurückholen an. „Wieder aktivieren“ geht hier
+    nicht, denn die Ware ist belegt.
+</p>
+<h3>Nummer unbekannt</h3>
+<p>
+    {{ inventur.haus.name }} kennt diese Nummern nicht. Ist es ein Artikel, der hier
+    fehlt: <strong>Neu anlegen</strong> öffnet das Formular mit Nummer und Bezeichnung und
+    führt nach dem Anlegen hierher zurück. Dann unten „Erneut zuordnen“, und das Soll kommt
+    an seinen Platz. Die Datei muss dafür nicht noch einmal hochgeladen werden.
+</p>
+<h3>Bezeichnung weicht ab</h3>
+<p>
+    Die Nummer passt, die Bezeichnung in der Datei nicht. Meist eine Umbenennung in
+    der Warenwirtschaft, womöglich aber eine <strong>neu belegte Nummer</strong>, und dann
+    gehörte der alte Satz eingestellt und der neue angelegt. Das Soll steht hier
+    trotzdem schon am Artikel.
+</p>
+<h3>Aktiv, aber ohne Soll</h3>
+<p>
+    {{ inventur.haus.name }} führt diese Artikel aktiv, und sie haben kein Soll: weder
+    aus der Datei noch von Hand.
+    <strong>Inaktiv</strong> heißt: kommt wieder, bleibt in den Zähllisten.
+    <strong>Einstellen</strong> heißt: vorbei, Nummer und Ware werden frei. In
+    beiden Fällen verschwinden die noch leeren Zählpositionen dieser Inventur.
+    Wer den Artikel trotzdem zählen lassen will, lässt ihn stehen.
+</p>
+<h3>Artikel anderer Arten in der Datei</h3>
+<p>
+    Die Datei nennt meist den ganzen Bestand, auch Artikel, die zu keiner der Arten dieser
+    Inventur gehören ({{ inventur.arten_anzeige }}). Ihr Soll wird gespeichert, zählt
+    hier aber nicht mit und erscheint nicht in der Prüfliste. Zählt jemand so einen Artikel
+    in der App dazu, steht sein Soll samt Differenz bereit. Dasselbe gilt für einen
+    inaktiven Artikel, der oben noch als Frage steht.
+</p>

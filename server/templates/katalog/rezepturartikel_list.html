@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Rezepturartikel" %}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="kopfleiste bg-body d-flex flex-wrap gap-2 justify-content-between align-items-center mb-1 py-2">
+        <div class="d-flex align-items-center gap-3">
+            <h1 class="h3 mb-0">{% translate "Rezepturartikel" %}</h1>
+            <span class="text-body-secondary small" data-ersetzen="anzahl">
+    {% blocktranslate count anzahl=rezepturartikel|length context "Zahl der Rezepturartikel" %}{{ anzahl }} Artikel{% plural %}{{ anzahl }} Artikel{% endblocktranslate %}
+</span>
+        </div>
+        <a href="{% url 'rezepturartikel_add' %}" class="btn btn-success btn-sm">{% translate "Neuer Rezepturartikel" %}</a>
+    </div>
+
+    {% url 'rezepturartikel_list' as zurueck %}
+    {% include "components/list_filter.html" with zuruecksetzen=zurueck %}
+
+    <div data-liste>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    {% include "components/column_header.html" with kopf=spalten.name %}
+                    {% include "components/column_header.html" with kopf=spalten.einheit breite="8rem" %}
+                    <th scope="col">{% translate "Rezeptur" %}</th>
+                    <th scope="col">{% translate "Erwartet in" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for artikel in rezepturartikel %}
+                <tr>
+                    <td>
+                        <a href="{{ artikel.get_absolute_url }}"
+                            class="link-body-emphasis link-offset-2 text-decoration-none">
+                            {{ artikel.name }}
+                        </a>
+                        {% if artikel.listenstatus == "INAKTIV" %}
+                        <span class="badge bg-body-secondary text-body border ms-1">{% translate "inaktiv" %}</span>
+                        {% elif artikel.listenstatus == "EINGESTELLT" %}
+                        <span class="badge bg-body-secondary text-body border ms-1">{% translate "nirgends auflösbar" %}</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="text-body-secondary small">
+                        {{ artikel.basiseinheit.kurz }}
+                        {% if artikel.wird_gewogen %}
+                        <span class="badge bg-body-secondary text-body border ms-1">{% translate "gewogen" %}</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <ul class="list-unstyled mb-0 small">
+                            {% for komponente in artikel.komponenten.all %}
+                            <li>
+                                <a href="{{ komponente.ware.get_absolute_url }}"
+                                    class="link-body-emphasis link-offset-2 text-decoration-none">
+                                    {{ komponente }}
+                                </a>
+                            </li>
+                            {% empty %}
+                            <li>
+                                <span
+                                    class="badge rounded-pill text-bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                    {% translate "keine Komponenten, nirgends auflösbar" %}
+                                </span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+
+                    <td>
+                        {% for haus in artikel.haeuser %}
+                        <a href="{{ haus.get_absolute_url }}"
+                            class="badge rounded-pill text-bg-secondary text-decoration-none me-1">
+                            {{ haus.name }}
+                        </a>
+                        {% empty %}
+                        <span
+                            class="badge rounded-pill text-bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                            {% translate "keinem Ort zugeordnet" %}
+                        </span>
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-body-secondary py-5">
+                        {% if filterform.ist_eingeschraenkt %}{% translate "Kein Rezepturartikel passt zu diesen Filtern." %}{% else %}{% translate "Noch keine Rezepturartikel angelegt." %}{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    </div>
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% include "components/script.html" with name="live_filter" %}
+{% endblock extra_scripts %}

@@ -1,0 +1,94 @@
+<h3>The three steps</h3>
+<ul>
+    <li><strong>Preparation</strong>: the count lines exist. Now is the time for the target
+        stock, from the file or by hand. A missing inventory type is added through “Change
+        types”. “Start counting” releases the inventory to the counting app.</li>
+    <li><strong>Counting</strong>: the counters fill the lines in the counting app. Here you
+        can follow what has arrived. Nothing is entered on this page on purpose.
+        Differences, notes and closing are under “Review”. Once everything is counted,
+        “Lock” stops the counting.</li>
+    <li><strong>Closed</strong>: the lines are frozen and do not change any more, not even
+        if a target stock later turns out to be wrong. In the merchandise management system they are entered by hand.</li>
+</ul>
+<h3>Locking</h3>
+<p>
+    Once counting is done, <strong>Lock</strong> stops it. In the counting app only the
+    review list stays open: notes and the difference by hand go on, the server takes no new
+    counts. Whatever a phone still sends from a dead spot waits there until counting is
+    open again. The lock on the button shows the state, <strong>Open</strong> releases
+    counting again. Managers switch it here and in the app. Closing works locked or open,
+    and “Back to preparation” opens the lock.
+</p>
+{% if lauf %}
+<h3>The sites of the day</h3>
+<p>
+    On the same day other sites are counting too. The tabs above switch between them. “Total” shows them all side by side and closes them together on request.
+    This page only applies to {{ inventur.haus.name }}.
+</p>
+{% endif %}
+<h3>The count lines</h3>
+<p>
+    Per location in the same order as in the counting app, that is, the way the goods sit on
+    the shelf, not alphabetically. Whoever looks here for what is still missing walks the
+    same list as the counters in the store. The order is set by the count list of the
+    location.
+</p>
+<p>
+    This inventory counts {{ inventur.arten_anzeige }}. With several types the lines sit in
+    one tab per type, as in the counting app, as far as there are lines for it. Each tab
+    shows how far it has come.
+</p>
+<h3>Importing the target stock</h3>
+<p>
+    First choose the system the file comes from. For WinTICKET that is the inventory
+    count list as an Excel file. Its menus are German: <strong>Berichte → Warenwirtschaft
+    → Zähl-, Auffüll- und Differenzlisten → Inventurzählliste mit Sollbestand nach Lager
+    und Artikelnummer (236)</strong>, saved as “Excel-Datei ohne Formatierung” (Excel file
+    without formatting). Read are the article number, the name and “Istbestand lt.
+    Rechner” (stock according to the system). The header and warehouse rows of the sheet
+    do no harm. A CSV file with “article number;quantity” works too, and a column with
+    the name may be there too.
+    Taken over is what {{ inventur.haus.name }} carries. Unknown numbers, discontinued
+    articles with stock and inactive ones with stock that are due at this inventory become a
+    question under “Clarify target stock”. The target stock of articles of other types is
+    stored and only counts once someone counts them. The stock of a discontinued duplicate
+    goes to the article it counts as. Articles with the status “Not countable” are skipped.
+</p>
+<p>
+    Without a file, or for the articles it does not know, there is “Maintain by hand”:
+    the target per article for entering. It counts like one from the file.
+</p>
+<p>
+    <strong>The last file counts</strong>: whatever it does not name falls away, a target
+    by hand included. Importing
+    only happens during preparation. If something is missing later: “Back to preparation”,
+    upload, start again. The counted quantities are kept in the process. On closing, the
+    target stocks disappear. What remains is their copy in the result.
+</p>
+<h3>Difference by hand</h3>
+<p>
+    If there is no file with the stock, but the merchandise management system shows the
+    difference once the counted quantities are in there, it can be entered here: <strong>Enter
+    the difference by hand</strong> in the card “Target stock”. That only works as long as no
+    target stock came in, neither from a file nor by hand. With a target the difference
+    computes itself, and two differences per article would contradict each other.
+</p>
+<p>
+    It is entered per article in the review list or in the counting app, there by the
+    counters too. Managers switch it on and off here, above the review list and in the app.
+    As long as it is on, no target stock comes in. Switched off, what has been entered stays
+    and applies again once it is switched on again. On closing, the entered difference is
+    frozen, and the target stays empty.
+</p>
+<h3>Counters</h3>
+<p>
+    Only those assigned to the inventory see it in the counting app. Administrators may
+    count everywhere anyway. Closing deletes the assignment: who counted is not kept.
+</p>
+<h3>Taking back and deleting</h3>
+<p>
+    “Back to preparation” only turns the status around. Counted quantities stay. Deleting
+    takes count lines, target stocks and notes with it. A closed inventory cannot be deleted here,
+    because the only record of the day hangs on it. That is only possible in the
+    administration.
+</p>

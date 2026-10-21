@@ -1,0 +1,17 @@
+{# Light or dark. The choice applies to the site, the administration and the app. #}
+{#                                                                                #}
+{# The script is in the <head> and runs before the first paint: if it came        #}
+{# later, the light version would briefly flash on every page change.             #}
+{#                                                                                #}
+{# The choice hangs **on the account** ('CustomUser.darstellung') and thus        #}
+{# applies on every device. Signed in it therefore stands right in the page       #}
+{# and goes to '/api/v1/ich/' on a switch. In the browser it additionally         #}
+{# lies under the key the Django admin uses ('theme' with "auto|light|dark"):     #}
+{# that way its own toggle follows the same choice. The login page, on which      #}
+{# nobody is known yet, shows what applied last.                                  #}
+{#                                                                                #}
+{# A file and no inline script: the Content-Security-Policy allows only           #}
+{# scripts from here ('SECURE_CSP'). Classic and without 'defer' a file too       #}
+{# holds up the first paint, and what the page knows travels as an attribute.     #}
+{% load static %}
+<script src="{% static 'js/theme.js' %}"{% if user.is_authenticated %} data-am-konto="{{ user.darstellung }}" data-adresse="{% url 'ich' 'v1' %}"{% endif %}></script>

@@ -1,0 +1,12 @@
+{% extends "components/error_page.html" %}
+{% load i18n %}
+
+{# 'PermissionDenied' outside the middleware that otherwise shows the pages  #}
+{# for counters and administrators. Until 10/2026 this was Django's bare     #}
+{# "403 Forbidden".                                                           #}
+
+{% block title %}{% translate "Kein Zugriff" %}{% endblock title %}
+
+{% block fehlercode %}{% translate "Fehler 403" %}{% endblock fehlercode %}
+{% block ueberschrift %}{% translate "Dafür fehlt die Berechtigung" %}{% endblock ueberschrift %}
+{% block erklaerung %}{% translate "Dieses Konto darf das nicht. Wenn es das können soll, wende dich an eine Führungskraft oder an die Administration." %}{% endblock erklaerung %}

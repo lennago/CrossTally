@@ -1,0 +1,121 @@
+# The server is an application, not a package: 'uv' manages the environment
+# ('uv sync'), 'uv.lock' pins every version, including those of dependencies
+# of dependencies, which a hand-written 'requirements.txt' never had
+# completely. Here stand only the packages the project itself needs, with the
+# version from which it is tested. Bumped via 'uv lock --upgrade'.
+[project]
+name = "crosstally-server"
+version = "0.1.0"
+description = "Server von CrossTally: Django, DRF und die ausgelieferte Zähl-PWA."
+requires-python = ">=3.14"
+dependencies = [
+    "django>=6.1,<6.2",
+    "crispy-bootstrap5>=2026.9",
+    "django-crispy-forms>=2.7",
+    # 'ipware' delivers the caller's address behind the proxy.
+    "django-axes[ipware]>=8.3.1",
+    "djangorestframework>=3.18.1",
+    "djangorestframework-simplejwt>=5.5.1",
+    "environs>=15.2.0",
+    # For 'env.dj_db_url'. Directly instead of via 'environs[django]': the extra
+    # would bring dj-email-url and django-cache-url along, which nobody needs, and
+    # dj-email-url does not even ship its license text.
+    "dj-database-url>=3.1.0",
+    "gunicorn>=26.2.0",
+    # Compeso exports: xlsx via openpyxl, xls via xlrd, both through pandas.
+    "openpyxl>=3.1.5",
+    "pandas>=3.0.5",
+    "xlrd>=2.0.2",
+    # Without '[binary]': the wheel there bundles libpq, OpenSSL and Kerberos, but
+    # not their license texts. This way libpq comes from the system, in the image
+    # from Debian ('libpq5' in the Dockerfile), and brings its texts along.
+    "psycopg>=3.3.5",
+    # Derives the icons from the uploaded logo. Comes with WeasyPrint anyway, but
+    # stands here explicitly: it is used directly.
+    "pillow>=12.0",
+    "weasyprint>=70.0",
+    "whitenoise[brotli]>=6.12.0",
+    # Signing in with a passkey: parses and checks what the browser hands back
+    # ('accounts/passkey.py'). BSD-3, brings cryptography and pyOpenSSL along.
+    "webauthn>=3.0.1",
+]
+
+# Only for development and for the CI. In the image they are missing ('uv sync --no-dev').
+[dependency-groups]
+dev = [
+    "ruff",
+    "pyright",
+    # Without the stubs pyright takes every model field for a 'CharField' instead
+    # of a 'str'. Measured: 2242 diagnostics instead of 581.
+    "django-stubs",
+    "djangorestframework-stubs",
+    "pandas-stubs>=3.0.5.260914",
+]
+# Only where PostgreSQL runs: in the image and in the tests of the CI
+# ('uv sync --group postgres'). The C implementation of psycopg, built on the
+# spot against the system's libpq. Nothing is bundled, so what is said above
+# about '[binary]' holds. Without it psycopg fetches every cell of a result
+# through ctypes, and the pages that read a lot took up to twice as long
+# (measured on 2026-09-28). A group and not a dependency: building needs a
+# compiler and the headers of libpq, and development on SQLite needs neither.
+postgres = ["psycopg[c]>=3.3.5"]
+# For the tests. 'tblib' for the parallel run: Django hands failures from the
+# workers to the main process as pickles, and a traceback is none without
+# it. A failing test would end the run with "cannot pickle 'traceback'
+# object" instead of its name. 'coverage' measures what the tests reach (the
+# settings are below). The CI installs the group too.
+test = ["tblib>=3.1", "coverage>=7.16"]
+
+[tool.uv]
+package = false
+
+# What the tests reach, lines and branches. The CI measures it in the job
+# "Tests" ('server_ci.yml') and turns red below 'fail_under'. In the parallel
+# run each worker writes a file of its own, 'coverage combine' merges them.
+# Not counted: the tests, the migrations, the settings and the test runner.
+[tool.coverage.run]
+branch = true
+parallel = true
+concurrency = ["multiprocessing"]
+source = ["."]
+omit = [
+    "*/migrations/*",
+    "*/test*.py",
+    "*/tests.py",
+    ".venv/*",
+    "manage.py",
+    "django_project/settings.py",
+    "django_project/testing.py",
+    "django_project/test_runner.py",
+]
+
+[tool.coverage.report]
+# 97 % in 10/2026. The bar below leaves room for a small step back, not for
+# a feature without tests.
+fail_under = 95
+skip_empty = true
+skip_covered = true
+show_missing = true
+
+[tool.ruff]
+line-length = 100
+exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+# D212 alone from pydocstyle: the summary stands on the first line of a
+# multi-line docstring. The other D rules do not fit the house style.
+select = ["E", "F", "I", "UP", "DJ", "PL", "D212", "RUF100"]
+
+[tool.ruff.lint.per-file-ignores]
+"manage.py" = ["PLC0415"]
+"transform.py" = ["PLC0415"]
+
+[tool.ruff.lint.pylint]
+max-args = 8
+[tool.pyright]
+pythonVersion = "3.14"
+venvPath = "."
+venv = ".venv"
+typeCheckingMode = "basic"
+include = ["."]
+exclude = ["**/migrations", ".venv", "pwa", "staticfiles", "data"]

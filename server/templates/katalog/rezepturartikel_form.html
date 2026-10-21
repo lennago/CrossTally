@@ -1,0 +1,43 @@
+{% extends "components/form_page.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if object %}{% blocktranslate with name=object.name %}{{ name }} bearbeiten{% endblocktranslate %}{% else %}{% translate "Neuer Rezepturartikel" %}{% endif %}{% endblock title %}
+{% block breite %}max-breite-52{% endblock breite %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'rezepturartikel_list' %}">{% translate "Rezepturartikel" %}</a></li>
+{% endblock pfad %}
+
+{% block neu %}{% translate "Neuer Rezepturartikel" %}{% endblock neu %}
+
+{% block kopf_knoepfe %}
+{% if object %}
+<a href="{% url 'rezepturartikel_delete' object.pk %}" class="btn btn-outline-danger btn-sm">{% translate "Löschen" %}</a>
+{% endif %}
+{% endblock kopf_knoepfe %}
+
+{% block felder %}
+<div class="card mb-3">
+    <div class="card-header bg-body-tertiary">{% translate "Stammdaten" %}</div>
+    <div class="card-body">
+        {{ form|crispy }}
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header bg-body-tertiary">{% translate "Rezeptur" %}</div>
+    <div class="card-body">
+        {% translate "Weitere Komponente" as weitere_komponente %}
+        {% include "components/formset_rows.html" with formset=formsets.komponenten knopf=weitere_komponente einmalig="ware" %}
+    </div>
+</div>
+{% endblock felder %}
+
+{% block abbrechen_url %}{% if object %}{{ object.get_absolute_url }}{% else %}{% url 'rezepturartikel_list' %}{% endif %}{% endblock abbrechen_url %}
+
+{% block extra_scripts %}
+{% include "components/script.html" with name="formset" %}
+{% translate "Anteil am Gewicht in %" as anteil %}
+{% include "components/script.html" with name="rezepturartikel_form" wert=anteil %}
+{% endblock extra_scripts %}

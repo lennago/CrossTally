@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Inventurarten" %}{% endblock title %}
+
+{% block content %}
+<div class="container py-4 seite-mittel">
+
+    <div class="kopfleiste bg-body d-flex flex-wrap gap-2 justify-content-between align-items-center mb-1 py-2">
+        <div class="d-flex align-items-center gap-3">
+            <h1 class="h3 mb-0">{% translate "Inventurarten" %}</h1>
+        </div>
+        <a href="{% url 'inventurart_add' %}" class="btn btn-success btn-sm">{% translate "Neue Inventurart" %}</a>
+    </div>
+
+    {# The order is that of the tabs in the app and of the choices when creating an    #}
+    {# inventory. The arrows move one place, the page comes back as it was.            #}
+    <div class="table-responsive" data-liste>
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th class="breite-7" scope="col"><span class="visually-hidden">{% translate "Reihenfolge" %}</span></th>
+                    <th scope="col">{% translate "Name" %}</th>
+                    <th scope="col">{% translate "Aktive Artikel je Haus" %}</th>
+                    <th class="text-end breite-7" scope="col">{% translate "Artikel" context "Anzahl" %}</th>
+                    <th class="text-end breite-7" scope="col">{% translate "Inventuren" %}</th>
+                    <th class="breite-13" scope="col"><span class="visually-hidden">{% translate "Aktionen" %}</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for art in inventurarten %}
+                <tr>
+                    <td>
+                        <form method="post" action="{% url 'inventurart_verschieben' art.pk %}" class="d-inline-flex gap-1" data-sofort>
+                            {% csrf_token %}
+                            <input type="hidden" name="weiter" value="{{ request.get_full_path }}">
+                            {# 'data-fokus': the same name and value stand in every row; the #}
+                            {# script finds the pressed button again by this mark.           #}
+                            <button type="submit" name="richtung" value="vor" class="btn btn-sm btn-outline-secondary"
+                                data-fokus="art-{{ art.pk }}-vor"
+                                title="{% translate 'Nach vorn' %}" aria-label="{% blocktranslate with name=art.name %}„{{ name }}“ nach vorn{% endblocktranslate %}"
+                                {% if forloop.first %}disabled{% endif %}>↑</button>
+                            <button type="submit" name="richtung" value="zurueck" class="btn btn-sm btn-outline-secondary"
+                                data-fokus="art-{{ art.pk }}-zurueck"
+                                title="{% translate 'Nach hinten' %}" aria-label="{% blocktranslate with name=art.name %}„{{ name }}“ nach hinten{% endblocktranslate %}"
+                                {% if forloop.last %}disabled{% endif %}>↓</button>
+                        </form>
+                    </td>
+                    <td>
+                        <a href="{% url 'inventurart_edit' art.pk %}"
+                            class="link-body-emphasis link-offset-2 text-decoration-none">{{ art.name }}</a>
+                    </td>
+                    <td class="small">
+                        {% for haus, anzahl in art.haeuser_mit_artikeln %}
+                        <span class="text-nowrap">{{ haus }} <span class="text-body-secondary">{{ anzahl }}</span></span>{% if not forloop.last %}<span class="text-body-secondary"> · </span>{% endif %}
+                        {% empty %}
+                        <span class="text-body-secondary">{% translate "in keinem Haus" %}</span>
+                        {% endfor %}
+                    </td>
+                    <td class="text-end">
+                        {# The list of products is the product list, filtered by the type. #}
+                        <a href="{% url 'ware_list' %}?inventurart={{ art.pk }}" class="link-body-emphasis">{{ art.anzahl_artikel }}</a>
+                    </td>
+                    <td class="text-end text-body-secondary">{{ art.anzahl_inventuren }}</td>
+                    <td class="text-end">
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'inventurart_edit' art.pk %}"
+                                class="btn btn-sm btn-outline-secondary">{% translate "Bearbeiten" %}</a>
+                            <a href="{% url 'inventurart_delete' art.pk %}"
+                                class="btn btn-sm btn-outline-danger">{% translate "Löschen" %}</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock content %}

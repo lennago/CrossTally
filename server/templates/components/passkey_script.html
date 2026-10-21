@@ -1,0 +1,17 @@
+{% load i18n static %}
+{# Signing in, registering and confirming with a passkey ('passkey.js').     #}
+{#                                                                            #}
+{# The texts stand here and not in the script: gettext does not work in a    #}
+{# '.js' file. These are the browser's own refusals. What the server refuses #}
+{# arrives translated as JSON, except a session that has expired: then the   #}
+{# server no longer knows the account's language ('abgemeldet' for a new     #}
+{# key, 'nicht-bestaetigt' for a confirmation). Nor does the lock after too  #}
+{# many wrong passwords, which 'axes' answers with a page ('gesperrt', the    #}
+{# sentence of 'accounts/lockout.py').                                        #}
+<script src="{% static 'js/passkey.js' %}"
+    data-abgebrochen="{% translate 'Abgebrochen, oder auf diesem Gerät gibt es keinen Passkey für diese Adresse.' %}"
+    data-schon-da="{% translate 'Für dieses Konto gibt es auf diesem Gerät schon einen Passkey.' %}"
+    data-fehler="{% translate 'Das hat nicht geklappt. Bitte noch einmal versuchen.' %}"
+    data-abgemeldet="{% translate 'Der Passkey ist nicht angelegt, denn die Anmeldung ist abgelaufen. Bitte melde dich neu an.' %}"
+    data-nicht-bestaetigt="{% translate 'Nicht bestätigt, denn die Anmeldung ist abgelaufen. Bitte melde dich neu an.' %}"
+    data-gesperrt="{% translate 'Zu viele Fehlversuche. Dieses Konto ist von hier aus vorübergehend gesperrt. Bitte später noch einmal versuchen.' %}"></script>

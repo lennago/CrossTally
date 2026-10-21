@@ -1,0 +1,22 @@
+<h3>What is listed here</h3>
+<p>
+    What {{ haus.name }} carries, with this site's number, name and article
+    group. If another site carries the same product, its article hangs on the same product
+    but has its own number there.
+</p>
+{% include "help/en/shared/artikelstatus.html" %}
+<p>The status only concerns the article at {{ haus.name }}.</p>
+{% include "help/en/shared/inventurart.html" %}
+<p>
+    The column “Weighing” belongs to the product and switches weighing at every site. “No”
+    also removes the product's containers.
+</p>
+<h3>Searching and grouping</h3>
+<p>
+    The search covers number, name, EAN, product, article group and product family, for the
+    family also the families below it. A typo does no harm: when the search finds nothing,
+    it shows what sounds alike. Numbers have to be exact. Under “View” the list can be
+    grouped by article group or product family. Otherwise a click on the column header
+    sorts it.
+</p>
+{% include "help/en/shared/search_order.html" %}

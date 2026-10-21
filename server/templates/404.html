@@ -1,0 +1,12 @@
+{% extends "components/error_page.html" %}
+{% load i18n %}
+
+{# The navigation bar is in 'base.html' and only appears for managers. Whoever #}
+{# strays here gets back with one click instead of correcting the address by   #}
+{# hand.                                                                       #}
+
+{% block title %}{% translate "Seite nicht gefunden" %}{% endblock title %}
+
+{% block fehlercode %}{% translate "Fehler 404" %}{% endblock fehlercode %}
+{% block ueberschrift %}{% translate "Diese Seite gibt es nicht" %}{% endblock ueberschrift %}
+{% block erklaerung %}{% translate "Unter" %} <code>{{ request_path }}</code> {% translate "liegt nichts. Vielleicht ist die Adresse vertippt, vielleicht wurde der Eintrag inzwischen gelöscht." %}{% endblock erklaerung %}

@@ -1,0 +1,95 @@
+<h3>Rollen</h3>
+<p>
+    <strong>Zähler</strong> benutzen nur die Zähl-App. <strong>Führungskräfte</strong>
+    dürfen zusätzlich diese Weboberfläche benutzen: Stammdaten pflegen, Inventuren anlegen
+    und abschließen. <strong>Administratoren</strong> erreichen außerdem die Verwaltung
+    und die Backups. Einen Administrator legt ein Administrator in der Verwaltung an, dort
+    gibt es den Haken dafür. Ein Administrator ist immer auch Führungskraft.
+</p>
+<h3>Häuser</h3>
+<p>
+    Die Häuser eines Zählers sind ein Vorschlag: bei einer Inventur dieser Häuser steht
+    er auf der Seite „Zählende“ oben, beim Anlegen steht sein Haus neben dem Namen.
+    Eingetragen wird er dort trotzdem ausdrücklich. Bei Führungskräften ist die Auswahl ausgeblendet, denn sie sind an
+    kein Haus gebunden. Ihre Häuser gehen dabei nicht verloren.
+</p>
+<h3>Sprache</h3>
+<p>
+    Die Sprache gilt für die Oberfläche der Person{% if mail_moeglich %} und für ihre
+    E-Mails{% endif %}. Beim Anlegen vorbelegt ist deine eigene. Die Person kann sie später im Kontomenü
+    selbst umstellen.
+</p>
+{% if mail_moeglich %}
+<h3>Einladung oder Passwort</h3>
+<p>
+    Ein neues Konto wird eingeladen: Die Person bekommt eine E-Mail mit einem Link, setzt
+    ihr Passwort dort selbst und ist damit freigeschaltet. So kennt niemand sonst ihr
+    Passwort. Bis dahin steht das Konto als <strong>eingeladen</strong> in der Liste, und
+    auf seiner Seite lässt sich die Einladung erneut senden, etwa wenn der Link abgelaufen
+    ist. Er gilt {{ einladung_tage }} Tag{{ einladung_tage|pluralize:"e" }}. Wer das Passwort lieber gleich selbst vergibt, setzt den Haken
+    <strong>Passwort selbst vergeben</strong>. Dann erscheinen die beiden Felder.
+</p>
+<p>
+    Wer ein eingeladenes Konto aktiv schaltet und wieder deaktiviert, macht jeden bisher
+    verschickten Link ungültig. Das Konto bleibt eingeladen, und eine neue Einladung bringt
+    einen Link, der wieder geht.
+</p>
+{% else %}
+<h3>Erstes Passwort</h3>
+<p>
+    Beim Anlegen vergibst du das erste Passwort und gibst es der Person weiter. Sie ändert
+    es danach selbst.
+</p>
+{% endif %}
+<h3>Adresse</h3>
+<p>
+    Die Adresse ändert die Person selbst, in der Zähl-App über das Kontomenü und auf der
+    Website über das Kontomenü oder die Sperrseite, oder ein Administrator hier und in der
+    Verwaltung. Eine Führungskraft sieht
+    das Feld nur grau.{% if mail_moeglich %} An eine neue Adresse geht erst eine Mail mit
+    einem Link. Die Adresse gilt, sobald die Person ihn bestätigt hat, bis dahin bleibt die
+    bisherige. So kommt eine vertippte Adresse nie ins Konto. Nur ein eingeladenes oder
+    deaktiviertes Konto bekommt die neue Adresse sofort: dort gibt es nichts zu bestätigen,
+    und die Einladung soll an die richtige Adresse gehen. Es gilt nur der letzte Link. Ein
+    neues Passwort, ein entfernter Passkey oder das Deaktivieren nimmt ihn zurück.{% endif %}
+</p>
+<h3>Passwort</h3>
+<p>
+    Das Passwort wird hier nicht geändert. Jeder ändert seines selbst: Führungskräfte über
+    das Menü oben rechts, Zähler in der Zähl-App über das Kontomenü oder über die Links auf
+    der Sperrseite der Website. Gespeichert ist es ohnehin nur
+    als Prüfwert. Niemand kann es auslesen, auch ein Administrator nicht. Wer seines
+    vergisst, bekommt von einem Administrator in der Verwaltung ein neues gesetzt.
+    Eine Führungskraft kann das nicht.{% if mail_moeglich %} Es geht auch über
+    „Passwort vergessen?“ auf der Anmeldeseite.{% endif %} Ein neues Passwort meldet das
+    Konto auf allen Geräten ab, auch in der Zähl-App. Nur wer seines selbst ändert, bleibt
+    auf dem Gerät angemeldet, an dem er es tut. Was auf den anderen noch nicht
+    gesendet ist, bleibt liegen und geht nach der nächsten Anmeldung raus.
+</p>
+{% if mail_moeglich %}
+<h3>Benachrichtigung</h3>
+<p>
+    Wer ein Konto ändert, deaktiviert oder löscht, löst eine E-Mail an die Person aus. Sie
+    nennt, was sich geändert hat, mit altem und neuem Wert, und wer es war. Ändert sich die
+    Adresse, geht sie an die alte und an die neue. Ebenso bekommt jede Person eine Mail, wenn ihr
+    Passwort neu gesetzt oder ein Passkey angelegt oder entfernt wird, auch wenn sie es
+    selbst war. Ein deaktiviertes Konto bekommt nur noch die Mail über die Deaktivierung.
+    Erst wenn es wieder aktiv ist, kommen wieder welche.
+</p>
+<p>
+    Was in den Mails steht, legt ein Administrator in der Verwaltung unter
+    <strong>Mailtexte</strong> fest. Dort steht auch, ob eine Mail nennt, wer etwas
+    ausgelöst hat.
+</p>
+{% endif %}
+<h3>Wer geht</h3>
+<p>
+    Wer den Betrieb verlässt, dessen Konto wird <strong>gelöscht</strong>, nicht auf
+    inaktiv gesetzt. Am Konto hängen keine Zähldaten. Es verschwinden nur die
+    Zuordnungen zu Häusern und Inventuren und die Passkeys. Ein Konto ist in einer
+    Minute wieder angelegt, falls doch jemand zurückkommt. Inaktiv ist für den vorübergehenden Fall
+    gedacht, etwa eine längere Abwesenheit. Wer ein Konto auf inaktiv setzt, meldet es überall
+    ab, auf der Website und in der Zähl-App. Ist es wieder aktiv, meldet sich die Person neu an.
+    Was in ihrer Zähl-App noch nicht gesendet ist, bleibt liegen und geht nach der neuen
+    Anmeldung raus.
+</p>

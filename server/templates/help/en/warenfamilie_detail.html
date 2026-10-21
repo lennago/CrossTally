@@ -1,0 +1,21 @@
+{# "Not countable" has no button for a subfamily. #}
+{% if not familie.sammelt_ignorierte %}
+<h3>New subfamily</h3>
+<p>
+    Creates a family below this one. Up for choice are first the products of this family,
+    they move into the new subfamily, then all products without a family. The other
+    subfamilies of this family can be moved under the new one as well. That is how “Drinks”
+    splits step by step into “Beers” and “Soft drinks” and gains levels, without a detour
+    past “No product family”.
+</p>
+{% endif %}
+<h3>The family “Not countable”</h3>
+<p>
+    What the merchandise management system carries as an article without it being a product: deposits, vouchers,
+    discounts. The articles of these products are not countable at every site: they appear
+    in no list, no count and no report, and the import skips them silently. “Bring back”
+    takes a product out: it returns to its old family, and its articles get their old status
+    and their places back at their old position at every site, as far as family, location and
+    packs still exist. Older records that did not yet remember family and places come back
+    without them.
+</p>

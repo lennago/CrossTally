@@ -1,0 +1,39 @@
+{% load i18n %}
+{# Set the status of a house article directly in the row.                          #}
+{#                                                                                 #}
+{# Call: {% include "katalog/components/status_buttons.html" with artikel=... %}   #}
+{#                                                                                 #}
+{# Three states as a button row, the current one filled and disabled, as           #}
+{# with the inventory scope. "Not countable" stands set apart next to them:        #}
+{# it is no fourth state but the statement that the product is none, and           #}
+{# that applies in every house, because the product moves into the family          #}
+{# "Not countable" for it.                                                         #}
+{#                                                                                 #}
+{# An ignored article gets no buttons here: ignored is its product, and its        #}
+{# page brings it back.                                                            #}
+{% if artikel.status == "IGNORIERT" %}
+<a href="{{ artikel.ware.get_absolute_url }}" class="btn btn-sm btn-outline-secondary"
+    title="{% translate 'Die Ware aus „Nicht zählbar“ herausnehmen' %}">{% translate "Zur Ware" %}</a>
+{% else %}
+<form method="post" action="{% url 'hausartikel_status' artikel.pk %}"
+    class="d-inline-flex align-items-center gap-2" data-sofort>
+    {% csrf_token %}
+    <input type="hidden" name="weiter" value="{{ request.get_full_path }}">
+    <div class="btn-group btn-group-sm" role="group" aria-label="{% blocktranslate with name=artikel.name %}Status von {{ name }}{% endblocktranslate %}">
+        <button type="submit" name="status" value="AKTIV" data-fokus="status-{{ artikel.pk }}-AKTIV" title="{% translate 'Wird geführt und gezählt' %}"
+            class="btn {% if artikel.status == 'AKTIV' %}btn-success{% else %}btn-outline-success{% endif %}"
+            {% if artikel.status == 'AKTIV' %}disabled aria-pressed="true"{% endif %}>{% translate "Aktiv" %}</button>
+        <button type="submit" name="status" value="INAKTIV" data-fokus="status-{{ artikel.pk }}-INAKTIV"
+            title="{% translate 'Gerade nicht im Sortiment, kommt wieder (etwa Saisonware)' %}"
+            class="btn {% if artikel.status == 'INAKTIV' %}btn-secondary{% else %}btn-outline-secondary{% endif %}"
+            {% if artikel.status == 'INAKTIV' %}disabled aria-pressed="true"{% endif %}>{% translate "Inaktiv" %}</button>
+        <button type="submit" name="status" value="EINGESTELLT" data-fokus="status-{{ artikel.pk }}-EINGESTELLT"
+            title="{% translate 'Vorbei: bleibt nur für alte Ergebnisse stehen' %}"
+            class="btn {% if artikel.status == 'EINGESTELLT' %}btn-danger{% else %}btn-outline-danger{% endif %}"
+            {% if artikel.status == 'EINGESTELLT' %}disabled aria-pressed="true"{% endif %}>{% translate "Eingestellt" %}</button>
+    </div>
+    <button type="submit" name="status" value="IGNORIERT" class="btn btn-sm btn-outline-secondary"
+        title="{% translate 'Nicht zählbar: Pfand, Gutschein und dergleichen' %}"
+        data-rueckfrage="{% blocktranslate with name=artikel.ware.name %}Nicht zählbar? Die Ware „{{ name }}“ kommt in die Familie „Nicht zählbar“, in jedem Haus.{% endblocktranslate %}">{% translate "Nicht zählbar" %}</button>
+</form>
+{% endif %}

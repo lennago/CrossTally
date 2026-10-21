@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% blocktranslate with name=haus.name %}Hausartikel {{ name }}{% endblocktranslate %}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'haus_list' %}">{% translate "Häuser" %}</a></li>
+            <li class="breadcrumb-item">
+                <a href="{{ haus.get_absolute_url }}">{{ haus.name }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{% translate "Hausartikel" %}</li>
+        </ol>
+    </nav>
+
+    <div class="kopfleiste bg-body d-flex flex-wrap gap-2 justify-content-between align-items-center mb-1 py-2">
+        <div class="d-flex align-items-center gap-3">
+            <h1 class="h3 mb-0">
+    {% blocktranslate with name=haus.name %}Hausartikel {{ name }}{% endblocktranslate %}
+</h1>
+            <span class="text-body-secondary small" data-ersetzen="anzahl">
+                {% if page_obj %}{% blocktranslate count anzahl=page_obj.paginator.count context "Zahl der Hausartikel" %}{{ anzahl }} Artikel{% plural %}{{ anzahl }} Artikel{% endblocktranslate %}{% else %}{% blocktranslate count anzahl=hausartikel|length context "Zahl der Hausartikel" %}{{ anzahl }} Artikel{% plural %}{{ anzahl }} Artikel{% endblocktranslate %}{% endif %}
+                {% if filterform.ist_eingeschraenkt %}{% translate "gefunden" %}{% endif %}
+            </span>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'hausartikel_add' haus.pk %}" class="btn btn-success btn-sm">
+                {% translate "Neuer Hausartikel" %}
+            </a>
+            <a href="{% url 'hausartikel_import' haus.pk %}" class="btn btn-outline-secondary btn-sm">
+                {% translate "Importieren" %}
+            </a>
+        </div>
+    </div>
+
+    {% url 'hausartikel_list' haus.pk as zurueck %}
+    {% include "components/list_filter.html" with zuruecksetzen=zurueck breite=2 %}
+
+    <div data-liste>
+    {% include "components/pagination.html" with stelle="oben" %}
+
+    {% if gruppen is not None %}
+    {# By product group or product family: one collapsible per group, inside   #}
+    {# by number, as in the review list. No paging here. A group that ran over #}
+    {# two pages would no longer be a group. They are closed by default. What  #}
+    {# was open the browser remembers.                                         #}
+    {% include "components/expand_buttons.html" %}
+    {% for gruppe in gruppen %}
+    {% include "katalog/components/hausartikel_group.html" %}
+    {% empty %}
+    <p class="text-center text-body-secondary py-5">
+        {% if filterform.ist_eingeschraenkt %}{% translate "Kein Artikel passt zu diesen Filtern." %}{% else %}{% blocktranslate with name=haus.name %}{{ name }} führt noch keine Hausartikel.{% endblocktranslate %}{% endif %}
+    </p>
+    {% endfor %}
+    {% else %}
+    {% include "katalog/components/hausartikel_table.html" with zeilen=hausartikel gegliedert=False %}
+    {% endif %}
+
+    {% include "components/pagination.html" with stelle="unten" %}
+    </div>
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% include "components/script.html" with name="multi_select" %}
+{% include "components/script.html" with name="live_filter" %}
+{% endblock extra_scripts %}

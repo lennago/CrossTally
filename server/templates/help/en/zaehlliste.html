@@ -1,0 +1,75 @@
+<h3>Two tabs</h3>
+<p>
+    <strong>Select articles</strong> decides <em>which</em> articles occur at
+    {{ ort.name }}. <strong>Count list</strong> decides <em>order and packs</em>. The way
+    the goods sit on the shelf is the way they appear in the counting app.
+</p>
+<h3>Count list</h3>
+<p>
+    The list is divided by <strong>inventory type</strong>, like the tabs of the counting
+    app. Every type has its own section and within it its own order. Which type an article
+    belongs to is set on the article, not in the list. A prepared item stands under the
+    first type of its ingredients. If an article changes its type, it moves to the end of
+    its new type at every location that expects it. An inventory without that type gives it
+    no line. With only one inventory type there is no division.
+</p>
+<p>
+    Rows can be dragged by their handle, but only within their section. If you hold one at the top or bottom edge, the list
+    scrolls along. The arrows move a row by one, the arrows with a bar move it all the way
+    to the top or bottom of its section. Every change of order is saved immediately. One checkbox per pack:
+    ticked, a line is created for it at the next inventory. At least one has to be ticked,
+    otherwise the article would get no line here at all. For goods that can be weighed,
+    weighing will do instead. The quantity beside it is the usual stock. It appears in grey
+    in the empty field while counting, as a reference point, not as a preset.
+</p>
+<p>
+    An inactive pack stands in the row in grey with its default and “inactive”. New
+    inventories give it no line. Whatever of it is still on the shelf is counted in an active
+    pack, through the search if need be. The default stays and applies again as soon as the
+    pack is active again.
+</p>
+<p>
+    Above the column the menu <strong>All rows</strong> acts on the whole list: tick or
+    untick all packs, tick or untick only the loose single unit (“Single”) everywhere, tick
+    or untick weighing everywhere. What would change nothing is greyed out. Unticking packs
+    loses the quantities entered. If there are any, the entry asks first. This too is only
+    saved with “Save”, or when switching to the <strong>Select articles</strong> tab: that
+    saves what was changed in the list first.
+</p>
+<p>
+    <strong>Refresh</strong> at the top right fetches the list anew from the server without
+    throwing away the ticks and quantities already entered here. That way a pack just created
+    in another tab appears in its row.
+</p>
+<p>
+    The arrows and the × work even when a row is not in order, say a weighable article
+    without pack and without weighing. The other rows are saved in the process. A changed
+    row that is not in order reports it. Only “Save” insists on a list without errors.
+</p>
+<p>
+    For goods that can be weighed, the checkbox <strong>Weighing</strong> sits below: ticked, the
+    scale is part of the count at this location too. If the goods only sit in their carton here,
+    it stays empty. Otherwise a line would be left open at every inventory that nobody
+    fills. Weighing is still possible in the counting app. Closing then asks whether
+    weighing should be added here.
+</p>
+<p>
+    A newly added article comes <strong>without</strong> this tick. Only where a product
+    has no pack at all is it set: the scale is then the only way to count it, and without
+    the tick it would get no line.
+</p>
+<p>
+    If a pack is missing, it is created on the article. The link in the row leads straight to
+    the “Packs” section of its edit page. A running inventory keeps its order. Changes apply
+    from the next one.
+</p>
+<h3>Select articles</h3>
+<p>
+    An article in the count list means: it is expected here. That drives the completeness
+    check and the order while counting. Everything may still be counted. Unexpected items
+    are marked as such while counting. In which order and in which packs is decided in the
+    <strong>Count list</strong> tab. A newly added article arrives there with all its active
+    packs ticked. Prepared items are only on offer where their recipe can be resolved. A
+    discontinued article cannot be added here. Reactivate it first, on its page.
+</p>
+{% include "help/en/shared/search_order.html" %}

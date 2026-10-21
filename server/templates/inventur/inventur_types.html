@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% blocktranslate %}Inventurarten für {{ inventur }}{% endblocktranslate %}{% endblock title %}
+
+{% block content %}
+<div class="container py-4 max-breite-46">
+
+    <nav aria-label="{% translate 'Navigationspfad' %}">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'inventur_list' %}">{% translate "Inventuren" %}</a></li>
+            <li class="breadcrumb-item">
+                <a href="{{ inventur.get_absolute_url }}">{{ inventur }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{% translate "Inventurarten" %}</li>
+        </ol>
+    </nav>
+
+    <div class="kopfleiste bg-body py-2 mb-1">
+        <h1 class="h3 mb-0">{% translate "Arten ändern" %}</h1>
+    </div>
+    <p class="text-body-secondary small mb-3">
+        {% blocktranslate with haus=inventur.haus.name %}Jede gewählte Art wird ein Reiter in der Zähl-App. Gilt nur für {{ haus }}, die anderen Häuser des Tages bleiben, wie sie sind.{% endblocktranslate %}
+    </p>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {# CheckboxSelectMultiple passes its attributes on to the enclosing      #}
+        {# element too. Rendered one by one, Bootstrap draws no empty box.       #}
+        <fieldset class="card mb-3">
+            <legend class="card-header bg-body-tertiary fs-6 mb-0">{{ form.inventurarten.label }}</legend>
+            <div class="card-body">
+                {% for eintrag in form.inventurarten %}
+                <div class="form-check">
+                    {{ eintrag.tag }}
+                    <label class="form-check-label" for="{{ eintrag.id_for_label }}">{{ eintrag.choice_label }}</label>
+                </div>
+                {% endfor %}
+                <div class="form-text">{{ form.inventurarten.help_text }}</div>
+                {% for fehler in form.inventurarten.errors %}
+                <div class="invalid-feedback d-block">{{ fehler }}</div>
+                {% endfor %}
+            </div>
+        </fieldset>
+
+        {% for fehler in form.non_field_errors %}
+        <div class="alert alert-danger py-2">{{ fehler }}</div>
+        {% endfor %}
+
+        <div class="fussleiste d-flex flex-wrap gap-2 bg-body border-top py-3">
+            <button class="btn btn-success" type="submit">{% translate "Arten speichern" %}</button>
+            <a href="{{ inventur.get_absolute_url }}" class="btn btn-outline-secondary">
+                {% translate "Abbrechen" %}
+            </a>
+        </div>
+    </form>
+
+</div>
+{% endblock content %}

@@ -1,0 +1,62 @@
+{% load i18n %}
+{# Set the status of a product or product group, on all their house                              #}
+{# articles, in every house.                                                                     #}
+{#                                                                                               #}
+{# Call: {% include "katalog/components/sammelstatus_buttons.html" with satz=... art="ware" %}   #}
+{#         'art' is "ware" or "gruppe".                                                          #}
+{#                                                                                               #}
+{# The same button row as on the house article, only it acts on all records;                     #}
+{# that is why "Inactive", "Discontinued" and "Not countable" ask first. The                     #}
+{# record stands like its liveliest house article ('sammelstatus'). The                          #}
+{# numbers for that the list brings via 'mit_statuszahlen'. "Not countable"                      #}
+{# puts the products into the family of the same name, for a group all its                       #}
+{# products.                                                                                     #}
+{# The button row itself. Its target and the texts of the confirmations come from below.         #}
+{% partialdef reihe %}
+<form method="post" action="{{ ziel }}" class="d-inline-flex align-items-center gap-2" data-sofort>
+    {% csrf_token %}
+    <input type="hidden" name="weiter" value="{{ request.get_full_path }}">
+    {% if status == "IGNORIERT" %}
+    <button type="submit" name="status" value="WIEDER_AUFNEHMEN" class="btn btn-sm btn-outline-secondary"
+        title="{% translate 'Aus „Nicht zählbar“ herausnehmen. Familie, Status der Hausartikel und ihre Plätze kommen zurück, soweit sie gemerkt sind.' %}"
+        data-rueckfrage="{% blocktranslate with name=satz.name %}„{{ name }}“ wieder als Ware führen? Familie und Status der Hausartikel kommen zurück, ihre Plätze in den Zähllisten an die alte Stelle, soweit sie gemerkt sind und es sie noch gibt.{% endblocktranslate %}">{% translate "Wieder aufnehmen" %}</button>
+    {% else %}
+    <div class="btn-group btn-group-sm" role="group" aria-label="{% blocktranslate with name=satz.name %}Status von {{ name }}{% endblocktranslate %}">
+        <button type="submit" name="status" value="AKTIV" title="{% translate 'Inaktive und eingestellte Hausartikel wieder aktivieren' %}"
+            class="btn {% if status == 'AKTIV' %}btn-success{% else %}btn-outline-success{% endif %}"
+            {% if status == 'AKTIV' %}disabled aria-pressed="true"{% endif %}>{% translate "Aktiv" %}</button>
+        <button type="submit" name="status" value="INAKTIV" title="{% translate 'Alle aktiven Hausartikel inaktiv setzen' %}"
+            class="btn {% if status == 'INAKTIV' %}btn-secondary{% else %}btn-outline-secondary{% endif %}"
+            {% if status == 'INAKTIV' %}disabled aria-pressed="true"{% endif %}
+            data-rueckfrage="{% blocktranslate with name=satz.name %}„{{ name }}“ inaktiv setzen? Das trifft {{ wen }}.{% endblocktranslate %}">{% translate "Inaktiv" %}</button>
+        <button type="submit" name="status" value="EINGESTELLT" title="{% translate 'Alle Hausartikel einstellen' %}"
+            class="btn {% if status == 'EINGESTELLT' %}btn-danger{% else %}btn-outline-danger{% endif %}"
+            {% if status == 'EINGESTELLT' %}disabled aria-pressed="true"{% endif %}
+            data-rueckfrage="{% blocktranslate with name=satz.name %}„{{ name }}“ einstellen? Das trifft {{ welche }}. Sie fallen aus den Zähllisten.{% endblocktranslate %}">{% translate "Eingestellt" %}</button>
+    </div>
+    <button type="submit" name="status" value="IGNORIERT" class="btn btn-sm btn-outline-secondary"
+        title="{% translate 'Nicht zählbar: Pfand, Gutschein und dergleichen' %}"
+        data-rueckfrage="{{ nicht_zaehlbar_frage }}">{% translate "Nicht zählbar" %}</button>
+    {% endif %}
+</form>
+{% endpartialdef %}
+
+{# The parts of the confirmation sentences arrive here translated. Fixed in   #}
+{# the 'with' they stood in German on every English page until 09/2026.       #}
+{% if art == "gruppe" %}
+{% url 'warengruppe_status' satz.pk as ziel %}
+{% translate "alle aktiven Hausartikel dieser Warengruppe" as wen %}
+{% translate "alle Hausartikel dieser Warengruppe" as welche %}
+{% translate "Alle Waren dieser Warengruppe nicht zählbar setzen? Sie kommen in die Familie „Nicht zählbar“, in jedem Haus, auch wo ein anderes Haus dieselbe Ware unter einer anderen Warengruppe führt." as nicht_zaehlbar_frage %}
+{% with status=satz.sammelstatus %}
+{% partial reihe %}
+{% endwith %}
+{% else %}
+{% url 'ware_status' satz.pk as ziel %}
+{% translate "die aktiven Hausartikel in jedem Haus" as wen %}
+{% translate "alle Hausartikel in jedem Haus" as welche %}
+{% translate "Nicht zählbar? Die Ware kommt in die Familie „Nicht zählbar“, in jedem Haus." as nicht_zaehlbar_frage %}
+{% with status=satz.warenstatus %}
+{% partial reihe %}
+{% endwith %}
+{% endif %}

@@ -1,0 +1,18 @@
+{% extends "components/form_page.html" %}
+{% load i18n %}
+
+{% block title %}{% if object %}{% blocktranslate with name=object.name %}{{ name }} bearbeiten{% endblocktranslate %}{% else %}{% translate "Neue Inventurart" %}{% endif %}{% endblock title %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'inventurart_list' %}">{% translate "Inventurarten" %}</a></li>
+{% endblock pfad %}
+
+{% block neu %}{% translate "Neue Inventurart" %}{% endblock neu %}
+
+{% block kopf_knoepfe %}
+{% if object %}
+<a href="{% url 'inventurart_delete' object.pk %}" class="btn btn-outline-danger btn-sm">{% translate "Löschen" %}</a>
+{% endif %}
+{% endblock kopf_knoepfe %}
+
+{% block abbrechen_url %}{% url 'inventurart_list' %}{% endblock abbrechen_url %}

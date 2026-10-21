@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% if hausartikel.artikelnummer %}{{ hausartikel.artikelnummer }} {% endif %}{{ hausartikel.name }}{% endblock title %}
+
+{% block content %}
+<div class="container py-4 seite-mittel">
+
+    {% include "components/breadcrumbs.html" with aktuell=hausartikel.name %}
+
+    <div class="kopfleiste bg-body py-2 d-flex flex-wrap gap-2 justify-content-between align-items-start mb-3">
+        <div>
+            <h1 class="h3 mb-1">
+                <span class="font-monospace text-body-secondary">
+                    {{ hausartikel.artikelnummer|default:"–" }}
+                </span>
+                {{ hausartikel.name }}
+            </h1>
+            <div class="text-body-secondary small">
+                {{ hausartikel.haus.name }}
+                · {% if hausartikel.aktiv %}{{ hausartikel.get_status_display|lower }}{% else %}{% blocktranslate with status=hausartikel.get_status_display|lower datum=hausartikel.gueltig_bis|date:"SHORT_DATE_FORMAT" %}{{ status }} seit {{ datum }}{% endblocktranslate %}{% endif %}
+            </div>
+        </div>
+        <div class="d-flex flex-wrap justify-content-end gap-2">
+            {# An ignored one gets its product back via "Edit".               #}
+            {% if hausartikel.status != "IGNORIERT" %}
+            {% include "katalog/components/status_buttons.html" with artikel=hausartikel %}
+            {% endif %}
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'hausartikel_edit' hausartikel.pk %}"
+                    class="btn btn-sm btn-outline-secondary">{% translate "Bearbeiten" %}</a>
+                {% if hausartikel.status != "IGNORIERT" %}
+                <a href="{% url 'hausartikel_zusammenfuehren' hausartikel.pk %}"
+                    class="btn btn-sm btn-outline-secondary">{% translate "Zusammenführen" %}</a>
+                {% endif %}
+                <a href="{% url 'hausartikel_delete' hausartikel.pk %}"
+                    class="btn btn-sm btn-outline-danger">{% translate "Löschen" %}</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-body-tertiary">{% translate "Stammdaten" %}</div>
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-4">{% translate "Ware" %}</dt>
+                <dd class="col-sm-8">
+                    <a href="{{ hausartikel.ware.get_absolute_url }}?von={{ herkunft|urlencode }}"
+                        class="link-body-emphasis link-offset-2 text-decoration-none">
+                        {{ hausartikel.ware.name }}
+                    </a>
+                    <span class="text-body-secondary small">
+                        ({% translate "die hausübergreifende Identität dieses Artikels" %})
+                    </span>
+                </dd>
+
+                <dt class="col-sm-4">{% translate "Quelle" %}</dt>
+                <dd class="col-sm-8">{{ hausartikel.get_quelle_display }}</dd>
+
+                <dt class="col-sm-4">{% translate "Einheit im Haus" %}</dt>
+                <dd class="col-sm-8">
+                    {{ hausartikel.basiseinheit.kurz }}
+                    {% if hausartikel.weicht_ab %}
+                    <div class="text-body-secondary small">
+                        {% blocktranslate with einheit=hausartikel.ware.basiseinheit.kurz %}Die Ware wird in {{ einheit }} geführt.{% endblocktranslate %}
+                        {{ hausartikel.einheit_hinweis }}
+                    </div>
+                    {% endif %}
+                </dd>
+
+                <dt class="col-sm-4">{% translate "Inventurart" %}</dt>
+                <dd class="col-sm-8">
+                    {# The menu asks, as the form does, whether a new type applies #}
+                    {# to the product's other articles too.                        #}
+                    {% url 'hausartikel_inventurart' hausartikel.pk as art_ziel %}
+                    {% include "components/inventurart_menu.html" with ziel=art_ziel arten=inventurarten aktuell=hausartikel.inventurart titel=hausartikel.name weitere=weitere_artikel %}
+                </dd>
+
+                <dt class="col-sm-4">{% translate "Abwiegen" %}</dt>
+                <dd class="col-sm-8">
+                    {% if hausartikel.ware.abwiegbar %}
+                    {% translate "ja, brutto in Gramm" %}
+                    {% if hausartikel.ware.braucht_wiegefaktor %}
+                    <span class="text-body-secondary small">
+                        {% if hausartikel.ware.gramm_je_einheit %}
+                        (1 {{ hausartikel.ware.basiseinheit.kurz }} = {{ hausartikel.ware.gramm_je_einheit|floatformat:"-6" }} g)
+                        {% else %}
+                        {% translate "(Gramm je Einheit fehlt noch, die Waage rechnet 1:1)" %}
+                        {% endif %}
+                    </span>
+                    {% endif %}
+                    {% else %}
+                    <span class="text-body-secondary">{% translate "nein, nur in Gebinden" %}</span>
+                    {% endif %}
+                    <div class="text-body-secondary small">
+                        {% translate "gilt für die Ware, also in jedem Haus" %}
+                    </div>
+                </dd>
+
+                <dt class="col-sm-4">{% translate "Warengruppe" %}</dt>
+                <dd class="col-sm-8">
+                    <a href="{{ hausartikel.warengruppe.get_absolute_url }}?von={{ herkunft|urlencode }}"
+                        class="link-body-emphasis link-offset-2 text-decoration-none">
+                        {{ hausartikel.warengruppe.anzeigename }}
+                    </a>
+                </dd>
+
+                <dt class="col-sm-4">{% translate "EAN" %}</dt>
+                <dd class="col-sm-8">
+                    {% if hausartikel.ean %}
+                    <span class="font-monospace">{{ hausartikel.ean }}</span>
+                    {% else %}
+                    <span class="text-body-secondary">{% translate "nicht hinterlegt" %}</span>
+                    {% endif %}
+                </dd>
+
+                <dt class="col-sm-4">{% translate "Zuletzt geändert" %}</dt>
+                <dd class="col-sm-8">{{ hausartikel.geaendert_am|date:"SHORT_DATETIME_FORMAT" }}</dd>
+
+                <dt class="col-sm-4">{% translate "Status" %}</dt>
+                <dd class="col-sm-8 mb-0">
+                    {% if hausartikel.status == "AKTIV" %}
+                    {% translate "Wird geführt und gezählt." %}
+                    {% elif hausartikel.status == "INAKTIV" %}
+                    {% blocktranslate with datum=hausartikel.gueltig_bis|date:"SHORT_DATE_FORMAT" %}Inaktiv seit {{ datum }}: gerade nicht im Sortiment. Er behält Nummer und Zähllisten, steht in der App hinter den aktiven Artikeln, wenn die Inventur seine Inventurart zählt, und lässt sich vor dem Abschluss wieder aktivieren.{% endblocktranslate %}
+                    {% elif hausartikel.status == "EINGESTELLT" %}
+                    {% blocktranslate with datum=hausartikel.gueltig_bis|date:"SHORT_DATE_FORMAT" haus=hausartikel.haus.name %}Eingestellt seit {{ datum }}. Nummer und Ware sind in {{ haus }} frei. Der Satz steht nur noch für alte Inventurergebnisse da. Ausgelistetes steht aber manchmal noch im Regal: solange kein anderer Satz Nummer oder Ware übernimmt, bietet die Zähl-App ihn ganz hinten weiter an, wenn die Inventur seine Inventurart zählt. So lange lässt er sich auch wieder aktivieren.{% endblocktranslate %}
+                    {# Per article: only a memory knows the places. #}
+                    {% if hausartikel.erwartungen_vorher %}
+                    {% translate "Seine Plätze in den Zähllisten kommen dabei an ihre alte Stelle zurück, soweit es Ort und Gebinde noch gibt." %}
+                    {% else %}
+                    {% translate "Plätze in den Zähllisten hat er sich keine gemerkt. Wieder aktiv, steht er erst in einer Zählliste, wenn du ihn dort aufnimmst." %}
+                    {% endif %}
+                    {% else %}
+                    {% translate "Nicht zählbar: seine Ware gehört zur Familie „Nicht zählbar“. Er taucht in keiner Liste und keiner Zählung auf und wird beim Import still übergangen. Zurück holt ihn „Wieder aufnehmen“ auf der Seite der Ware, oder unter „Bearbeiten“ eine andere Ware." %}
+                    {% if hausartikel.erwartungen_vorher %}
+                    {% translate "Mit „Wieder aufnehmen“ kommen seine Plätze in den Zähllisten an ihre alte Stelle zurück, soweit es Ort und Gebinde noch gibt." %}
+                    {% else %}
+                    {% translate "Plätze in den Zähllisten hat er sich keine gemerkt." %}
+                    {% endif %}
+                    {% endif %}
+                </dd>
+
+                {# Duplicates from merging two products ('Hausartikel.zaehlt_als'). #}
+                {% if hausartikel.zaehlt_als %}
+                <dt class="col-sm-4 mt-2">{% translate "Zählt als" %}</dt>
+                <dd class="col-sm-8 mt-2 mb-0">
+                    <a href="{{ hausartikel.zaehlt_als.get_absolute_url }}" class="link-body-emphasis">
+                        {{ hausartikel.zaehlt_als.artikelnummer|default:"–" }} {{ hausartikel.zaehlt_als.name }}
+                    </a>
+                    <div class="text-body-secondary small">
+                        {% translate "Sein Sollbestand aus der Warenwirtschaft kommt beim Einlesen dort dazu." %}
+                    </div>
+                </dd>
+                {% endif %}
+                {% with dubletten=hausartikel.dubletten.all %}
+                {% if dubletten %}
+                <dt class="col-sm-4 mt-2">{% translate "Dubletten" %}</dt>
+                <dd class="col-sm-8 mt-2 mb-0">
+                    {% for dublette in dubletten %}
+                    <a href="{{ dublette.get_absolute_url }}" class="link-body-emphasis me-2">
+                        {{ dublette.artikelnummer|default:"–" }} {{ dublette.name }}
+                    </a>
+                    {% endfor %}
+                    <div class="text-body-secondary small">
+                        {% translate "Eingestellt, ihr Sollbestand kommt beim Einlesen hier dazu." %}
+                    </div>
+                </dd>
+                {% endif %}
+                {% endwith %}
+            </dl>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-body-tertiary d-flex justify-content-between">
+                    <span>{% translate "Gebinde" %}</span>
+                    {% if not hausartikel.ware.ist_nicht_zaehlbar %}
+                    <a href="{% url 'ware_edit' hausartikel.ware.pk %}#gebinde"
+                        class="small link-secondary">{% translate "ändern" %}</a>
+                    {% endif %}
+                </div>
+                {# What is no product has packs only on paper: there the list stays #}
+                {# as it is. Everywhere else it is the same list as on the product's #}
+                {# page, to drag and to move.                                        #}
+                {% if hausartikel.ware.ist_nicht_zaehlbar %}
+                <ul class="list-group list-group-flush">
+                    {% for gebinde in hausartikel.ware.gebinde.all %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center
+                        {% if not gebinde.aktiv %}ausgegraut{% endif %}">
+                        <span>{{ gebinde.anzeigename }}</span>
+                        <span class="text-body-secondary small">
+                            {{ gebinde.faktor_in_basiseinheit|floatformat:"-3" }}
+                            {{ hausartikel.ware.basiseinheit.kurz }}
+                        </span>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-body-secondary">
+                        {% translate "Keine Gebinde. Die Gebinde hängen an der Ware und gelten für alle Häuser." %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                {% include "katalog/components/gebinde_list.html" with ware=hausartikel.ware vom_hausartikel=True %}
+                {% endif %}
+            </div>
+        </div>
+
+        {% if hausartikel.ware.abwiegbar %}
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-body-tertiary">{% translate "Übliche Behälter" %}</div>
+                <div class="card-body">
+                    <form method="post"
+                        action="{% url 'ware_behaelter' hausartikel.ware.pk %}" data-sofort>
+                        {% csrf_token %}
+                        <input type="hidden" name="weiter" value="{{ request.get_full_path }}">
+                        {% for behaelter, gewaehlt in behaelterwahl %}
+                        <div class="form-check">
+                            <input type="checkbox" name="behaelter" value="{{ behaelter.pk }}"
+                                class="form-check-input" id="behaelter-{{ behaelter.pk }}"
+                                {% if gewaehlt %}checked{% endif %}>
+                            <label class="form-check-label" for="behaelter-{{ behaelter.pk }}">
+                                {{ behaelter.anzeigename }}
+                                <span class="text-body-secondary small font-monospace">
+                                    {{ behaelter.tara|floatformat:"-3" }} g
+                                </span>
+                            </label>
+                        </div>
+                        {% empty %}
+                        <p class="text-body-secondary small mb-2">
+                            {% translate "Es gibt noch keine Behälter. Angelegt werden sie" %}
+                            <a href="{% url 'behaelter_list' %}">{% translate "unter Stammdaten" %}</a>.
+                        </p>
+                        {% endfor %}
+
+                        {% if behaelterwahl %}
+                        <button class="btn btn-success btn-sm mt-3" type="submit">
+                            {% translate "Behälter speichern" %}
+                        </button>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {# A discontinued or ignored article is expected nowhere.             #}
+        {% if not hausartikel.ist_ausgeschieden %}
+        <div class="col-md-6">
+            <div class="card h-100" data-liste>
+                <div class="card-header bg-body-tertiary">
+                    {% translate "Kommt vor an" %}
+                </div>
+                {# The same expectation as in the selection tab of the counting  #}
+                {# list, only switched from the article page.                    #}
+                <ul class="list-group list-group-flush">
+                    {% for bereich, orte in ortswahl %}
+                    <li class="list-group-item bg-body-tertiary py-1">
+                        <span class="small text-body-secondary">{{ bereich.name }}</span>
+                    </li>
+                    {% for ort, erwartung in orte %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+                        <a href="{{ ort.get_absolute_url }}"
+                            class="link-body-emphasis link-offset-2 text-decoration-none">
+                            {{ ort.name }}
+                        </a>
+                        <span class="d-flex align-items-center gap-2">
+                            {% if erwartung %}
+                            <span class="text-body-secondary small font-monospace">
+    {% blocktranslate with sortierung=erwartung.sortierung %}Pos. {{ sortierung }}{% endblocktranslate %}
+</span>
+                            {% endif %}
+                            <form method="post" class="d-inline" data-sofort
+                                action="{% url 'erwartung_umschalten' ort.pk %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="weiter"
+                                    value="{{ request.get_full_path }}">
+                                <input type="hidden" name="artikel"
+                                    value="{{ hausartikel.pk }}">
+                                {# The button says what it wants: a stale click changes nothing. #}
+                                <button type="submit" name="aktion"
+                                    value="{% if erwartung %}entfernen{% else %}aufnehmen{% endif %}"
+                                    data-fokus="ort-{{ ort.pk }}"
+                                    class="btn btn-sm {% if erwartung %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                                    {% if erwartung %}{% translate "Entfernen" %}{% else %}{% translate "Hinzufügen" %}{% endif %}
+                                </button>
+                            </form>
+                        </span>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-body-secondary small ps-4">
+                        {% translate "Noch kein Ort in diesem Bereich." %}
+                    </li>
+                    {% endfor %}
+                    {% empty %}
+                    <li class="list-group-item text-body-secondary">
+    {% blocktranslate with name=hausartikel.haus.name %}{{ name }} hat noch keine Bereiche. Angelegt werden sie{% endblocktranslate %}
+<a href="{{ hausartikel.haus.get_absolute_url }}">{% translate "dort" %}</a>.
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div class="card-body border-top">
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% include "components/sortable_script.html" %}
+{% endblock extra_scripts %}
+

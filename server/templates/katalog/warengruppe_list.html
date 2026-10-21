@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Warengruppen" %}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="kopfleiste bg-body d-flex flex-wrap gap-2 justify-content-between align-items-center mb-1 py-2">
+        <div class="d-flex align-items-center gap-3">
+            <h1 class="h3 mb-0">{% translate "Warengruppen" %}</h1>
+            <span class="text-body-secondary small" data-ersetzen="anzahl">
+    {% blocktranslate with warengruppen=warengruppen|length %}{{ warengruppen }} Gruppen{% endblocktranslate %}
+</span>
+        </div>
+        <a href="{% url 'warengruppe_add' %}" class="btn btn-success btn-sm">{% translate "Neue Warengruppe" %}</a>
+    </div>
+
+    {% url 'warengruppe_list' as zurueck %}
+    {% include "components/list_filter.html" with zuruecksetzen=zurueck %}
+
+    <div data-liste>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    {% include "components/column_header.html" with kopf=spalten.name %}
+                    {% include "components/column_header.html" with kopf=spalten.artikel klasse="text-center" %}
+                    {% include "components/column_header.html" with kopf=spalten.aktiv klasse="text-center" %}
+                    <th scope="col">{% translate "Häuser" %}</th>
+                    <th class="breite-10" scope="col">{% translate "Inventurart" %}</th>
+                    <th class="breite-23" scope="col"><span class="visually-hidden">{% translate "Aktionen" %}</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for warengruppe in warengruppen %}
+                <tr>
+                    <td>
+                        <a href="{{ warengruppe.get_absolute_url }}"
+                            class="link-body-emphasis link-offset-2 text-decoration-none">
+                            {{ warengruppe.anzeigename }}
+                        </a>
+                        {% if warengruppe.sammelstatus != "AKTIV" %}
+                        <span class="badge bg-body-secondary text-body border ms-1">{{ warengruppe.sammelstatus_anzeige|lower }}</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="text-center text-body-secondary font-monospace">
+                        {{ warengruppe.anzahl_artikel }}
+                    </td>
+
+                    <td class="text-center text-body-secondary font-monospace">
+                        {{ warengruppe.anzahl_aktiv }}
+                    </td>
+
+                    <td>
+                        {% for haus in warengruppe.haeuser %}
+                        <a href="{{ haus.get_absolute_url }}"
+                            class="badge rounded-pill text-bg-secondary text-decoration-none me-1">
+                            {{ haus.name }}
+                        </a>
+                        {% empty %}
+                        <span
+                            class="badge rounded-pill text-bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                            {% translate "von keinem Haus benutzt" %}
+                        </span>
+                        {% endfor %}
+                    </td>
+
+                    {# For all house articles of the group. The button shows the type #}
+                    {# they agree on, otherwise "mixed".                              #}
+                    <td>
+                        {% url 'warengruppe_inventurart' warengruppe.pk as art_ziel %}
+                        {% blocktranslate asvar frage with gruppe=warengruppe.anzeigename %}Alle Hausartikel aus „{{ gruppe }}“ in diese Inventurart setzen?{% endblocktranslate %}
+                        {% include "components/inventurart_menu.html" with ziel=art_ziel arten=inventurarten aktuell=warengruppe.art_der_gruppe gemischt=warengruppe.arten_gemischt titel=warengruppe.anzeigename rueckfrage=frage %}
+                    </td>
+
+                    <td class="text-end text-nowrap">
+                        {% include "katalog/components/sammelstatus_buttons.html" with satz=warengruppe art="gruppe" %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-body-secondary py-5">
+                        {% if filterform.ist_eingeschraenkt %}{% translate "Keine Warengruppe passt zu diesen Filtern." %}{% else %}{% translate "Noch keine Warengruppen angelegt." %}{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    </div>
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% include "components/script.html" with name="live_filter" %}
+{% endblock extra_scripts %}

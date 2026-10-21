@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="de">
+    <head>
+        <meta charset="utf-8" />
+        <!--
+        'maximum-scale=1': the app adapts to the screen once and does not
+        zoom by itself. iOS would otherwise zoom into a field and stay
+        there, even after the keyboard is closed again. Pinching with two
+        fingers iOS still allows, Android no longer.
+            -->
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+        />
+        <meta name="theme-color" content="#0d6efd" />
+        <!-- The name stands here as in the build. When serving, Django inserts
+             the one from 'APP_NAME' ('django_project/urls.py'). -->
+        <title>CrossTally</title>
+
+        <!--
+        Light or dark, before the first paint. As a file and not in the
+        page, because the Content-Security-Policy allows only scripts from
+        here, see 'public/theme.js'. Without 'defer' and without
+        'type="module"', otherwise it would only run after the first paint.
+            -->
+        <script src="/app/theme.js"></script>
+
+        <!--
+        The icon in the browser tab. SVG first, the PNG is the fallback for
+        browsers that do not take SVG as favicon.
+            -->
+        <link rel="icon" href="/app/icons/logo.svg" type="image/svg+xml" />
+        <link rel="icon" href="/app/icons/favicon-32.png" sizes="32x32" type="image/png" />
+
+        <!--
+        iOS reads the manifest only in part and fetches the icon for the
+        home screen from here. Without this line it takes a screenshot of
+        the page. The file is opaque and without rounding of its own:
+        transparency iOS backs with black, and rounded corners it would get
+        twice, because the system rounds itself.
+            -->
+        <link rel="apple-touch-icon" href="/app/icons/apple-touch-icon.png" />
+        <!--
+        Without these two the app starts on iOS in Safari instead of on its
+        own, and on the home screen the <title> would stand, which is too long.
+            -->
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-title" content="Inventur" />
+        <!-- The status bar thus takes the colour of the header bar. -->
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    </head>
+
+    <body>
+        <div id="app"></div>
+        <script type="module" src="/src/main.js"></script>
+    </body>
+</html>

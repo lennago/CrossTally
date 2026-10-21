@@ -1,0 +1,24 @@
+<h3>The list</h3>
+<p>
+    Every account with role, sites and last sign-in, on the website or in the counting app.
+    As long as the counting app stays signed in, the date does not change.
+    <strong>Counters</strong> only use the counting app, <strong>managers</strong> this web
+    interface too, <strong>administrators</strong> the administration on top. The column
+    headers sort.
+</p>
+<h3>What the badges say</h3>
+<p>
+    <strong>invited</strong> means: created without a password and never signed
+    in.{% if mail_moeglich %} The person has not used the link from the e-mail yet.{% else %}
+    Without a mail server no invitation goes out. An administrator sets a password in the
+    administration and switches the account active.{% endif %} <strong>deactivated</strong>
+    means: the account is signed out everywhere and cannot sign in, not in the counting app
+    either, until someone activates it again.
+</p>
+<h3>Who changes whom</h3>
+<p>
+    Managers create accounts and change counters and other managers. An administrator is
+    changed or deleted only by an administrator. The e-mail address is changed by the person
+    themselves or by an administrator. The password is changed by the person themselves.
+    Whoever has forgotten theirs gets a new one set by an administrator in the administration.
+</p>

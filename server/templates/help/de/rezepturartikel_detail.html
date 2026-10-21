@@ -1,0 +1,25 @@
+{# Only for what goes on the scale. #}
+{% if rezepturartikel.wird_gewogen %}
+<h3>Wiegen</h3>
+<p>
+    Gewogen wird brutto in Gramm. Die Tara des gewählten Behälters geht ab.
+    Die Nettomenge verteilt sich anschließend über die Rezeptur auf die
+    beteiligten Waren.
+</p>
+{% endif %}
+<h3>Auflösbar</h3>
+<p>
+    Auflösbar heißt: jede Komponente hat in diesem Haus einen geführten Hausartikel. Ist
+    eine Zutat dort inaktiv, steht der Rezepturartikel wie ein inaktiver Artikel: er lässt
+    sich in die Zählliste nehmen und in der App hinzuzählen, bekommt aber von sich aus
+    keine Zeile. Fehlt eine Zutat ganz oder ist sie eingestellt, steht er dort nicht zur
+    Auswahl.
+</p>
+<h3>Kommt vor an</h3>
+<p>
+    Wo eine Komponente fehlt, lässt sich der Artikel nicht auflösen und
+    deshalb auch nicht eintragen. Ein bereits eingetragener Ort bleibt
+    trotzdem entfernbar. Die Reihenfolge je Ort steht in dessen Zählliste.
+    Gebinde hat ein Rezepturartikel nicht: gezählt wird er in seiner Einheit,
+    eine Zeile je Ort.
+</p>

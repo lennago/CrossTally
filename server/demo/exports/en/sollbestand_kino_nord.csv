@@ -1,0 +1,73 @@
+Article number;Stock;Description
+101001;47;Cola 0.5 l
+101002;120;Cola sugar-free 0.5 l
+101003;157;Orange soda 0.5 l
+101004;21;Lemon soda 0.5 l
+101005;12;Bitter lemon 0.2 l
+101006;30,000;Syrup cola 10 l
+101007;10,000;Syrup orange 10 l
+101020;8,000;Syrup lemon 10 l
+101008;42;Sparkling water 0.25 l
+101009;24;Sparkling water 0.5 l
+101010;38;Apple juice 0.2 l
+101011;53;Orange juice 0.2 l
+101012;83;Apple spritzer 0.5 l
+101013;36;Iced tea peach 0.5 l
+101014;60;Beer 0.33 l
+101015;20;Beer alcohol-free 0.33 l
+101016;20;White wine 0.2 l
+101017;9;Red wine 0.2 l
+101018;10;Sparkling wine 0.2 l
+101019;0;Tomato juice 0.2 l
+101101;47,449;Popping corn loose
+101102;0,058;Popcorn salt
+101103;25,064;Popcorn sugar
+101104;26,612;Coconut oil
+101105;15,000;Caramel mix
+101201;4,000;Nacho chips
+101202;8,400;Cheese sauce
+101203;30,000;Salsa sauce
+101204;2,900;Jalapenos
+101301;14,428;Fruit gums loose
+101302;18,892;Chocolate beans loose
+101303;17,612;Liquorice loose
+101304;7,374;Sour laces loose
+101305;195;Chocolate bar
+101306;67;Biscuit bar
+101401;15;Ice cream vanilla
+101402;106;Ice cream chocolate
+101403;118;Ice cream strawberry
+101405;154;Ice cream sandwich
+101406;22;Ice cream bar
+101410;151;Ice cream cone
+101501;6,120;Coffee beans
+101502;15,000;Cocoa powder
+101503;397;Tea bags
+101504;30,000;Milk powder
+101505;31;Sugar sticks
+101601;3505;Popcorn bag small
+101602;4496;Popcorn bag medium
+101603;924;Popcorn bag large
+101604;1401;Popcorn bucket
+101605;2443;Nacho tray
+101606;3017;Cup 0.3 l
+101607;9000;Cup 0.4 l
+101608;2400;Cup 0.5 l
+101609;5015;Lid small
+101610;8000;Lid large
+101611;15000;Drinking straw
+101612;7;Napkin
+101613;600;Drinking cup 0.4 l
+101614;212;Reusable cup 0.3 l
+101615;148;Reusable cup 0.5 l
+101701;80;Sausage
+101702;148;Hot dog bun
+101703;7,500;Fried onions
+101704;10,000;Mustard
+101705;8,000;Tomato ketchup
+101801;744;Spray cream
+101802;11,069;Sugar sprinkles
+101803;13,000;Ice cubes
+101804;30;Cleaning wipes
+101805;36;Disposable gloves
+101999;84;Bulk order kiosk

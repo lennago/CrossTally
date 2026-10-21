@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{# The legal notice as the business wrote it in the administration. No frame #}
+{# around it: what belongs in it, the application cannot know. Set from the  #}
+{# same five rules as the privacy text ('textformat.py'), never as HTML.     #}
+
+{% block title %}{% translate "Impressum" %}{% endblock title %}
+
+{% block content %}
+<div class="container py-4 max-breite-46">
+
+    <div class="kopfleiste bg-body py-2 mb-3">
+        <h1 class="h3 mb-0">{% translate "Impressum" %}</h1>
+    </div>
+
+    {{ impressum }}
+
+</div>
+{% endblock content %}

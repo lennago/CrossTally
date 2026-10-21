@@ -1,0 +1,25 @@
+{% extends "components/delete_page.html" %}
+{% load i18n %}
+
+{% block art %}{% translate "Hausartikel löschen" %}{% endblock art %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'haus_list' %}">{% translate "Häuser" %}</a></li>
+<li class="breadcrumb-item">
+    <a href="{{ object.haus.get_absolute_url }}">{{ object.haus.name }}</a>
+</li>
+{% endblock pfad %}
+
+{% block frage %}
+{% blocktranslate with name=object %}Soll <strong>{{ name }}</strong> wirklich gelöscht werden?{% endblocktranslate %}
+{% endblock frage %}
+
+{% block folgen %}
+<p class="mb-0">
+    {% blocktranslate with erwartet_an=object.erwartet_an.all|length %}{{ erwartet_an }} Ortserwartung(en) samt ihren Gebinde-Vorgaben entfallen dabei. Die Ware{% endblocktranslate %}
+<strong>{{ object.ware.name }}</strong> {% translate "und ihre Gebinde bleiben bestehen, denn die anderen Häuser führen sie weiter." %}
+</p>
+<p class="text-body-secondary small mt-3 mb-0">
+    {% translate "Ist der Artikel nur ausgelistet, statt zu löschen besser einstellen: Nummer und Ware werden im Haus frei, und alte Inventurergebnisse zeigen weiter auf diesen Satz." %}
+</p>
+{% endblock folgen %}

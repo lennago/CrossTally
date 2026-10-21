@@ -1,0 +1,30 @@
+<h3>A new address</h3>
+<p>
+    Here you change the e-mail address of your account.{% if bestaetigung %} First a mail with
+    a link goes to the new address. Only once you have confirmed it does the address apply.
+    Until then the old one stays, and a typo does not cut you off from your mails.{% else %}
+    The new address applies at once.{% endif %} In the counting app it works the same way,
+    through the account menu.
+</p>
+{% if bestaetigung %}
+<h3>The link</h3>
+<p>
+    It lasts {{ tage }} day{{ tage|pluralize }} and works once. If you enter another address
+    before that, only the new link counts. A new password takes it back, and so do a removed
+    passkey and a deactivated account. Whoever had your device or your password no longer
+    gets at the address that way. Then simply enter it once more.
+</p>
+{% endif %}
+<h3>Password or passkey</h3>
+<p>
+    Before that the page asks for your password. A session left open is not enough on its own,
+    because whoever changes the address could take over the account.{% if mail_moeglich %} With
+    the new address and “Forgot your password?” that would be easy.{% endif %} A wrong password
+    counts like a failed attempt at signing in.
+</p>
+<p>
+    If your account has no password, you confirm with one of your passkeys instead. After
+    <strong>Confirm with passkey</strong> the device asks for face, finger or PIN. Then you
+    have two minutes to send the address. Without a password and without a passkey there is
+    nothing to confirm with. Then an administrator can set a password for you.
+</p>

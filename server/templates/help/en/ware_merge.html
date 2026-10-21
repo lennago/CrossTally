@@ -1,0 +1,71 @@
+<h3>What merging is for</h3>
+<p>
+    If the same product is named differently at two sites, the import creates two products.
+    Here they become one again: articles, packs and recipe lines of the dissolved product
+    move over to the one that remains, and the dissolved one disappears afterwards.
+</p>
+<h3>Which product remains</h3>
+<p>
+    That can be chosen, no matter whose page you merge from. Name, inventory type, product
+    family and the weighing details (containers, grams per unit) come from the one that
+    remains. The inventory type only as long as its articles agree on one. Otherwise every
+    moving article keeps its own, and the product then stands as <em>mixed</em>. So the better maintained one should remain. Whatever the other had of its own
+    in these details is lost.
+</p>
+<h3>The preview first, then the button</h3>
+<p>
+    “Preview” shows what would happen: which packs merge or move, and which sites carry
+    both. Nothing is changed until then. Writing happens only with “Merge for good”, after
+    a confirmation. Whoever changes the choice in the preview gets the preview for it
+    first. Merging cannot be undone.
+</p>
+<h3>What does not work, and when you are asked</h3>
+<p>
+    If the two are carried in different units, the dissolved one is converted into the
+    unit of the one that remains: its pack quantities, the quantities in its recipe lines
+    and the conversion of every site. Shares in percent stay as they are. Between g and kg
+    or litres and millilitres this happens by itself.
+    Between pieces, weight and volume the field <strong>Conversion</strong> asks for it:
+    how many units of the remaining one is one unit of the dissolved one? The sites keep
+    counting in their own unit afterwards. If a piece good is absorbed into kg or litres,
+    its loose single unit becomes an ordinary pack there, because the single unit exists
+    only in pieces. If a pack would become too small or too large in the process, or a
+    quantity in a recipe or the conversion of a site too large, nothing is merged. The
+    field <strong>Conversion</strong> names what does not fit.
+</p>
+<p>
+    Two obstacles cannot be cleared here and are reported: when both sit in the same recipe,
+    and when only one of the two belongs to “Not countable”. A third one depends on which one
+    remains: if the dissolved one sits in a recipe with shares in percent, the one that
+    remains has to know what one unit weighs. That is entered on its page first, or the other
+    one remains.
+    Identical pack names, by contrast, are the normal case, because it is the same product.
+    You are only asked where the same name means a different quantity or where the same
+    quantity runs under two names.
+</p>
+<p>
+    And where an active pack of the dissolved product would be absorbed into one that the
+    remaining product carries only <strong>inactive</strong>. The preview highlights it and
+    asks: <em>Activate again</em> brings it back, at every site, because the pack belongs
+    to the product. <em>Leave inactive</em> hangs the defaults of the dissolved product on
+    it, and there they rest. New inventories get no row for an inactive pack.
+</p>
+<h3>A site carries both</h3>
+<p>
+    Then the same thing exists there twice, under two numbers, active or inactive. The
+    article of the dissolved product is <strong>discontinued</strong> there and
+    <strong>counts as the one that remains</strong> from then on. If the merchandise
+    management system keeps a stock on its number, that stock is added to the one that
+    remains when the target stock is imported. The article import no longer offers the
+    number for bringing back. Nothing changes about the remaining article, not even when it
+    is inactive. Which one remains follows from the choice above of which product remains.
+    If one of the two is already discontinued, there is no conflict, and both stay as they
+    are.
+</p>
+<p>
+    Every expectation of the discontinued article has a tick: <strong>take over</strong>
+    or let it go with discontinuing. Taken over at a location where the one that stays is
+    not expected yet, the expectation moves with its position and packs. Where it is
+    already expected, the packs are added and the expected quantities of the same pack are
+    summed. Lines in a running inventory stay as they are: counted is counted.
+</p>

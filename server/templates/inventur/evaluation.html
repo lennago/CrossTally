@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% translate "Auswertungen" %}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="kopfleiste bg-body d-flex flex-wrap gap-2 justify-content-between align-items-center mb-1 py-2">
+        <div class="d-flex align-items-center gap-3">
+            <h1 class="h3 mb-0">{% translate "Differenzen über Inventuren" %}</h1>
+            <span class="text-body-secondary small">
+    {% blocktranslate count anzahl=inventuren|length %}{{ anzahl }} Inventur{% plural %}{{ anzahl }} Inventuren{% endblocktranslate %} &middot; {% blocktranslate count anzahl=anzahl_waren %}{{ anzahl }} Ware{% plural %}{{ anzahl }} Waren{% endblocktranslate %}
+</span>
+        </div>
+        {% if inventuren %}
+        <a href="?{{ request.GET.urlencode }}{% if request.GET %}&{% endif %}pdf=1"
+            class="btn btn-success btn-sm" target="_blank">{% translate "Als PDF" %}</a>
+        {% endif %}
+    </div>
+
+    <form method="get" class="card card-body bg-body-tertiary mb-3">
+        <div class="row g-3">
+            <div class="col-6 col-lg-2">{{ form.von|as_crispy_field }}</div>
+            <div class="col-6 col-lg-2">{{ form.bis|as_crispy_field }}</div>
+            <div class="col-12 col-lg-3">{{ form.haeuser|as_crispy_field }}</div>
+            {# The families as a menu of boxes, as in the article lists. A chosen   #}
+            {# family brings the families below it along. Applied with "Apply".    #}
+            <div class="col-12 col-lg-2">
+                {% include "components/multi_select.html" with wahl=form.familienwahl titel=form.familienwahl.titel %}
+            </div>
+            <div class="col-12 col-lg-3">{{ form.nur_mehrere_haeuser|as_crispy_field }}</div>
+            {# Only the sheet carries the title. The page keeps its heading, and #}
+            {# "As PDF" passes the field on with the other filters.             #}
+            <div class="col-12 col-lg-4">{{ form.titel|as_crispy_field }}</div>
+        </div>
+        <div>
+            <button class="btn btn-primary btn-sm" type="submit">{% translate "Anwenden" %}</button>
+            <a href="{% url 'auswertung' %}" class="btn btn-link btn-sm">{% translate "Zurücksetzen" %}</a>
+        </div>
+    </form>
+
+    {% if inventuren %}
+    <p class="small text-body-secondary">
+        {% translate "Ausgewertet:" %}
+        {% for inventur in inventuren %}
+        <a href="{{ inventur.get_absolute_url }}" class="link-body-emphasis">{{ inventur }}</a>{% if not forloop.last %} {% translate "&middot;" %} {% endif %}
+        {% endfor %}
+    </p>
+
+    {% if not bestaende_sinnvoll %}
+    <div class="alert alert-light border py-2 small">
+        {% translate "Aus mindestens einem Haus liegen mehrere Inventuren in der Auswahl. Ergebnis und Sollbestand stehen deshalb nicht dabei, denn über die Zeit addiert wären sie keine Aussage. Die Differenzen bleiben aussagekräftig." %}
+    </div>
+    {% endif %}
+
+    {# One group per product family as in the article lists: closed by default,   #}
+    {# the sum is in the header so the overview gets by without unfolding. What   #}
+    {# was open is remembered by 'expand.js'.                                     #}
+    {% if bloecke %}{% include "components/expand_buttons.html" %}{% endif %}
+    {# By family the blocks nest ('evaluation_block.html' includes itself). #}
+    {% for block in bloecke %}
+    {% include "inventur/components/evaluation_block.html" %}
+    {% empty %}
+    <p class="text-body-secondary">
+        {% translate "Für diese Auswahl gibt es keine eingefrorenen Ergebnisse." %}
+    </p>
+    {% endfor %}
+    {% else %}
+    <p class="text-body-secondary">
+        {% translate "Es gibt noch keine abgeschlossene Inventur in dieser Auswahl." %}
+    </p>
+    {% endif %}
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+{% include "components/script.html" with name="multi_select" %}
+{% endblock extra_scripts %}

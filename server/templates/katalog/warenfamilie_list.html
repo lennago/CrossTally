@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Warenfamilien" %}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="kopfleiste bg-body d-flex flex-wrap gap-2 justify-content-between align-items-center mb-1 py-2">
+        <div class="d-flex align-items-center gap-3">
+            <h1 class="h3 mb-0">{% translate "Warenfamilien" %}</h1>
+            <span class="text-body-secondary small">
+    {% blocktranslate count familien=familien|length %}{{ familien }} Familie{% plural %}{{ familien }} Familien{% endblocktranslate %}
+</span>
+        </div>
+        <a href="{% url 'warenfamilie_add' %}" class="btn btn-success btn-sm">{% translate "Neue Familie" %}</a>
+    </div>
+
+    {# The tree: a family below another stands indented under it, in the   #}
+    {# order of the tree. No sorting by columns, it would tear the tree.   #}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th scope="col">{% translate "Familie" %}</th>
+                    <th scope="col" class="breite-10">{% translate "Summe in" %}</th>
+                    <th scope="col" class="text-center breite-12">{% translate "Waren" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for familie in familien %}
+                <tr>
+                    <td>
+                        <div class="{% if familie.tiefe %}baum-ebene-{{ familie.tiefe }}{% endif %}">
+                            {% if familie.tiefe %}<span class="text-body-secondary baum-zweig" aria-hidden="true"></span>{% endif %}
+                            <a href="{{ familie.get_absolute_url }}"
+                                class="link-body-emphasis link-offset-2 text-decoration-none">
+                                {{ familie.anzeigename }}
+                            </a>
+                            {% if familie.anzeigebeschreibung %}
+                            <div class="text-body-secondary small">{{ familie.anzeigebeschreibung }}</div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        {% if familie.leiteinheit %}{{ familie.leiteinheit.kurz }}
+                        {% else %}<span class="text-body-secondary">{% translate "noch offen" %}</span>{% endif %}
+                    </td>
+                    <td class="text-center">
+                        {{ familie.warenzahl }}
+                        {# With families below: what the family sums in total. #}
+                        {% if familie.gesamtzahl != familie.warenzahl %}
+                        <span class="text-body-secondary small text-nowrap">
+                            {% blocktranslate with anzahl=familie.gesamtzahl %}({{ anzahl }} mit Unterfamilien){% endblocktranslate %}
+                        </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-body-secondary">
+                        {% translate "Noch keine Familie angelegt." %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock content %}

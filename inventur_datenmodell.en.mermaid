@@ -1,0 +1,405 @@
+erDiagram
+    %% The data model, ordered by topic. The German version is next to it in
+    %% 'inventur_datenmodell.mermaid'. Whoever changes one updates the other.
+    %% Entity and field names are the identifiers from the code and stay German.
+
+    %% Reading aid: ||--o{ means "one to many", }o--o{ "many to many",
+    %% |o--o{ "optional one to many". Italic entries in the boxes are
+    %% comments on the field, not its content.
+
+    %% ===================== Houses and locations (organisation) ================
+    HAUS ||--o{ BEREICH : "is divided into areas"
+    BEREICH ||--o{ ORT : "contains locations"
+    HAUS ||--o{ HAUSARTIKEL : "carries house articles"
+    HAUS ||--o{ INVENTUR : "is inventoried"
+
+    %% ===================== Accounts (accounts) =================================
+    BENUTZER }o--o{ HAUS : "is assigned to"
+    BENUTZER }o--o{ INVENTUR : "counts in (until closing)"
+    BENUTZER ||--o{ PASSKEY : "signs in with"
+    BENUTZER |o--o{ SITZUNG : "is signed in through"
+    BENUTZER ||--o| ADRESSWECHSEL : "waits for the confirmation of a new address"
+    BENUTZER |o--o{ ADRESSWECHSEL : "entered (optional)"
+
+    %% ===================== Catalog: products and units (katalog) ==============
+    BASISEINHEIT ||--o{ WARE : "kept in (lead unit of the evaluation)"
+    BASISEINHEIT |o--o{ WARENFAMILIE : "lead unit (only with the first product)"
+    WARENFAMILIE |o--o{ WARE : "groups"
+    WARENFAMILIE |o--o{ WARE : "family before Not countable (for the way back)"
+    WARENFAMILIE |o--o{ WARENFAMILIE : "nests (subfamilies)"
+    WARE ||--o{ WAREUMRECHNUNG : "converts into foreign dimensions"
+    WARE ||--o{ GEBINDE : "has packs"
+    WARE }o--o{ BEHAELTER : "is weighed in"
+    HAUS }o--o{ BEHAELTER : "offers generally"
+
+    %% ===================== Catalog: articles (katalog) =========================
+    ARTIKEL ||--o| HAUSARTIKEL : "MTI"
+    ARTIKEL ||--o| REZEPTURARTIKEL : "MTI"
+    WARE ||--o{ HAUSARTIKEL : "bundles across houses"
+    WARENGRUPPE ||--o{ HAUSARTIKEL : "categorises"
+    HAUSARTIKEL |o--o{ HAUSARTIKEL : "counts as (duplicate, discontinued only)"
+    BASISEINHEIT ||--o{ HAUSARTIKEL : "counted in (unit of the house)"
+    INVENTURART ||--o{ HAUSARTIKEL : "counts (exactly one per article)"
+    BASISEINHEIT ||--o{ REZEPTURARTIKEL : "counted in"
+    REZEPTURARTIKEL }o--o{ BEHAELTER : "is weighed in"
+    REZEPTURARTIKEL ||--o{ REZEPTURKOMPONENTE : "consists of"
+    WARE ||--o{ REZEPTURKOMPONENTE : "goes into"
+
+    %% ===================== Counting list (katalog) =============================
+    ORT ||--o{ ERWARTUNG : "expects"
+    ARTIKEL ||--o{ ERWARTUNG : "is expected"
+    ERWARTUNG ||--o{ ERWARTUNGGEBINDE : "defaults (house articles only)"
+    GEBINDE ||--o{ ERWARTUNGGEBINDE : "preset"
+
+    %% ===================== Inventory: expected stock and count (inventur) =====
+    INVENTUR ||--|{ INVENTUR_INVENTURART : "counts (the tabs of the app)"
+    INVENTURART ||--o{ INVENTUR_INVENTURART : "is counted in"
+    INVENTUR ||--o{ SOLLBESTAND : "imports"
+    HAUSARTIKEL ||--o{ SOLLBESTAND : "has expected stock"
+    INVENTUR ||--o{ SOLLZEILE : "leaves open (temporary)"
+    HAUSARTIKEL |o--o{ SOLLZEILE : "meant, if inactive or discontinued"
+    INVENTUR ||--o{ ZAEHLPOSITION : "collects (temporary)"
+    ORT ||--o{ ZAEHLPOSITION : "place found"
+    ARTIKEL ||--o{ ZAEHLPOSITION : "counted as"
+    GEBINDE |o--o{ ZAEHLPOSITION : "in pack"
+    ZAEHLPOSITION ||--o{ WIEGUNG : "one per vessel"
+    BEHAELTER ||--o{ WIEGUNG : "weighed in"
+
+    %% ===================== Inventory: review and closing (inventur) ===========
+    INVENTUR ||--o{ INVENTURNOTIZ : "notes (temporary)"
+    HAUSARTIKEL ||--o{ INVENTURNOTIZ : "is annotated"
+    INVENTUR ||--o{ INVENTURERGEBNIS : "freezes"
+    HAUSARTIKEL ||--o{ INVENTURERGEBNIS : "yields"
+    BASISEINHEIT ||--o{ INVENTURERGEBNIS : "frozen in"
+    INVENTUR ||--o{ ARTENTSCHEIDUNG : "sets at closing"
+    WARE ||--o{ ARTENTSCHEIDUNG : "all articles into one type"
+    INVENTURART ||--o{ ARTENTSCHEIDUNG : "target"
+
+    %% ===================== Houses and locations (organisation) ================
+    HAUS {
+        int id PK
+        string name UK
+    }
+
+    BEREICH {
+        int id PK
+        int haus_id FK
+        string name "counter, storage, cooling. Unique per house"
+    }
+
+    ORT {
+        int id PK
+        int bereich_id FK "the house comes via the area"
+        string name "unique per area"
+    }
+
+    ERSCHEINUNGSBILD {
+        int id PK
+        string name UK "Standard is bundled and immutable"
+        bool aktiv "exactly one version applies"
+        string anwendungsname "application name"
+        bytes logo "the icons are derived from it"
+        string betreiber "operator name, for footer and privacy"
+        string betreiber_kontakt "operator contact"
+        string datenschutz_kontakt "privacy contact"
+        string rueckmeldeadresse "address for feedback, empty means no entry in the account menu"
+        string hintergrund "colour behind the motif, Android only"
+        text datenschutztext "privacy text in German, bundled or own"
+        text datenschutztext_en "privacy text in English, bundled or own"
+        text impressum "legal notice in German, empty means none"
+        text impressum_en "legal notice in English, empty shows the German one"
+        datetime geaendert_am
+    }
+
+    MAILTEXT {
+        int id PK
+        enum art UK "kind: invitation, forgot password, account changed …"
+        string betreff "subject in German, empty means bundled"
+        text text "German, empty means bundled"
+        string betreff_en "subject in English, empty means bundled"
+        text text_en "English, empty means bundled"
+        bool nennt_namen "whether the mail names who triggered it"
+        datetime geaendert_am
+    }
+
+    %% ===================== Accounts (accounts) =================================
+    BENUTZER {
+        int id PK
+        string username UK
+        string first_name
+        string last_name
+        string email UK
+        bool is_staff "manager: access to the web interface"
+        bool is_superuser "administrator"
+        bool is_active
+        enum darstellung "appearance: auto | light | dark, applies everywhere"
+        enum sprache "language: de | en, applies everywhere"
+        enum differenzfarben "whether the difference is coloured"
+    }
+
+    PASSKEY {
+        int id PK
+        int benutzer_id FK
+        string kennung UK "credential id as the browser sends it (base64url)"
+        bytes oeffentlicher_schluessel "COSE, the public half"
+        int signaturzaehler "sign count, climbs with every sign-in, exposes clones"
+        string name "for the person: which device"
+        datetime erstellt_am "created at"
+        datetime zuletzt_benutzt "last used, optional"
+    }
+
+    SITZUNG {
+        string session_key PK "the key in the cookie"
+        text session_data "signed content"
+        datetime expire_date "expired ones go with cleanup"
+        int konto_id FK "account, optional, from the content on every save, no constraint"
+    }
+
+    ADRESSWECHSEL {
+        int id PK "only this number stands signed in the link"
+        int konto_id FK, UK "account, one waits per account, a newer one replaces it"
+        string neu "new address, applies only once someone confirms the link"
+        string alt "old address, the link holds only while the account carries it"
+        int von_id FK "optional, who entered it, if not the person"
+        bool fremd "someone else, even once their account is gone"
+        datetime erstellt_am "created at, removed after the link's time (cleanup)"
+    }
+
+    PASSWORTANFRAGE {
+        int id PK
+        string email "lower-cased, counted per hour"
+        string ip_address "optional"
+        datetime zeitpunkt "removed after 30 days (cleanup)"
+    }
+
+    ANMELDEVERSUCH {
+        int id PK
+        string username "as typed, optional"
+        string ip_address "optional"
+        string session_key "always empty since 10/2026, the key would be the sign-in"
+        text user_agent "browser id, optional"
+        datetime timestamp "removed after 30 days (cleanup)"
+        text path "address called under /admin/"
+    }
+
+    %% ===================== Catalog: products and units (katalog) ==============
+    BASISEINHEIT {
+        int id PK
+        string name UK "piece(s), g, kg, millilitre, litre, portion"
+        enum kennung UK "STUECK | GRAMM | KILOGRAMM | MILLILITER | LITER | PORTION"
+        int nachkommastellen "decimal places: 0 for piece, g, ml, portion. 3 for kg, litre"
+        enum dimension "STUECK | MASSE | VOLUMEN | PORTION (piece, mass, volume, portion: lead unit of a family only)"
+        decimal faktor_zur_referenz "g = 1, kg = 1000, ml = 1, litre = 1000"
+    }
+
+    WARENGRUPPE {
+        int id PK
+        string name UK "product group. No aktiv: derived from the house articles"
+    }
+
+    WARE {
+        int id PK
+        string name UK "canonical product name across all houses"
+        int basiseinheit_id FK
+        int warenfamilie_id FK "optional, groups the evaluations"
+        int familie_vorher_id FK "optional, the family before Not countable: the way back restores it"
+        bool abwiegbar "goes on the scale loose"
+    }
+
+    INVENTURART {
+        int id PK
+        string name UK "monthly, annual, cup inventory, there is always at least one"
+        int reihenfolge "order of the tabs in the app and in the name of the inventory"
+    }
+
+    WAREUMRECHNUNG {
+        int id PK
+        int ware_id FK
+        enum dimension "at most one per foreign dimension"
+        decimal referenzmenge_je_einheit "what one unit weighs, measures or counts there"
+    }
+
+    WARENFAMILIE {
+        int id PK
+        string name UK "product family, say all lemonades or all ice cream flavours"
+        text beschreibung "description"
+        int leiteinheit_id FK "lead unit, empty until a product is assigned"
+        int uebergeordnet_id FK "optional, the family above sums along"
+        bool sammelt_ignorierte "exactly one record: Not countable"
+    }
+
+    GEBINDE {
+        int id PK
+        int ware_id FK
+        string name "pack: single, crate, carton, bag"
+        bool ist_einzeln "the loose unit, at most one per product"
+        decimal faktor_in_basiseinheit "crate = 20. Each quantity only once per product"
+        int sortierung "unique per product, assigned automatically"
+        bool aktiv
+    }
+
+    BEHAELTER {
+        int id PK
+        string name UK "container"
+        decimal tara "empty weight in grams"
+        bool immer_erlaubt "exactly one record: without container"
+    }
+
+    %% ===================== Catalog: articles (katalog) =========================
+    ARTIKEL {
+        int id PK
+        string name
+        datetime erstellt_am "created at"
+        datetime geaendert_am "changed at"
+    }
+
+    HAUSARTIKEL {
+        int artikel_ptr_id PK "= ARTIKEL.id"
+        int haus_id FK
+        int ware_id FK "required, establishes the identity"
+        int warengruppe_id FK "per house"
+        int basiseinheit_id FK "unit of the house, mostly that of the product"
+        decimal faktor_zur_ware "only with a foreign dimension"
+        enum quelle "source: winticket | eigen (own)"
+        string artikelnummer "article number, scheme per source, empty for own. Unique per house if set"
+        string ean "optional"
+        enum status "AKTIV | INAKTIV | EINGESTELLT | IGNORIERT"
+        bool aktiv "generated: status = AKTIV"
+        datetime gueltig_bis "valid until, set once no longer AKTIV"
+        int zaehlt_als_id FK "counts as, optional, only EINGESTELLT: its target is added there"
+        enum status_vorher "empty, or the status before Not countable: the way back restores it"
+        json erwartungen_vorher "the places before discontinuing or Not countable: the way back restores them"
+        int inventurart_id FK "inventory type, required, per article, settable for all on the product"
+    }
+
+    REZEPTURARTIKEL {
+        int artikel_ptr_id PK "= ARTIKEL.id"
+        int basiseinheit_id FK "only piece(s) or g"
+        bool anteilig "recipe as shares of the weight in percent, only with g"
+    }
+
+    REZEPTURKOMPONENTE {
+        int id PK
+        int rezepturartikel_id FK
+        int ware_id FK "independent of the house"
+        decimal menge_in_basiseinheit "per 1 unit of the recipe article, percent if anteilig"
+    }
+
+    %% ===================== Counting list (katalog) =============================
+    ERWARTUNG {
+        int id PK
+        int ort_id FK
+        int artikel_id FK
+        int sortierung "order in the counting list, unique per location"
+        bool wiegen_erwartet "whether the product goes on the scale at this location"
+    }
+
+    ERWARTUNGGEBINDE {
+        int id PK
+        int erwartung_id FK
+        int gebinde_id FK
+        decimal standard_menge "refill stock as a suggestion, optional"
+    }
+
+    %% ===================== Inventory: expected stock and count (inventur) =====
+    INVENTUR {
+        int id PK
+        int haus_id FK
+        date stichtag "one inventory per house and day, the cut-off date is the run"
+        enum status "VORBEREITUNG | ZAEHLUNG | ABGESCHLOSSEN (preparation, counting, closed)"
+        datetime erstellt_am "created at"
+        datetime abgeschlossen_am "closed at, set once closed"
+        bool differenz_von_hand "difference by hand: without target stock, entered per article"
+        bool gesperrt "locked: counting stopped, only the review list in the app"
+    }
+
+    SOLLBESTAND {
+        int id PK
+        int inventur_id FK
+        int hausartikel_id FK
+        decimal menge_basiseinheit "in the unit of the house"
+        enum herkunft "origin: DATEI | HAND (file, by hand)"
+        string name_in_datei "name in the file. If it differs, the number may be reassigned"
+    }
+
+    SOLLZEILE {
+        int id PK
+        int inventur_id FK
+        string artikelnummer "article number, unique per inventory"
+        string name "designation according to the file"
+        decimal menge_basiseinheit
+        enum grund "reason: UNBEKANNT | INAKTIV | EINGESTELLT (unknown, inactive, discontinued)"
+        int hausartikel_id FK "the record meant, otherwise empty"
+    }
+
+    ZAEHLPOSITION {
+        int id PK
+        int inventur_id FK
+        int ort_id FK
+        int artikel_id FK
+        int gebinde_id FK "empty when weighing and for recipe articles"
+        decimal eingabemenge "count. Empty when weighing, the quantity is in WIEGUNG"
+        int sortierung "position in the counting list, copy from the expectation"
+        datetime gezaehlt_am "counted at"
+        datetime zuletzt_geaendert "last changed. The app fetches only newer"
+        bool unerwartet "unexpected: added while counting"
+        bool aktiv "removed = False, stays so the app learns of it"
+    }
+
+    WIEGUNG {
+        int id PK
+        int zaehlposition_id FK
+        decimal brutto_gramm "gross grams: what the scale shows, vessel included"
+        int behaelter_id FK "the tare applies to this weighing"
+        datetime erfasst_am "recorded at"
+        uuid kennung UK "assigned by the device, recognises duplicates after a dead spot"
+    }
+
+    %% ===================== Inventory: review and closing (inventur) ===========
+    INVENTURNOTIZ {
+        int id PK
+        int inventur_id FK
+        int hausartikel_id FK
+        text text "recorded while reviewing"
+        bool soll_statt_ist "at closing the expected stock counts"
+        decimal differenz "by hand, in the unit of the house"
+        datetime geaendert_am "changed at"
+    }
+
+    INVENTURERGEBNIS {
+        int id PK
+        int inventur_id FK
+        int hausartikel_id FK "historically stable, even when reassigned"
+        decimal gesamtmenge_basiseinheit "counted"
+        decimal sollbestand "expected, copy at closing"
+        decimal differenz "counted minus expected"
+        text notiz "copy of the INVENTURNOTIZ at closing"
+        datetime eingefroren_am "frozen at"
+        int einheit_id FK "unit of the house at closing, the numbers are in it"
+        decimal faktor_zur_ware "only with a foreign dimension, follows the product"
+    }
+
+    INVENTUR_INVENTURART {
+        int id PK
+        int inventur_id FK
+        int inventurart_id FK "every type once per inventory"
+    }
+
+    ARTENTSCHEIDUNG {
+        int id PK
+        int inventur_id FK "who decided at closing"
+        int ware_id FK "one per inventory and product"
+        int inventurart_id FK "blocks the opposite answer for the whole product in the same run"
+    }
+
+    %% ===================== Counting app's API (api) ============================
+    PASSKEYFRAGE {
+        string pruefsumme PK "SHA-256 of the question, which itself travels signed"
+        datetime gefragt_am "after two minutes it opens nothing, the next question removes it"
+    }
+
+    %% ===================== Demo (demo) =========================================
+    DEMOKENNZEICHEN {
+        int id PK
+        datetime aufgebaut_am "exists only while the stock comes from manage.py demo"
+    }

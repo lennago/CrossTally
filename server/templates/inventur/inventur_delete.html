@@ -1,0 +1,33 @@
+{% extends "components/delete_page.html" %}
+{% load i18n %}
+
+{% block art %}{% translate "Inventur löschen" %}{% endblock art %}
+
+{% block pfad %}
+<li class="breadcrumb-item"><a href="{% url 'inventur_list' %}">{% translate "Inventuren" %}</a></li>
+{% endblock pfad %}
+
+{% block folgen %}
+{% if inventur.laeuft %}
+<ul class="small mb-0">
+    <li>
+    {% blocktranslate with anzahl_positionen=inventur.anzahl_positionen anzahl_gezaehlt=inventur.anzahl_gezaehlt %}{{ anzahl_positionen }} Zählposition(en) gehen mit, davon {{ anzahl_gezaehlt }} bereits gezählt.{% endblocktranslate %}
+</li>
+    <li>
+    {% blocktranslate with sollbestaende=inventur.sollbestaende.count %}{{ sollbestaende }} Sollbestände gehen mit.{% endblocktranslate %}
+</li>
+    <li>{% translate "Die Zähllisten der Orte und die Artikelstammdaten bleiben unberührt. Gelöscht wird nur dieser Durchgang." %}</li>
+</ul>
+{% else %}
+<p class="mb-0">
+    {% translate "Diese Inventur ist abgeschlossen. An ihr hängen die eingefrorenen Ergebnisse. Gelöscht wird sie nur in der Verwaltung" %}{% if ist_administrator %}:
+    <a href="{% url 'admin:inventur_inventur_delete' inventur.pk %}">{% translate "dort löschen" %}</a>{% endif %}.
+</p>
+{% endif %}
+{% endblock folgen %}
+
+{% block knopf %}
+<button class="btn btn-danger" type="submit" {% if not inventur.laeuft %}disabled{% endif %}>
+    {% translate "Endgültig löschen" %}
+</button>
+{% endblock knopf %}

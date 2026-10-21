@@ -1,0 +1,17 @@
+Dein Zugang zu {{ anwendung }}
+
+Hallo {{ vorname }},
+
+{% if wer %}
+{{ wer }} hat dir ein Konto bei {{ anwendung }} angelegt. Dein Benutzername: {{ benutzername }}
+{% else %}
+Für dich gibt es jetzt ein Konto bei {{ anwendung }}. Dein Benutzername: {{ benutzername }}
+{% endif %}
+
+Über diesen Link setzt du dein Passwort. Damit ist das Konto freigeschaltet:
+{{ link }}
+
+Der Link gilt {{ tage }} Tage. Danach kann dir eine Führungskraft eine neue Einladung schicken.
+
+Gezählt wird in der Zähl-App: {{ app }}
+Führungskräfte melden sich auch auf der Website an: {{ website }}
