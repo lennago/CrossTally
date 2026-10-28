@@ -986,10 +986,13 @@ the line `Release-As: 1.0.0` in its body. The first release was 0.1.0, as
 the `initial-version` in `release-please-config.json` says. Without it,
 release-please would have started at 1.0.0.
 
-Two quirks: pull requests created by a workflow do not themselves trigger
-workflows. So no check runs on the release PR. That is fine, because it contains
-no code. Whoever demands required checks in the branch protection has to exempt
-it or give release-please a token of its own. And the version
+Two quirks: a workflow opens the release PR with the `GITHUB_TOKEN`. Its checks
+therefore only run once someone approves the waiting workflows in the PR, and
+again after every new state release-please pushes. After that it is merged like
+any other. That is also why the title check listens to the `pull_request`
+event: on `pull_request_target` GitHub starts no run at all for such a PR, and
+it would stay blocked. A token of its own for release-please saves the approval.
+And the version
 in `pyproject.toml` and `package.json` stays as it is. Neither is a published
 package, and a jump there would invalidate `uv.lock`.
 
