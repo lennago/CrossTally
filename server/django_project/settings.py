@@ -268,6 +268,13 @@ DATABASES = {"default": _datenbank()}
 # 'setdefault' would never apply, and every request would open a new connection.
 DATABASES["default"]["CONN_MAX_AGE"] = env.int("CONN_MAX_AGE", default=60)
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
+# On SQLite (development, the end-to-end run) a transaction takes the write
+# lock when it begins, and a second writer waits for it. Begun as a reader, a
+# transaction that writes after reading is refused at once while another
+# connection writes, and the request ends in a 500 "database is locked".
+# PostgreSQL has no such option, and psycopg would refuse it when connecting.
+if DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
+    DATABASES["default"].setdefault("OPTIONS", {})["transaction_mode"] = "IMMEDIATE"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
