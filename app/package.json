@@ -20,7 +20,7 @@
         "format:check": "prettier --check \"src/**/*.{js,css,svelte}\" \"bin/*.mjs\" \"e2e/*.js\" \"playwright.config.js\" \"../server/static/js/*.js\" \"../server/static/site.css\""
     },
     "dependencies": {
-        "dexie": "^4.0.11",
+        "dexie": "^4.4.7",
         "svelte": "^5.57.2",
         "vite-plugin-pwa": "^2.0.0"
     },
@@ -33,7 +33,7 @@
         "playwright": "^1.63.0",
         "prettier": "^3.9.10",
         "prettier-plugin-svelte": "^4.1.1",
-        "vite": "^8.3.4",
+        "vite": "^8.3.5",
         "vitest": "^5.0.5"
     },
     "overrides": {
