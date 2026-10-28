@@ -269,6 +269,16 @@ class Betriebswerte(SimpleTestCase):
         datenbank = geladen(DATABASE_URL="sqlite:///probe.sqlite3").DATABASES["default"]
         self.assertEqual(datenbank["ENGINE"], "django.db.backends.sqlite3")
 
+    def test_nur_sqlite_schreibt_von_anfang_an(self):
+        """Why SQLite needs it: 'test_sqlite_writers.py'. psycopg would refuse the option."""
+        sqlite = geladen(DATABASE_URL="sqlite:///probe.sqlite3").DATABASES["default"]
+        self.assertEqual(sqlite["OPTIONS"]["transaction_mode"], "IMMEDIATE")
+        for postgres in (
+            geladen(DATABASE_URL="postgres://crosstally:geheim@db:5432/crosstally"),
+            geladen(POSTGRES_HOST="db", POSTGRES_PASSWORD="geheim"),
+        ):
+            self.assertNotIn("transaction_mode", postgres.DATABASES["default"].get("OPTIONS", {}))
+
     def test_verbindungen_bleiben_offen(self):
         """'dj_db_url' sets the value to 0 itself. A 'setdefault' would never apply."""
         self.assertEqual(geladen().DATABASES["default"]["CONN_MAX_AGE"], 60)
