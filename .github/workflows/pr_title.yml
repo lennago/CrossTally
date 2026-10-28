@@ -5,13 +5,18 @@
 # the changelog. A title like "Reworked the import page" would vanish there
 # without a trace.
 #
-# 'pull_request_target' instead of 'pull_request': only the title is checked.
-# The pull request's code is neither checked out nor executed. That way the
-# check also runs for pull requests from a fork without granting it anything.
+# 'pull_request' like the other checks, not 'pull_request_target'. The release
+# PR comes from a workflow with the 'GITHUB_TOKEN'. For it GitHub starts
+# 'pull_request' runs only once someone approves them in the pull request, and
+# 'pull_request_target' runs never (10/2026). The title is a required check,
+# so the release PR could only be merged by bypassing the rules. Now it runs
+# with the others after the approval. A pull request from a fork that needs an
+# approval for its other checks needs it for this one too. The token stays
+# read-only.
 name: PR title
 
 on:
-  pull_request_target:
+  pull_request:
     branches: [main]
     types: [opened, edited, reopened, synchronize]
 

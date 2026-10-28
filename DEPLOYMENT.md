@@ -988,10 +988,13 @@ Nachricht im Rumpf die Zeile `Release-As: 1.0.0` trägt. Das erste Release war
 0.1.0, so steht es als `initial-version` in `release-please-config.json`. Ohne
 die Angabe hätte release-please bei 1.0.0 begonnen.
 
-Zwei Eigenheiten: Pull Requests, die ein Workflow anlegt, lösen selbst keine
-Workflows aus. Am Release-PR läuft also keine Prüfung. Das ist in Ordnung, denn
-er enthält keinen Code. Wer im Zweigschutz Pflichtprüfungen verlangt, muss ihn
-davon ausnehmen oder release-please ein eigenes Token geben. Und die Version
+Zwei Eigenheiten: Den Release-PR legt ein Workflow mit dem `GITHUB_TOKEN` an.
+Seine Prüfungen laufen deshalb erst, wenn jemand die wartenden Workflows im PR
+freigibt, und nach jedem neuen Stand von release-please wieder. Danach wird er
+zusammengeführt wie jeder andere. Auch die Prüfung des Titels hört deshalb auf
+das Ereignis `pull_request`: Auf `pull_request_target` startet GitHub für einen
+solchen PR gar keinen Lauf, und er bliebe blockiert. Ein eigenes Token für
+release-please erspart die Freigabe. Und die Version
 in `pyproject.toml` und `package.json` bleibt, wie sie ist. Beides sind keine
 veröffentlichten Pakete, und ein Sprung dort machte `uv.lock` ungültig.
 
