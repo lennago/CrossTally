@@ -4,14 +4,22 @@
 # of the vendor still contains the vulnerability. Accepted does not mean
 # harmless. It means that nothing can be done but wait.
 #
-# Every entry names the file it applies to, what is affected and an expiry
-# date. After that date the finding turns the run red again and is looked at
-# anew. A new finding turns it red at once. An entry whose finding is gone is
-# removed.
+# Every entry names the file or package it applies to, what is affected and
+# an expiry date. After that date the finding turns the run red again and is
+# looked at anew. A new finding turns it red at once. An entry whose finding is
+# gone is removed.
 #
 # Caddy 2.11.7 (October 2026) is the newest release and is built with Go
-# 1.26.8. The fixes are in Go 1.26.9 and in golang.org/x/net 0.60.0. Only a
-# new release of Caddy brings them, and 'caddy:2-alpine' follows it by itself.
+# 1.26.8. The fixes are in Go 1.26.9 and 1.26.10, in golang.org/x/net 0.60.0
+# and in go-jose 4.1.6. Only a new release of Caddy brings them, and
+# 'caddy:2-alpine' follows it by itself.
+#
+# The images of the database and the proxy were built on 21 October 2026.
+# Alpine has fixed brotli and curl since, but only a new build of the vendor
+# brings the fix into the image. 'docker compose pull' then fetches it. A
+# system package has no file path, so these entries name the package instead
+# ('purls', without a version). That keeps them to Alpine. The same
+# vulnerability in a Debian package of our own image still turns the run red.
 vulnerabilities:
   - id: CVE-2026-78667
     paths: [usr/bin/caddy]
@@ -24,4 +32,20 @@ vulnerabilities:
   - id: CVE-2026-97031
     paths: [usr/bin/caddy]
     statement: Go 1.26.8 in Caddy 2.11.7 (crypto/tls, ECH), fixed in Go 1.26.9
+    expired_at: 2026-11-09
+  - id: CVE-2026-111943
+    paths: [usr/bin/caddy]
+    statement: Go 1.26.8 in Caddy 2.11.7 (crypto/x509), fixed in Go 1.26.10
+    expired_at: 2026-11-09
+  - id: CVE-2026-116587
+    paths: [usr/bin/caddy]
+    statement: go-jose 4.1.5 in Caddy 2.11.7, fixed in 4.1.6
+    expired_at: 2026-11-09
+  - id: CVE-2026-111497
+    purls: [pkg:apk/alpine/brotli-libs]
+    statement: brotli-libs 1.2.0 in postgres:18-alpine and caddy:2-alpine, fixed in 1.2.1-r0
+    expired_at: 2026-11-09
+  - id: CVE-2026-92392
+    purls: [pkg:apk/alpine/curl, pkg:apk/alpine/libcurl]
+    statement: curl 8.22.0 in postgres:18-alpine and caddy:2-alpine, fixed in 8.23.0-r0
     expired_at: 2026-11-09
