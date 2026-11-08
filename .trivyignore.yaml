@@ -9,43 +9,18 @@
 # looked at anew. A new finding turns it red at once. An entry whose finding is
 # gone is removed.
 #
-# Caddy 2.11.7 (October 2026) is the newest release and is built with Go
-# 1.26.8. The fixes are in Go 1.26.9 and 1.26.10, in golang.org/x/net 0.60.0
-# and in go-jose 4.1.6. Only a new release of Caddy brings them, and
-# 'caddy:2-alpine' follows it by itself.
+# A finding in a Go program names its file ('paths'). A system package has no
+# file path, so such an entry names the package instead ('purls', without a
+# version, for example 'pkg:apk/alpine/curl'). That keeps it to Alpine. The
+# same vulnerability in a Debian package of our own image still turns the run
+# red.
 #
-# The images of the database and the proxy were built on 21 October 2026.
-# Alpine has fixed brotli and curl since, but only a new build of the vendor
-# brings the fix into the image. 'docker compose pull' then fetches it. A
-# system package has no file path, so these entries name the package instead
-# ('purls', without a version). That keeps them to Alpine. The same
-# vulnerability in a Debian package of our own image still turns the run red.
+# Caddy 2.11.9 (5 November 2026) is the newest release and still contains
+# golang.org/x/net 0.60.0. The fix is in 0.62.0, which the development branch
+# of Caddy already requires. Only a new release of Caddy brings it, and
+# 'caddy:2-alpine' follows it by itself.
 vulnerabilities:
-  - id: CVE-2026-78667
+  - id: CVE-2026-78661
     paths: [usr/bin/caddy]
-    statement: Go 1.26.8 in Caddy 2.11.7 (net/http, Range headers), fixed in Go 1.26.9
-    expired_at: 2026-11-09
-  - id: CVE-2026-78669
-    paths: [usr/bin/caddy]
-    statement: golang.org/x/net 0.59.0 and Go 1.26.8 in Caddy 2.11.7, fixed in 0.60.0 and Go 1.26.9
-    expired_at: 2026-11-09
-  - id: CVE-2026-97031
-    paths: [usr/bin/caddy]
-    statement: Go 1.26.8 in Caddy 2.11.7 (crypto/tls, ECH), fixed in Go 1.26.9
-    expired_at: 2026-11-09
-  - id: CVE-2026-111943
-    paths: [usr/bin/caddy]
-    statement: Go 1.26.8 in Caddy 2.11.7 (crypto/x509), fixed in Go 1.26.10
-    expired_at: 2026-11-09
-  - id: CVE-2026-116587
-    paths: [usr/bin/caddy]
-    statement: go-jose 4.1.5 in Caddy 2.11.7, fixed in 4.1.6
-    expired_at: 2026-11-09
-  - id: CVE-2026-111497
-    purls: [pkg:apk/alpine/brotli-libs]
-    statement: brotli-libs 1.2.0 in postgres:18-alpine and caddy:2-alpine, fixed in 1.2.1-r0
-    expired_at: 2026-11-09
-  - id: CVE-2026-92392
-    purls: [pkg:apk/alpine/curl, pkg:apk/alpine/libcurl]
-    statement: curl 8.22.0 in postgres:18-alpine and caddy:2-alpine, fixed in 8.23.0-r0
-    expired_at: 2026-11-09
+    statement: golang.org/x/net 0.60.0 in Caddy 2.11.9 (HTML parser), fixed in 0.62.0
+    expired_at: 2026-11-30
