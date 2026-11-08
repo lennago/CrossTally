@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.2](https://github.com/lennago/CrossTally/compare/v0.1.1...v0.1.2) (2026-11-08)
+
+
+### Behoben
+
+* **deps:** bump pyasn1 from 0.6.4 to 0.6.5 in /server ([#17](https://github.com/lennago/CrossTally/issues/17)) ([e031c03](https://github.com/lennago/CrossTally/commit/e031c0300848394d5e9c24d420387c8454dcd394))
+* **deps:** bump the npm group in /app with 2 updates ([#14](https://github.com/lennago/CrossTally/issues/14)) ([fba09b5](https://github.com/lennago/CrossTally/commit/fba09b5763f14ae8b684189b030e933cd955a46e))
+
 ## [0.1.1](https://github.com/lennago/CrossTally/compare/v0.1.0...v0.1.1) (2026-10-28)
 
 
