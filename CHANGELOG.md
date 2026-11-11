@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/lennago/CrossTally/compare/v0.1.2...v0.1.3) (2026-11-11)
+
+
+### Behoben
+
+* **deps:** bump the python group in /server with 6 updates ([#23](https://github.com/lennago/CrossTally/issues/23)) ([c249d6e](https://github.com/lennago/CrossTally/commit/c249d6e30127a2749d3f7d44867002a8afc8f58e))
+
 ## [0.1.2](https://github.com/lennago/CrossTally/compare/v0.1.1...v0.1.2) (2026-11-08)
 
 
