@@ -69,6 +69,13 @@ updates:
     commit-message:
       prefix: fix
       include: scope
+    # A new Python version is more than the tag. 'server/.python-version'
+    # names it for uv and the CI, the image does not download one, and the
+    # packages need wheels for it. With the tag alone the build breaks. That
+    # switch comes on purpose, on its own branch.
+    ignore:
+      - dependency-name: python
+        update-types: ["version-update:semver-minor"]
 
   # Database and proxy in 'compose.yaml'.
   - package-ecosystem: docker-compose
