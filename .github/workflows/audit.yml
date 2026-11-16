@@ -146,9 +146,12 @@ jobs:
       # minifier since Vite 8. It only runs at build time and does not end up
       # in the app (it is missing from 'third-party-licenses.txt'). The MPL
       # anyway only requires disclosing changes to its own files, and nothing
-      # is changed. On the server it already applies to 'pyphen'.
+      # is changed. On the server it already applies to 'pyphen'. '0BSD' is
+      # 'tslib'. It asks even less than MIT, not even for the notice. Vite
+      # pulls it in through Rolldown's WebAssembly build, which npm only
+      # installs where no native build fits. It is not in the app.
       ALLOWED_NPM: >-
-        MIT MIT-0 ISC Apache-2.0 BSD-2-Clause BSD-3-Clause
+        MIT MIT-0 0BSD ISC Apache-2.0 BSD-2-Clause BSD-3-Clause
         BlueOak-1.0.0 CC0-1.0 CC-BY-4.0 MPL-2.0
 
     steps:
