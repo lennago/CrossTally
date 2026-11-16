@@ -37,7 +37,7 @@ RUN sh /build/git/version.sh "$APP_VERSION" /build/git > /build/VERSION \
 # Stage 2: the Python environment
 # --------------------------------------------------------------------------
 # The same base image as the last stage: the environment points to its Python.
-FROM python:3.14-slim AS python-env
+FROM python:3.15-slim AS python-env
 
 # Python comes from the base image, uv must not download one here.
 ENV UV_COMPILE_BYTECODE=1 \
@@ -74,7 +74,7 @@ RUN uv sync --frozen --no-dev --group postgres
 # files are closed to others, and the account could not read its own code.
 # Here the change costs nothing. In the last stage a 'chmod' or 'chown' puts
 # every file it touches into the image a second time.
-FROM python:3.14-slim AS files
+FROM python:3.15-slim AS files
 
 WORKDIR /app
 
@@ -90,7 +90,7 @@ RUN chmod -R u=rwX,go=rX /app
 # --------------------------------------------------------------------------
 # Stage 4: Django
 # --------------------------------------------------------------------------
-FROM python:3.14-slim
+FROM python:3.15-slim
 
 # With the environment's path in front, 'python' and 'gunicorn' find it
 # without 'start.sh' having to know where it lies.
