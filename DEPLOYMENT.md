@@ -1056,7 +1056,10 @@ mit.
 
 Meldet der Montagsscan Lücken im veröffentlichten Image, ist meist nur das
 Basisbild gealtert. Ein neues Release baut ohne Cache und spielt die
-Sicherheitsupdates von Debian ein (`apt-get upgrade` im `Dockerfile`). Meldet er
+Sicherheitsupdates von Debian ein (`apt-get upgrade` im `Dockerfile`). Ein
+Build auf main holt sie einmal am Tag frisch, beim ersten Push des Tages. Damit
+ist `:main` so aktuell wie sein letzter Build, und `:latest` zieht erst mit dem
+nächsten Release nach. Meldet er
 Lücken in Datenbank oder Proxy, die der Hersteller noch nicht behoben hat, steht
 der Befund bis dahin in `.trivyignore.yaml`, mit Grund und Ablaufdatum. Danach
 wird der Lauf wieder rot. Das eigene Image prüft der Scan nur in dem Repo, das

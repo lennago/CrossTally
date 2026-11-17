@@ -150,6 +150,12 @@ jobs:
             type=sha,prefix=main-,format=short,priority=300
             type=raw,value=main
 
+      # Debian's security updates once a day, not only with a release. The
+      # reason stands at 'APT_DATE' in the 'Dockerfile'.
+      - name: Date for system packages
+        id: today
+        run: echo "date=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+
       - name: Build and push
         id: build
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
@@ -161,9 +167,10 @@ jobs:
           labels: ${{ steps.tags.outputs.labels }}
           build-args: |
             APP_VERSION=${{ steps.tags.outputs.version }}
+            APT_DATE=${{ steps.today.outputs.date }}
           # Always today's base image, not the one from the last run. And a
-          # release is built entirely without cache. Only then do the security
-          # updates in the Dockerfile ('apt-get upgrade') really run again.
+          # release is built entirely without cache, so that nothing at all is
+          # left over from an older build.
           pull: true
           no-cache: ${{ needs.release.outputs.created == 'true' }}
           cache-from: type=gha
@@ -231,10 +238,19 @@ jobs:
 
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
+      # The same date as on main, so that a pull request finds today's layer
+      # in the cache. Without it, it would never find the layer and would
+      # build the system packages anew every time.
+      - name: Date for system packages
+        id: today
+        run: echo "date=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+
       - name: Build
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           platforms: linux/amd64
           push: false
+          build-args: |
+            APT_DATE=${{ steps.today.outputs.date }}
           cache-from: type=gha
