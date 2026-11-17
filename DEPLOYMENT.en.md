@@ -1053,7 +1053,10 @@ in both languages.
 
 If the Monday scan reports vulnerabilities in the published image, usually only
 the base image has aged. A new release builds without a cache and brings in the
-security updates from Debian (`apt-get upgrade` in the `Dockerfile`). If it
+security updates from Debian (`apt-get upgrade` in the `Dockerfile`). A build
+on main fetches them afresh once a day, with the first push of the day. That
+makes `:main` as current as its last build, and `:latest` catches up only with
+the next release. If it
 reports vulnerabilities in the database or the proxy that the vendor has not
 fixed yet, the finding stands in `.trivyignore.yaml` until then, with a reason
 and an expiry date. After that the run turns red again. The scan checks the

@@ -111,7 +111,12 @@ WORKDIR /app
 # 'upgrade' first: the base image is rebuilt only every few weeks and lags
 # behind Debian's security updates. The scan in 'image.yml' found a dozen fixed
 # vulnerabilities in it. The layer sits in the cache, which is why a release
-# builds without it ('no-cache' there).
+# builds without it ('no-cache' there). In between, 'image.yml' passes the
+# day's date. A new date misses the cache from here on, so the first build of
+# a day fetches the updates afresh. Before, the scan after every push to main
+# found what Debian had fixed since the last release (11/2026). A local build
+# leaves it empty and keeps its cache.
+ARG APT_DATE=
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install --no-install-recommends -y \
