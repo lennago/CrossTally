@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.3](https://github.com/lennago/CrossTally/compare/v0.1.2...v0.1.3) (2026-11-17)
+
+
+### Behoben
+
+* **deps:** bump gunicorn from 26.2.0 to 27.0.1 in /server ([#28](https://github.com/lennago/CrossTally/issues/28)) ([570cf3a](https://github.com/lennago/CrossTally/commit/570cf3af09ad9c75a79652c38cd9a40709143065))
+* **deps:** bump the python group in /server with 3 updates ([#27](https://github.com/lennago/CrossTally/issues/27)) ([eed402b](https://github.com/lennago/CrossTally/commit/eed402b9dd019750302fa7857956f83d9c55596d))
+* **deps:** bump the python group in /server with 6 updates ([#23](https://github.com/lennago/CrossTally/issues/23)) ([c249d6e](https://github.com/lennago/CrossTally/commit/c249d6e30127a2749d3f7d44867002a8afc8f58e))
+
 ## [0.1.2](https://github.com/lennago/CrossTally/compare/v0.1.1...v0.1.2) (2026-11-08)
 
 
