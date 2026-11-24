@@ -443,8 +443,10 @@
                                     event.currentTarget
                                         .closest(".difference")
                                         .querySelector("input"),
-                                )}>±</button
+                                )}
                         >
+                            ±
+                        </button>
                         <input
                             class={tone(row.differenz)}
                             class:wrong={invalid === row.hausartikel}
@@ -469,22 +471,22 @@
                 <!-- Each part stays whole: next to "Soll zählt" the line wraps
                      between number, actual and target, not inside "Soll 120". -->
                 <span class="meta">
-                    {#if row.nummer}<span class="part"
-                            >{t("review.number", { number: row.nummer })}</span
-                        > ·{/if}
-                    <span class="part"
-                        >{t("review.actual")}
+                    {#if row.nummer}<span class="part">
+                            {t("review.number", { number: row.nummer })}
+                        </span> ·{/if}
+                    <span class="part">
+                        {t("review.actual")}
                         <span class="value">{formatQuantity(row.ist)}</span>
-                        {unitText(row.einheit)}</span
-                    >
+                        {unitText(row.einheit)}
+                    </span>
                     {#if !manual}
                         ·
-                        <span class="part"
-                            >{t("review.target")}
-                            <span class="value"
-                                >{row.soll === null ? "–" : formatQuantity(row.soll)}</span
-                            ></span
-                        >
+                        <span class="part">
+                            {t("review.target")}
+                            <span class="value">
+                                {row.soll === null ? "–" : formatQuantity(row.soll)}
+                            </span>
+                        </span>
                     {/if}
                     {#if !row.gezaehlt}
                         · <span class="badge">{t("review.not_counted")}</span>

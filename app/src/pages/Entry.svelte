@@ -395,9 +395,9 @@
                     />
                 {/each}
 
-                <button class="flat wide" onclick={addWeighing}
-                    >{t("entry.another_weighing")}</button
-                >
+                <button class="flat wide" onclick={addWeighing}>
+                    {t("entry.another_weighing")}
+                </button>
                 <p class="small">{t("entry.tare_note")}</p>
             </section>
         {:else if !article.gebinde.length}
@@ -409,14 +409,14 @@
                 {#snippet label(adding)}
                     <span>
                         <strong>{t("entry.count")}</strong>
-                        <span class="small"
-                            >{t("entry.in_unit", {
+                        <span class="small">
+                            {t("entry.in_unit", {
                                 unit: unitText(article.einheit),
                             })}
                             {#if adding}
                                 <span class="adding">{adding}</span>
-                            {/if}</span
-                        >
+                            {/if}
+                        </span>
                     </span>
                 {/snippet}
             </QuantityInput>

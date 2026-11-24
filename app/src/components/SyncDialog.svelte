@@ -133,14 +133,14 @@
         <h2>{t("sync.waiting", { n: jobs.length })}</h2>
         {#each jobs as job (job.number)}
             <div class="item">
-                <strong
-                    >{jobKind(job.kind)}{#if job.value !== undefined}: {valueText(job)}{/if}</strong
-                >
+                <strong>
+                    {jobKind(job.kind)}{#if job.value !== undefined}: {valueText(job)}{/if}
+                </strong>
                 {#if job.label}<span class="small">{job.label}</span>{/if}
                 <!-- The inventory is not being counted right now. The numbers wait for that. -->
-                {#if job.held}<span class="small held"
-                        >{t("sync.on_hold", { reason: job.held })}</span
-                    >{/if}
+                {#if job.held}<span class="small held">
+                        {t("sync.on_hold", { reason: job.held })}
+                    </span>{/if}
             </div>
         {:else}
             <p class="small">{t("sync.all_sent")}</p>
@@ -150,11 +150,11 @@
             <h2 class="warning">{t("sync.rejected", { n: rejected.length })}</h2>
             {#each rejected as entry, index (index)}
                 <div class="item rejected">
-                    <strong
-                        >{jobKind(entry.kind)}{#if entry.value !== undefined}: {valueText(
+                    <strong>
+                        {jobKind(entry.kind)}{#if entry.value !== undefined}: {valueText(
                                 entry,
-                            )}{/if}</strong
-                    >
+                            )}{/if}
+                    </strong>
                     {#if entry.label}<span class="small">{entry.label}</span>{/if}
                     <span class="small reason">{entry.reason} · {timeText(entry.at)}</span>
                 </div>
