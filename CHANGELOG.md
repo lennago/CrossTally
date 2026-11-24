@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/lennago/CrossTally/compare/v0.1.3...v0.1.4) (2026-11-24)
+
+
+### Behoben
+
+* **deps:** bump the npm group in /app with 4 updates ([#33](https://github.com/lennago/CrossTally/issues/33)) ([df70e1c](https://github.com/lennago/CrossTally/commit/df70e1c1da6c8593a70f4e1a94e9e98a4d0e8d2a))
+
 ## [0.1.3](https://github.com/lennago/CrossTally/compare/v0.1.2...v0.1.3) (2026-11-17)
 
 
