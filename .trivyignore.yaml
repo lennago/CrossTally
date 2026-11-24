@@ -19,8 +19,16 @@
 # golang.org/x/net 0.60.0. The fix is in 0.62.0, which the development branch
 # of Caddy already requires. Only a new release of Caddy brings it, and
 # 'caddy:2-alpine' follows it by itself.
+#
+# 'postgres:18-alpine' (built 18 November 2026, Alpine 3.24.4) still contains
+# libxml2 2.13.9-r2. Alpine has shipped the fix as 2.13.9-r3, so the next
+# rebuild of the image brings it.
 vulnerabilities:
   - id: CVE-2026-78661
     paths: [usr/bin/caddy]
     statement: golang.org/x/net 0.60.0 in Caddy 2.11.9 (HTML parser), fixed in 0.62.0
+    expired_at: 2026-11-30
+  - id: CVE-2026-86144
+    purls: [pkg:apk/alpine/libxml2]
+    statement: libxml2 2.13.9-r2 in postgres:18-alpine, fixed in 2.13.9-r3
     expired_at: 2026-11-30
